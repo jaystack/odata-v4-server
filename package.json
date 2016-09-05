@@ -1,0 +1,42 @@
+{
+  "name": "odata-v4-server",
+  "version": "0.1.0",
+  "description": "OData V4 Server",
+  "main": "lib/index.js",
+  "typings": "lib/index",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaystack/odata-v4-server.git"
+  },
+  "keywords": [
+    "OData",
+    "server",
+    "V4",
+    "server"
+  ],
+  "author": "JayStack",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jaystack/odata-v4-server/issues"
+  },
+  "homepage": "https://github.com/jaystack/odata-v4-server#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cors": "^2.8.0",
+    "express": "^4.14.0",
+    "extend": "^3.0.0",
+    "mongodb": "^2.2.6",
+    "odata-v4-mongodb": "^0.1.4",
+    "odata-v4-parser": "^0.1.10",
+    "odata-v4-resource": "^0.1.2",
+    "odata-v4-service-document": "0.0.3",
+    "odata-v4-service-metadata": "^0.1.5",
+    "reflect-metadata": "^0.1.8"
+  },
+  "devDependencies": {
+    "node-uuid": "^1.4.7"
+  }
+}
