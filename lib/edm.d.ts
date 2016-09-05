@@ -42,11 +42,10 @@ export declare namespace Edm {
     function isCollection(target: Function, propertyKey: string): boolean;
     function getProperties(target: Function): string[];
     function getParameters(target: Function, targetKey: string): any[];
-    function Key(): {
-        (target: Function): void;
-        (target: Object, targetKey: string | symbol): void;
-    };
+    function Key(): (target: any, targetKey: any) => void;
     function isKey(target: Function, propertyKey: string): boolean;
+    function getKeyProperties(target: Function): string[];
+    function escape(value: any, type: any): any;
     function Computed(): {
         (target: Function): void;
         (target: Object, targetKey: string | symbol): void;

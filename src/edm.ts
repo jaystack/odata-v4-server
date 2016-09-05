@@ -24,6 +24,7 @@ export class Entity{
 
 export namespace Edm{
     const EdmProperties:string = "edm:properties";
+    const EdmKeyProperties:string = "edm:keyproperties";
     const EdmKeyProperty:string = "edm:keyproperty";
     const EdmComputedProperty:string = "edm:computedproperty";
     const EdmNullableProperty:string = "edm:nullableproperty";
@@ -231,10 +232,37 @@ export namespace Edm{
     }
 
     export function Key(){
-        return Reflect.metadata(EdmKeyProperty, true);
+        return function(target, targetKey){
+            let properties:string[] = Reflect.getMetadata(EdmKeyProperties, target) || [];
+            if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
+            Reflect.defineMetadata(EdmKeyProperties, properties, target);
+            Reflect.defineMetadata(EdmKeyProperty, true, target, targetKey);
+        };
     }
     export function isKey(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmKeyProperty, target.prototype, propertyKey) || false;
+    }
+    export function getKeyProperties(target:Function):string[]{
+        return Reflect.getMetadata(EdmKeyProperties, target) || [];
+    }
+
+    export function escape(value:any, type:any){
+        switch (type){
+            case "Edm.Binary":
+                return value.toString("hex");
+            case "Edm.Boolean":
+            case "Edm.Byte":
+            case "Edm.Decimal":
+            case "Edm.Double":
+            case "Edm.Guid":
+            case "Edm.Int16":
+            case "Edm.Int32":
+            case "Edm.Int64":
+            case "Edm.SByte":
+            case "Edm.Single":
+                return value.toString();
+            case "Edm.String": return "'" + ("" + value).replace(/'/g, "''") + "'";
+        }
     }
 
     export function Computed(){

@@ -2,20 +2,32 @@ import { createServiceOperationCall } from "odata-v4-resource";
 import { Visitor as ResourceVisitor } from "odata-v4-resource/lib/visitor";
 import { ServiceMetadata } from "odata-v4-service-metadata";
 import { ServiceDocument } from "odata-v4-service-document";
+import { TokenType } from "odata-v4-parser/lib/lexer";
 import * as extend from "extend";
 import { Promise } from "es6-promise";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import { getFunctionParameters } from "./utils";
-import { ODataResult } from "./result";
+import { ODataResult, IODataResult } from "./result";
 import { ODataController } from "./controller";
 import { Edm } from "./edm";
 import { ResourceNotFoundError } from "./error";
 import { createMetadataJSON } from "./metadata";
 
-const annotateODataContext = function(result, req, baseResource){
-    result["@odata.context"] = (req.secure ? "https" : "http") + "://" + req.headers.host + req.baseUrl + "/$metadata#" + baseResource.name + (baseResource.key ? "/$entity" : "");
+const getODataContext = function(result, req, baseResource, resourcePath){
+    return (req.secure ? "https" : "http") + "://" + req.headers.host + req.baseUrl + "/$metadata#" + baseResource.name;
+}
+
+const extendODataContext = function(result, req, baseResource, resourcePath){
+    if (baseResource.key && resourcePath.navigation.length == 0) return "/$entity";
+    if (baseResource.key){
+        let type = Object.getPrototypeOf(result);
+        let keys = Edm.getKeyProperties(type);
+        return "(" + keys.map(key => Edm.escape(result[key], Edm.getTypeName(type.constructor, key))).join(",") + ")";
+    }
+    if (baseResource.type == TokenType.PrimitiveProperty) return "/" + baseResource.name;
+    return "";
 }
 
 const fnCaller = function(fn, body, params){
@@ -52,8 +64,13 @@ const ODataRequestResult:any = {
     delete: ODataResult.NoContent
 };
 
-const $count = function(){
-    return this.length;
+const expCalls = {
+    $count: function(){
+        return this.length;
+    },
+    $value: function(){
+        return this;
+    }
 };
 
 export class ODataServer{
@@ -75,18 +92,25 @@ export class ODataServer{
             if (ODataRequestMethods.indexOf(method) < 0) return next();
             
             let responseHandler = function(result:ODataResult, baseResource?:any, resourcePath?:any, instance?:any){
-                if (resourcePath && instance && resourcePath.call){
+                if (typeof result.body == "object"){
+                    if (!result.body["@odata.context"]) result.body["@odata.context"] = getODataContext(result.body, req, baseResource, resourcePath);
+                    if (baseResource.type == TokenType.PrimitiveProperty){
+                        result.body["@odata.context"] += extendODataContext(result.body, req, baseResource, resourcePath);
+                        result.body = <IODataResult>{
+                            "@odata.context": result.body["@odata.context"],
+                            value: result.body[baseResource.name]
+                        };
+                    }
+                }
+                if (resourcePath && resourcePath.call){
                     let boundOpName = resourcePath.call.split(".").pop();
-                    let boundOp = instance[boundOpName];
+                    let boundOp = instance ? instance[boundOpName] || expCalls[boundOpName] : expCalls[boundOpName];
                     try{
-                        if (!boundOp && boundOpName == "$count"){
-                            boundOp = $count;
-                        }
                         let opResult = fnCaller.call(result.body.value, boundOp, resourcePath.params);
                         ODataResult.Ok(opResult).then((result) => {
-                            responseHandler(result, {
-                                name: Edm.getReturnType(instance.constructor, boundOpName)
-                            });
+                            responseHandler(result, instance ? {
+                                name: Edm.getReturnType(instance.constructor, boundOpName) 
+                            } : null);
                         }, next);
                     }catch(err){
                         next(err);
@@ -94,22 +118,16 @@ export class ODataServer{
                 }else{
                     res.status(result.statusCode);
                     res.setHeader("OData-Version", "4.0");
-                    console.log('------------------', result);
                     if (result.body){
-                        if (typeof result.body == "object"){
-                            annotateODataContext(result.body, req, baseResource);
-                            res.send(sortObject(result.body));
-                        }else res.send("" + result.body);
+                        if (typeof result.body == "object") res.send(sortObject(result.body));
+                        else res.send("" + result.body);
                     }else res.end();
                 }
             };
 
             let resourcePath = createServiceOperationCall(req.url, $metadata.edmx);
-            console.log(resourcePath);
-            let navigationHandler = function(baseResource){
-                //TODO: recursive navigation path
+            let navigationHandler = function(baseResource, result?:any){
                 if (!baseResource){
-                    //Action or Function import handler
                     if (resourcePath.call){
                         let fn = server[resourcePath.call];
                         try{
@@ -128,6 +146,9 @@ export class ODataServer{
                         }
                     }else return next(new ResourceNotFoundError());
                 }else{
+                    if (baseResource.type == TokenType.PrimitiveProperty){
+                        return responseHandler(result, baseResource, resourcePath);
+                    }
                     let ctrl = server[baseResource.name];
                     let instance = new ctrl(req, res, next, server);
                     let params = {};
@@ -135,7 +156,6 @@ export class ODataServer{
                     let fn = instance[method];
                     if (!fn) return next(new ResourceNotFoundError());
                     let entity:any;
-                    let result:any;
                     switch (method){
                         case "get":
                         case "delete":
@@ -157,24 +177,24 @@ export class ODataServer{
                             result = fnCaller.call(instance, fn, entity || req.body, params);
                             break;
                     }
-                    if (result instanceof Promise){
-                        let defer = <Promise<any>>result;
-                        defer.then((result) => {
-                            if (!(result instanceof ODataResult)){
-                                return (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
-                                    return responseHandler(result, baseResource, resourcePath, instance);
-                                }, next);
-                            }
-                            return responseHandler(result, baseResource, resourcePath, instance);
-                        }, next);
-                    }else{
+                    let readyFn = function(result:any):any{
                         if (!(result instanceof ODataResult)){
                             return (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
+                                if (!result.body["@odata.context"]) result.body["@odata.context"] = getODataContext(result.body, req, baseResource, resourcePath);
+                                result.body["@odata.context"] += extendODataContext(result.body, req, baseResource, resourcePath);
+                                if (resourcePath.navigation.length > 0 || (resourcePath.call && server[resourcePath.call])) return navigationHandler(resourcePath.navigation.shift(), result);
                                 return responseHandler(result, baseResource, resourcePath, instance);
                             }, next);
                         }
+                        if (!result.body["@odata.context"]) result.body["@odata.context"] = getODataContext(result.body, req, baseResource, resourcePath);
+                        result.body["@odata.context"] += extendODataContext(result.body, req, baseResource, resourcePath);
+                        if (resourcePath.navigation.length > 0 || (resourcePath.call && server[resourcePath.call])) return navigationHandler(resourcePath.navigation.shift(), result);
                         return responseHandler(result, baseResource, resourcePath, instance);
-                    }
+                    };
+                    if (result instanceof Promise){
+                        let defer = <Promise<any>>result;
+                        defer.then(readyFn, next);
+                    }else readyFn(result);
                 }
             };
             navigationHandler(resourcePath.navigation.shift());
