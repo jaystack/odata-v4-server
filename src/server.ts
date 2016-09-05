@@ -52,6 +52,10 @@ const ODataRequestResult:any = {
     delete: ODataResult.NoContent
 };
 
+const $count = function(){
+    return this.length;
+};
+
 export class ODataServer{
     private static _metadataCache:any
     static namespace:string
@@ -75,6 +79,9 @@ export class ODataServer{
                     let boundOpName = resourcePath.call.split(".").pop();
                     let boundOp = instance[boundOpName];
                     try{
+                        if (!boundOp && boundOpName == "$count"){
+                            boundOp = $count;
+                        }
                         let opResult = fnCaller.call(result.body.value, boundOp, resourcePath.params);
                         ODataResult.Ok(opResult).then((result) => {
                             responseHandler(result, {
@@ -87,14 +94,18 @@ export class ODataServer{
                 }else{
                     res.status(result.statusCode);
                     res.setHeader("OData-Version", "4.0");
+                    console.log('------------------', result);
                     if (result.body){
-                        annotateODataContext(result.body, req, baseResource);
-                        res.send(sortObject(result.body));
+                        if (typeof result.body == "object"){
+                            annotateODataContext(result.body, req, baseResource);
+                            res.send(sortObject(result.body));
+                        }else res.send("" + result.body);
                     }else res.end();
                 }
             };
 
             let resourcePath = createServiceOperationCall(req.url, $metadata.edmx);
+            console.log(resourcePath);
             let navigationHandler = function(baseResource){
                 //TODO: recursive navigation path
                 if (!baseResource){

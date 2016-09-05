@@ -40,7 +40,9 @@ export class ODataResult{
                         "@odata.count": innercount
                     };
                 }else{
-                    result["@odata.count"] = innercount;
+                    if (typeof result == "object"){
+                        result["@odata.count"] = innercount;
+                    }
                 }
                 return new ODataResult(200, result);
             });
@@ -52,7 +54,9 @@ export class ODataResult{
                         "@odata.count": innercount
                     };
                 }else{
-                    result["@odata.count"] = innercount;
+                    if (typeof result == "object"){
+                        result["@odata.count"] = innercount;
+                    }
                 }
                 resolve(new ODataResult(200, result));
             });
