@@ -13,3 +13,7 @@ export declare class ResourceNotFoundError extends HttpRequestError {
     static MESSAGE: string;
     constructor();
 }
+export declare class MethodNotAllowedError extends HttpRequestError {
+    static MESSAGE: string;
+    constructor();
+}

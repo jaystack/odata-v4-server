@@ -1,24 +1,27 @@
 import "reflect-metadata";
+import { ODataController } from "./controller";
 import { getFunctionParameters } from "./utils";
 
 export class Entity{
-    constructor(entity:any){
-        let proto = Object.getPrototypeOf(this);
-        Edm.getProperties(proto).forEach((prop) => {
-            let type:any = Edm.getType(proto.constructor, prop);
-            let converter:Function = Edm.getConverter(proto.constructor, prop);
-            let isCollection = Edm.isCollection(proto.constructor, prop);
-            if (isCollection && entity[prop]){
-                let value = Array.isArray(entity[prop]) ? entity[prop] : [entity[prop]];
-                if (typeof type == "function") this[prop] = value.map(it => new type(it));
-                else if (typeof converter == "function") this[prop] = value.map(it => converter(it));
-                else this[prop] = value;
-            }else{
-                if (typeof type == "function" && entity[prop]) this[prop] = new type(entity[prop]);
-                else if (typeof converter == "function") this[prop] = converter(entity[prop]);
-                else this[prop] = entity[prop];
-            }
-        });
+    constructor(entity?:any){
+        if (typeof entity != "undefined"){
+            let proto = Object.getPrototypeOf(this);
+            Edm.getProperties(proto).forEach((prop) => {
+                let type:any = Edm.getType(proto.constructor, prop);
+                let converter:Function = Edm.getConverter(proto.constructor, prop);
+                let isCollection = Edm.isCollection(proto.constructor, prop);
+                if (isCollection && entity[prop]){
+                    let value = Array.isArray(entity[prop]) ? entity[prop] : [entity[prop]];
+                    if (typeof type == "function") this[prop] = value.map(it => new type(it));
+                    else if (typeof converter == "function") this[prop] = value.map(it => converter(it));
+                    else this[prop] = value;
+                }else{
+                    if (typeof type == "function" && entity[prop]) this[prop] = new type(entity[prop]);
+                    else if (typeof converter == "function") this[prop] = converter(entity[prop]);
+                    else this[prop] = entity[prop];
+                }
+            });
+        }
     }
 }
 
@@ -26,12 +29,14 @@ export namespace Edm{
     const EdmProperties:string = "edm:properties";
     const EdmKeyProperties:string = "edm:keyproperties";
     const EdmKeyProperty:string = "edm:keyproperty";
+    const EdmForeignKeys:string = "edm:foreignkeys";
     const EdmComputedProperty:string = "edm:computedproperty";
     const EdmNullableProperty:string = "edm:nullableproperty";
     const EdmRequiredProperty:string = "edm:requiredproperty";
     const EdmType:string = "edm:type";
     const EdmElementType:string = "edm:elementtype";
     const EdmComplexType:string = "edm:complextype";
+    const EdmEntityType:string = "edm:entitytype";
     const EdmOperations:string = "edm:operations";
     const EdmAction:string = "edm:action";
     const EdmFunction:string = "edm:function";
@@ -39,6 +44,8 @@ export namespace Edm{
     const EdmParameters:string = "edm:parameters";
     const EdmAnnotations:string = "edm:annotations";
     const EdmConverter:string = "edm:converter";
+    const EdmEntitySet:string = "edm:entityset";
+    const EdmContainer:Function[] = [];
 
     function typeDecoratorFactory(type:string){
         return function(target, targetKey, parameterIndex?:number){
@@ -57,6 +64,9 @@ export namespace Edm{
                 }
                 Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
             }else{
+                if (typeof target == "function"){
+                    Edm.register(target);
+                }
                 if (targetKey != EdmType){
                     let properties:string[] = Reflect.getMetadata(EdmProperties, target) || [];
                     if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
@@ -188,6 +198,9 @@ export namespace Edm{
                 }
                 Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
             }else{
+                if (typeof target == "function"){
+                    Edm.register(target);
+                }
                 let properties:string[] = Reflect.getMetadata(EdmProperties, target) || [];
                 if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
                 Reflect.defineMetadata(EdmProperties, properties, target);
@@ -201,24 +214,62 @@ export namespace Edm{
                 let elementTypeName = Reflect.getMetadata(EdmType, element, EdmType);
                 Reflect.defineMetadata(EdmType, "Collection", target, targetKey);
                 Reflect.defineMetadata(EdmElementType, elementTypeName, target, targetKey);
-                Reflect.defineMetadata(EdmComplexType, type, target, targetKey);
+                if (type){
+                    Reflect.defineMetadata(EdmComplexType, type, target, targetKey);
+                }else{
+                    type = Reflect.getMetadata(EdmEntityType, element, EdmType);
+                    Reflect.defineMetadata(EdmEntityType, type, target, targetKey);
+                }
             }
         };
     }
     export function getTypeName(target:Function, propertyKey:string):string{
         let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey);
         let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);
-        if (typeof type == "function"){
-            type = ((<any>type).namespace || (<any>target).namespace) + "." + (<any>type).name;
+        if (typeof type == "string" && type != "Collection" && type.indexOf(".") < 0){
+            for (let i = 0; i < EdmContainer.length; i++){
+                let containerType = EdmContainer[i];
+                let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
+                let containerTypeName = (<any>containerType).name;
+                if (containerTypeName == type){
+                    type = namespace + "." + type;
+                    break;
+                }
+            }
+        }else if (typeof type == "function"){
+            type = ((<any>type).namespace || (<any>target).namespace || "Default") + "." + (<any>type).name;
         }
-        if (typeof elementType == "function"){
-            elementType = ((<any>elementType).namespace || (<any>target).namespace) + "." + (<any>elementType).name;
+        if (typeof elementType == "string" && elementType != "Collection" && elementType.indexOf(".") < 0){
+            for (let i = 0; i < EdmContainer.length; i++){
+                let containerType = EdmContainer[i];
+                let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
+                let containerTypeName = (<any>containerType).name;
+                if (containerTypeName == elementType){
+                    elementType = namespace + "." + elementType;
+                    break;
+                }
+            }
+        }else if (typeof elementType == "function"){
+            elementType = ((<any>elementType).namespace || (<any>target).namespace || "Default") + "." + (<any>elementType).name;
         }
         return elementType ? type + "(" + elementType + ")" : type;
     }
     export function getType(target:Function, propertyKey:string):Function{
         let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey);
         let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);
+        let isEntityType = Edm.isEntityType(target, propertyKey);
+        if (isEntityType){
+            if (typeof elementType == "string" && elementType.indexOf(".") < 0) elementType = ((<any>target).namespace || "Default") + "." + elementType;
+            if (typeof type == "string" && type.indexOf(".") < 0) type = ((<any>target).namespace || "Default") + "." + type;
+        }
+        for (let i = 0; i < EdmContainer.length; i++){
+            let containerType = EdmContainer[i];
+            let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
+            let containerTypeName = (namespace ? namespace + "." : "") + (<any>containerType).name;
+            if (containerTypeName == elementType || containerTypeName == type){
+                return containerType;
+            }
+        }
         return elementType || type;
     }
     export function isCollection(target:Function, propertyKey:string):boolean{
@@ -233,6 +284,9 @@ export namespace Edm{
 
     export function Key(){
         return function(target, targetKey){
+            if (typeof target == "function"){
+                Edm.register(target);
+            }
             let properties:string[] = Reflect.getMetadata(EdmKeyProperties, target) || [];
             if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
             Reflect.defineMetadata(EdmKeyProperties, properties, target);
@@ -243,7 +297,7 @@ export namespace Edm{
         return Reflect.getMetadata(EdmKeyProperty, target.prototype, propertyKey) || false;
     }
     export function getKeyProperties(target:Function):string[]{
-        return Reflect.getMetadata(EdmKeyProperties, target) || [];
+        return Reflect.getMetadata(EdmKeyProperties, target) || Reflect.getMetadata(EdmKeyProperties, target.prototype) || [];
     }
 
     export function escape(value:any, type:any){
@@ -266,7 +320,12 @@ export namespace Edm{
     }
 
     export function Computed(){
-        return Reflect.metadata(EdmComputedProperty, true);
+        return function(target, targetKey){
+            if (typeof target == "function"){
+                Edm.register(target);
+            }
+            Reflect.defineMetadata(EdmComputedProperty, true, target, targetKey);
+        };
     }
     export function isComputed(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmComputedProperty, target.prototype, propertyKey) || false;
@@ -288,7 +347,12 @@ export namespace Edm{
                     });
                 }
                 Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
-            }else Reflect.defineMetadata(EdmNullableProperty, true, target, targetKey);
+            }else{
+                if (typeof target == "function"){
+                    Edm.register(target);
+                }
+                Reflect.defineMetadata(EdmNullableProperty, true, target, targetKey);
+            }
         }
     }
     export function isNullable(target:Function, propertyKey:string):boolean{
@@ -311,7 +375,12 @@ export namespace Edm{
                     });
                 }
                 Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
-            }else Reflect.defineMetadata(EdmNullableProperty, false, target, targetKey);
+            }else{
+                if (typeof target == "function"){
+                    Edm.register(target);
+                }
+                Reflect.defineMetadata(EdmNullableProperty, false, target, targetKey);
+            }
         }
     }
     export function isRequired(target:Function, propertyKey:string):boolean{
@@ -373,6 +442,9 @@ export namespace Edm{
 
     export function ComplexType(type:Function){
         return function(target, targetKey){
+            if (typeof target == "function"){
+                Edm.register(target);
+            }
             if (targetKey != EdmType){
                 let properties:string[] = Reflect.getMetadata(EdmProperties, target) || [];
                 if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
@@ -386,8 +458,34 @@ export namespace Edm{
         return Reflect.hasMetadata(EdmComplexType, target.prototype, propertyKey);
     }
 
+    export function EntityType(type?:Function | string){
+        return function(target:any, targetKey?:string){
+            if (typeof target == "function"){
+                Edm.register(target);
+            }
+            if (targetKey != EdmType){
+                let properties:string[] = Reflect.getMetadata(EdmProperties, target) || [];
+                if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
+                Reflect.defineMetadata(EdmProperties, properties, target);
+            }
+            Reflect.defineMetadata(EdmEntityType, type, target, targetKey);
+            Reflect.defineMetadata(EdmType, type, target, targetKey);
+        };
+    }
+    export function isEntityType(target:Function, propertyKey:string):boolean{
+        return Reflect.hasMetadata(EdmEntityType, target.prototype, propertyKey);
+    }
+    export function register(type:Function){
+        if (EdmContainer.indexOf(type) < 0) EdmContainer.push(type);
+    }
+
     export function Convert(converter:Function){
-        return Reflect.metadata(EdmConverter, converter);
+        return function(target, targetKey){
+            if (typeof target == "function"){
+                Edm.register(target);
+            }
+            Reflect.defineMetadata(EdmConverter, converter, target, targetKey);
+        };
     }
     export function getConverter(target:Function, propertyKey:string):Function{
         return Reflect.getMetadata(EdmConverter, target.prototype, propertyKey);
@@ -395,6 +493,9 @@ export namespace Edm{
 
     export function Annotate(...annotation:any[]){
         return function(target:any, targetKey?:string){
+            if (typeof target == "function"){
+                Edm.register(target);
+            }
             let existingAnnotations:any[] = Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
             existingAnnotations = annotation.concat(existingAnnotations);
             Reflect.defineMetadata(EdmAnnotations, existingAnnotations, target, targetKey);
@@ -402,5 +503,25 @@ export namespace Edm{
     }
     export function getAnnotations(target:Function, targetKey?:string):any[]{
         return Reflect.getOwnMetadata(EdmAnnotations, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
+    }
+
+    export function ForeignKey(...keys:string[]){
+        return function(target:any, targetKey?:string){
+            if (typeof target == "function"){
+                Edm.register(target);
+            }
+            let existingForeignKeys:any[] = Reflect.getOwnMetadata(EdmForeignKeys, target, targetKey) || [];
+            existingForeignKeys = keys.concat(existingForeignKeys);
+            Reflect.defineMetadata(EdmForeignKeys, existingForeignKeys, target, targetKey);
+        };
+    }
+    export function getForeignKeys(target:Function, targetKey?:string):string[]{
+        return Reflect.getOwnMetadata(EdmForeignKeys, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmForeignKeys, target, targetKey) || [];
+    }
+
+    export function EntitySet(name:string){
+        return function(controller:typeof ODataController){
+            controller.prototype.entitySetName = name;
+        };
     }
 }

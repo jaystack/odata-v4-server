@@ -2,7 +2,9 @@
   "globalDependencies": {
     "cors": "registry:dt/cors#0.0.0+20160708202709",
     "extend": "registry:dt/extend#2.0.0+20160316155526",
-    "node": "registry:dt/node#6.0.0+20160831021119"
+    "jsonstream": "registry:dt/jsonstream#0.8.0+20160316155526",
+    "node": "registry:dt/node#6.0.0+20160831021119",
+    "qs": "registry:dt/qs#6.2.0+20160707010053"
   },
   "dependencies": {
     "body-parser": "registry:npm/body-parser#1.15.2+20160815132839",

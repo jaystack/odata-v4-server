@@ -1,4 +1,5 @@
 import { Promise } from "es6-promise";
+import * as extend from "extend";
 
 export interface IODataResult{
     "@odata.context":string
@@ -9,10 +10,14 @@ export interface IODataResult{
 export class ODataResult{
     statusCode:number
     body:IODataResult
+    elementType:Function
 
     constructor(statusCode:number, result?:any){
         this.statusCode = statusCode;
-        this.body = result;
+        if (result){
+            this.body = typeof result == "object" ? extend({}, result) : result;
+            if (result && result.constructor) this.elementType = result.constructor;
+        }
     }
 
     static Created = function Created(result:any):Promise<ODataResult>{
@@ -30,7 +35,7 @@ export class ODataResult{
     static Ok = function Ok(result:any, innercount?:number):Promise<ODataResult>{
         if (result && typeof result.then == 'function'){
             return result.then((result) => {
-                if (result.innercount){
+                if (result && result.innercount){
                     innercount = result.innercount;
                     delete result.innercount;
                 }
@@ -40,7 +45,7 @@ export class ODataResult{
                         "@odata.count": innercount
                     };
                 }else{
-                    if (typeof result == "object"){
+                    if (typeof result == "object" && result){
                         result["@odata.count"] = innercount;
                     }
                 }
@@ -48,13 +53,17 @@ export class ODataResult{
             });
         }else{
             return new Promise((resolve, reject) => {
+                if (result && result.innercount){
+                    innercount = result.innercount;
+                    delete result.innercount;
+                }
                 if (Array.isArray(result)){
                     result = {
                         value: result,
                         "@odata.count": innercount
                     };
                 }else{
-                    if (typeof result == "object"){
+                    if (typeof result == "object" && result){
                         result["@odata.count"] = innercount;
                     }
                 }

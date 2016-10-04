@@ -28,3 +28,10 @@ export class ResourceNotFoundError extends HttpRequestError{
         super(404, ResourceNotFoundError.MESSAGE);
     }
 }
+
+export class MethodNotAllowedError extends HttpRequestError{
+    static MESSAGE:string = "Method not allowed.";
+    constructor(){
+        super(405, MethodNotAllowedError.MESSAGE);
+    }
+}

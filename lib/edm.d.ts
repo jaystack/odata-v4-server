@@ -1,6 +1,7 @@
 import "reflect-metadata";
+import { ODataController } from "./controller";
 export declare class Entity {
-    constructor(entity: any);
+    constructor(entity?: any);
 }
 export declare namespace Edm {
     function Binary(): (target: any, targetKey: any, parameterIndex?: number) => void;
@@ -46,10 +47,7 @@ export declare namespace Edm {
     function isKey(target: Function, propertyKey: string): boolean;
     function getKeyProperties(target: Function): string[];
     function escape(value: any, type: any): any;
-    function Computed(): {
-        (target: Function): void;
-        (target: Object, targetKey: string | symbol): void;
-    };
+    function Computed(): (target: any, targetKey: any) => void;
     function isComputed(target: Function, propertyKey: string): boolean;
     function Nullable(): (target: any, targetKey: any, parameterIndex?: number) => void;
     function isNullable(target: Function, propertyKey: string): boolean;
@@ -67,11 +65,14 @@ export declare namespace Edm {
     function isFunction(target: Function, propertyKey: string): boolean;
     function ComplexType(type: Function): (target: any, targetKey: any) => void;
     function isComplexType(target: Function, propertyKey: string): boolean;
-    function Convert(converter: Function): {
-        (target: Function): void;
-        (target: Object, targetKey: string | symbol): void;
-    };
+    function EntityType(type?: Function | string): (target: any, targetKey?: string) => void;
+    function isEntityType(target: Function, propertyKey: string): boolean;
+    function register(type: Function): void;
+    function Convert(converter: Function): (target: any, targetKey: any) => void;
     function getConverter(target: Function, propertyKey: string): Function;
     function Annotate(...annotation: any[]): (target: any, targetKey?: string) => void;
     function getAnnotations(target: Function, targetKey?: string): any[];
+    function ForeignKey(...keys: string[]): (target: any, targetKey?: string) => void;
+    function getForeignKeys(target: Function, targetKey?: string): string[];
+    function EntitySet(name: string): (controller: typeof ODataController) => void;
 }

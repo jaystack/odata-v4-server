@@ -1,102 +1,62 @@
 import { Visitor as QueryVisitor } from "odata-v4-mongodb/lib/visitor";
+import { ExpandVisitor } from "./expand";
 import { Promise } from "es6-promise";
 import * as extend from "extend";
 import { ODataServer } from "./server";
 import { ODataResult } from "./result";
 import { MongoDBProvider } from "./provider";
 import { ResourceNotFoundError } from "./error";
+import { odata } from "./odata";
+import { getFunctionParameters } from "./utils";
 
-export abstract class ODataController<T>{
-    collectionName:string
-    elementType:Function
-
-    request:any
-    response:any
-    next:any
-    server:ODataServer
-
-    constructor(req, res, next, server){
-        this.request = req;
-        this.response = res;
-        this.next = next;
-        this.server = server;
-    }
-
-    abstract get(...keys:any[]):Promise<T[] | T>;
-    abstract post(entity:T):Promise<T>;
-    abstract patch(delta:T, ...keys:any[]):Promise<void>;
-    abstract put(update:T, ...keys:any[]):Promise<void>;
-    abstract delete(...keys:any[]):Promise<void>;
+export interface IODataController<T>{
+    get?(...keys:any[]):Promise<T[] | T>;
+    post?(entity:T):Promise<T>;
+    patch?(delta:T, ...keys:any[]):Promise<void>;
+    put?(update:T, ...keys:any[]):Promise<void>;
+    delete?(...keys:any[]):Promise<void>;
 }
 
-const createKeyQuery = function(...keys:any[]):any{
-    let ctr:any = this.elementType;
-    let keyQuery = null;
-    if (keys.length > 0){
-        keyQuery = {};
-        keys.forEach((key) => {
-            keyQuery[key.name] = key.value;
-        });
-        let entityKeyQuery = new ctr(keyQuery);
-        keys.forEach((key) => {
-            keyQuery[key.name] = entityKeyQuery[key.name];
-        });
+export abstract class ODataController implements IODataController<any>{
+    entitySetName:string
+    elementType:Function
+
+    static on(method:string, fn:Function | string, ...keys:string[]){
+        let fnName = <string>((<Function>fn).name || fn);
+        odata.method(method)(this.prototype, fnName);
+        if (keys && keys.length > 0){
+            fn = this.prototype[fnName];
+            let parameterNames = getFunctionParameters(<Function>fn);
+            keys.forEach((key) => {
+                odata.key()(this.prototype, fnName, parameterNames.indexOf(key));
+            });
+        }
     }
-    return keyQuery;
-};
+    static enableFilter(fn:Function | string, param?:string){
+        let fnName = <string>((<Function>fn).name || fn);
+        fn = this.prototype[fnName];
+        let parameterNames = getFunctionParameters(<Function>fn);
+        odata.filter()(this.prototype, fnName, parameterNames.indexOf(param || parameterNames[0]));
+    }
+}
 
-export class ODataMongoDBController<T> extends ODataController<T>{
+/*export class ODataStreamController<T> extends ODataController{
+
+}
+
+export class ODataMongoDBController<T> extends ODataController implements IODataController<T>{
     provider:MongoDBProvider
-    queryOptions:QueryVisitor
+    queryOptions:ExpandVisitor
 
-    constructor(req, res, next, server){
-        super(req, res, next, server);
+    constructor(context, server){
+        super(context, server);
         this.provider = new MongoDBProvider(server.configuration);
-        this.queryOptions = this.provider.createQueryOptions(this.request);
+        this.queryOptions = this.provider.createQueryOptions(this.context.url);
     }
 
     get(...keys:any[]):Promise<T[] | T>{
-        return this.provider.storage(this.collectionName).then((collection) => {
-            let ctr:any = this.elementType;
-            let keyQuery = createKeyQuery.apply(this, keys);
-            let entityQuery = new ctr(this.queryOptions.query);
-            for (let prop in entityQuery){
-                if (entityQuery[prop] !== this.queryOptions.query[prop]){
-                    this.queryOptions.query[prop] = entityQuery[prop];
-                }
-            }
-            let cursor = collection.find(extend(this.queryOptions.query || {}, keyQuery || {}), this.queryOptions.projection);
-            if (keyQuery){
-                cursor = cursor.limit(1);
-            }else{
-                if (this.queryOptions.sort) cursor = cursor.sort(this.queryOptions.sort);
-                if (this.queryOptions.skip) cursor = cursor.skip(this.queryOptions.skip);
-                if (this.queryOptions.limit) cursor = cursor.limit(this.queryOptions.limit);
-            }
-            if ((<any>this.queryOptions).inlinecount){
-                return cursor.count(false).then((innercount) => {
-                    return cursor.toArray().then((docs) => {
-                        let result:any = <T[]>(docs.map((doc) => { return new ctr(doc); }));
-                        result.innercount = innercount;
-                        return result;
-                    });
-                });
-            }else{
-                if (keyQuery){
-                    return cursor.next().then((doc) => {
-                        let result:T = <T>(new ctr(doc));
-                        return result;
-                    });
-                }else{
-                    return cursor.toArray().then((docs) => {
-                        let result:T[] = <T[]>(docs.map((doc) => { return new ctr(doc); }));
-                        return result;
-                    });
-                }
-            }
-        });
+        return this.provider.get<T>(this.collectionName, this.elementType, this.queryOptions, keys);
     }
-
     post(entity:T):Promise<T>{
         return this.provider.storage(this.collectionName).then((collection) => {
             let ctr:any = this.elementType;
@@ -108,7 +68,7 @@ export class ODataMongoDBController<T> extends ODataController<T>{
     patch(delta:T, ...keys:any[]):Promise<void>{
         return this.provider.storage(this.collectionName).then((collection) => {
             let ctr:any = this.elementType;
-            let keyQuery = createKeyQuery.apply(this, keys) || {};
+            let keyQuery = MongoDBProvider.createKeyQuery(this.elementType, keys) || {};
             for (let prop in keyQuery){
                 delete delta[prop];
             }
@@ -120,7 +80,7 @@ export class ODataMongoDBController<T> extends ODataController<T>{
     put(update:T, ...keys:any[]):Promise<void>{
         return this.provider.storage(this.collectionName).then((collection) => {
             let ctr:any = this.elementType;
-            let keyQuery = createKeyQuery.apply(this, keys) || {};
+            let keyQuery = MongoDBProvider.createKeyQuery(this.elementType, keys) || {};
             for (let prop in keyQuery){
                 delete update[prop];
             }
@@ -132,10 +92,10 @@ export class ODataMongoDBController<T> extends ODataController<T>{
     delete(...keys:any[]):Promise<void>{
         return this.provider.storage(this.collectionName).then((collection) => {
             let ctr:any = this.elementType;
-            let keyQuery = createKeyQuery.apply(this, keys) || {};
+            let keyQuery = MongoDBProvider.createKeyQuery(this.elementType, keys) || {};
             return collection.remove(keyQuery).then((writeOp) => {
                 if (writeOp.result.n != 1) throw new ResourceNotFoundError();
             });
         });
     }
-}
+}*/
