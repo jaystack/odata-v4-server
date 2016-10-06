@@ -39,7 +39,7 @@ export declare namespace Edm {
     function GeometryCollection(): (target: any, targetKey: any, parameterIndex?: number) => void;
     function Collection(elementType: Function): (target: any, targetKey: any, parameterIndex?: number) => void;
     function getTypeName(target: Function, propertyKey: string): string;
-    function getType(target: Function, propertyKey: string): Function;
+    function getType(target: Function, propertyKey: string): Function | string;
     function isCollection(target: Function, propertyKey: string): boolean;
     function getProperties(target: Function): string[];
     function getParameters(target: Function, targetKey: string): any[];
@@ -58,7 +58,8 @@ export declare namespace Edm {
     function FunctionImport(returnType: Function): (target: any, targetKey: any) => void;
     function Function(returnType: Function): (target: any, targetKey: any) => void;
     function getOperations(target: Function): string[];
-    function getReturnType(target: Function, propertyKey: string): string;
+    function getReturnTypeName(target: Function, propertyKey: string): string;
+    function getReturnType(target: Function, propertyKey: string): Function | string;
     function isActionImport(target: Function, propertyKey: string): boolean;
     function isFunctionImport(target: Function, propertyKey: string): boolean;
     function isAction(target: Function, propertyKey: string): boolean;

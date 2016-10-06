@@ -224,8 +224,8 @@ export namespace Edm{
         };
     }
     export function getTypeName(target:Function, propertyKey:string):string{
-        let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey);
-        let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);
+        let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey) || Reflect.getMetadata(EdmType, target.prototype);
+        let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey) || Reflect.getMetadata(EdmElementType, target.prototype);
         if (typeof type == "string" && type != "Collection" && type.indexOf(".") < 0){
             for (let i = 0; i < EdmContainer.length; i++){
                 let containerType = EdmContainer[i];
@@ -254,10 +254,11 @@ export namespace Edm{
         }
         return elementType ? type + "(" + elementType + ")" : type;
     }
-    export function getType(target:Function, propertyKey:string):Function{
+    export function getType(target:Function, propertyKey:string):Function | string{
         let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey);
         let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);
         let isEntityType = Edm.isEntityType(target, propertyKey);
+        if (!elementType) elementType = type;
         if (isEntityType){
             if (typeof elementType == "string" && elementType.indexOf(".") < 0) elementType = ((<any>target).namespace || "Default") + "." + elementType;
             if (typeof type == "string" && type.indexOf(".") < 0) type = ((<any>target).namespace || "Default") + "." + type;
@@ -266,11 +267,11 @@ export namespace Edm{
             let containerType = EdmContainer[i];
             let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
             let containerTypeName = (namespace ? namespace + "." : "") + (<any>containerType).name;
-            if (containerTypeName == elementType || containerTypeName == type){
+            if (containerTypeName == elementType){
                 return containerType;
             }
         }
-        return elementType || type;
+        return elementType;
     }
     export function isCollection(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmType, target.prototype, propertyKey) == "Collection";
@@ -389,16 +390,13 @@ export namespace Edm{
 
     function operationDecoratorFactory(type, returnType?){
         return function(target, targetKey){
-            let element = function(){};
+            let element = target;
             if (typeof returnType != "undefined"){
                 try{
-                    Reflect.decorate([returnType()], element, EdmType);
+                    Reflect.decorate([returnType()], element, EdmReturnType);
                 }catch(err){
-                    returnType(element);
+                    returnType(element, EdmReturnType);
                 }
-                let typeName = Reflect.getMetadata(EdmType, element, EdmType) || Reflect.getMetadata(EdmType, element);
-                let elementTypeName = Reflect.getMetadata(EdmElementType, element, EdmElementType) || Reflect.getMetadata(EdmElementType, element);
-                Reflect.defineMetadata(EdmReturnType, elementTypeName ? typeName + "(" + elementTypeName + ")" : typeName, target, targetKey);
             }
             Reflect.defineMetadata(type, type, target, targetKey);
         };
@@ -423,10 +421,14 @@ export namespace Edm{
     export function getOperations(target:Function):string[]{
         return Reflect.getOwnMetadata(EdmOperations, target.prototype) || [];
     }
-    export function getReturnType(target:Function, propertyKey:string):string{
-        return Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey) ||
-            Reflect.getMetadata(EdmReturnType, target, propertyKey);
+
+    export function getReturnTypeName(target:Function, propertyKey:string):string{
+        return Edm.getTypeName(target, EdmReturnType);
     }
+    export function getReturnType(target:Function, propertyKey:string):Function | string{
+        return Edm.getType(target, EdmReturnType);
+    }
+
     export function isActionImport(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmAction, target.prototype, propertyKey) || false;
     }

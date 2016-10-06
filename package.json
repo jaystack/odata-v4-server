@@ -24,22 +24,20 @@
   },
   "homepage": "https://github.com/jaystack/odata-v4-server#readme",
   "dependencies": {
-    "JSONStream": "^1.2.1",
     "body-parser": "^1.15.2",
     "cors": "^2.8.0",
     "express": "^4.14.0",
     "extend": "^3.0.0",
-    "mongodb": "^2.2.6",
-    "odata-v4-inmemory": "^0.1.6",
-    "odata-v4-mongodb": "^0.1.4",
     "odata-v4-parser": "^0.1.10",
-    "odata-v4-resource": "^0.1.2",
     "odata-v4-service-document": "0.0.3",
     "odata-v4-service-metadata": "^0.1.5",
     "reflect-metadata": "^0.1.8"
   },
   "devDependencies": {
+    "mongodb": "^2.2.6",
     "node-uuid": "^1.4.7",
+    "odata-v4-inmemory": "^0.1.6",
+    "odata-v4-mongodb": "^0.1.4",
     "typescript": "^2.0.3"
   }
 }

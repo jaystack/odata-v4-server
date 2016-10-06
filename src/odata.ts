@@ -19,6 +19,7 @@ export namespace odata{
     const ODataFilterParameter:string = "odata:filterparameter";
     const ODataBodyParameter:string = "odata:bodyparameter";
     const ODataContextParameter:string = "odata:contextparameter";
+    const ODataStreamParameter:string = "odata:streamparameter";
 
     export function type(elementType:Function){
         return function(constructor:Function){
@@ -198,5 +199,16 @@ export namespace odata{
     }
     export function getContextParameter(target, targetKey){
         return Reflect.getMetadata(ODataContextParameter, target.prototype, targetKey);
+    }
+
+    export function stream(){
+        return function(target, targetKey, parameterIndex:number){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let paramName = parameterNames[parameterIndex];
+            Reflect.defineMetadata(ODataStreamParameter, paramName, target, targetKey);
+        }
+    }
+    export function getStreamParameter(target, targetKey){
+        return Reflect.getMetadata(ODataStreamParameter, target.prototype, targetKey);
     }
 }

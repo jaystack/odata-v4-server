@@ -15,7 +15,7 @@ export class ODataResult{
     constructor(statusCode:number, result?:any){
         this.statusCode = statusCode;
         if (result){
-            this.body = typeof result == "object" ? extend({}, result) : result;
+            this.body = typeof result == "object" ? extend({}, result) : { value: result };
             if (result && result.constructor) this.elementType = result.constructor;
         }
     }

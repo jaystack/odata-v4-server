@@ -121,6 +121,54 @@ export function createMetadataJSON(server:typeof ODataServer){
                         typeDefinition.property.push(propertyDefinition);
                     });
 
+                    let operations:any = getAllOperations(elementType);
+                    Object.keys(operations).forEach((operation) => {
+                        let namespace = operations[operation].prototype[operation].namespace || elementType.namespace || parent.namespace || server.namespace;
+                        let elementTypeNamespace = elementType.namespace || parent.namespace || server.namespace;
+                        let operationSchema = definition.dataServices.schema.filter((schema) => schema.namespace == namespace)[0];
+                        if (!operationSchema){
+                            operationSchema = {
+                                namespace: namespace,
+                                entityType: [],
+                                complexType: [],
+                                action: [],
+                                function: [],
+                                annotations: []
+                            };
+                            definition.dataServices.schema.unshift(operationSchema);
+                        }
+
+                        if (Edm.isFunction(operations[operation], operation)){
+                            let returnType = Edm.getReturnTypeName(operations[operation], operation);
+                            let parameters = Edm.getParameters(operations[operation], operation);
+                            let definition = {
+                                name: operation,
+                                isBound: true,
+                                parameter: [{
+                                    name: "bindingParameter",
+                                    type: elementTypeNamespace + "." + elementType.name
+                                }].concat(parameters),
+                                returnType: { type: returnType }
+                            };
+                            operationSchema.function.push(definition);
+                        }
+
+                        if (Edm.isAction(operations[operation], operation)){
+                            let returnType = Edm.getReturnTypeName(operations[operation], operation);
+                            let parameters = Edm.getParameters(operations[operation], operation);
+                            let definition = {
+                                name: operation,
+                                isBound: true,
+                                parameter: [{
+                                    name: "bindingParameter",
+                                    type: elementTypeNamespace + "." + elementType.name
+                                }].concat(parameters),
+                                returnType: { type: returnType }
+                            };
+                            operationSchema.action.push(definition);
+                        }
+                    });
+
                     return {
                         schema: typeSchema,
                         definition: typeDefinition
@@ -149,7 +197,7 @@ export function createMetadataJSON(server:typeof ODataServer){
                     }
 
                     if (Edm.isFunction(operations[operation], operation)){
-                        let returnType = Edm.getReturnType(operations[operation], operation);
+                        let returnType = Edm.getReturnTypeName(operations[operation], operation);
                         let parameters = Edm.getParameters(operations[operation], operation);
                         operationSchema.function.push({
                             name: operation,
@@ -163,9 +211,9 @@ export function createMetadataJSON(server:typeof ODataServer){
                     }
 
                     if (Edm.isAction(operations[operation], operation)){
-                        let returnType = Edm.getReturnType(operations[operation], operation);
+                        let returnType = Edm.getReturnTypeName(operations[operation], operation);
                         let parameters = Edm.getParameters(operations[operation], operation);
-                        operationSchema.function.push({
+                        operationSchema.action.push({
                             name: operation,
                             isBound: true,
                             parameter: [{
@@ -191,7 +239,7 @@ export function createMetadataJSON(server:typeof ODataServer){
                 definition.dataServices.schema.unshift(operationSchema);
             }
             if (Edm.isActionImport(server, i)){
-                let returnType = Edm.getReturnType(server, i);
+                let returnType = Edm.getReturnTypeName(server, i);
                 let parameters = Edm.getParameters(server, i);
                 operationSchema.action.push({
                     name: i,
@@ -206,7 +254,7 @@ export function createMetadataJSON(server:typeof ODataServer){
             }
 
             if (Edm.isFunctionImport(server, i)){
-                let returnType = Edm.getReturnType(server, i);
+                let returnType = Edm.getReturnTypeName(server, i);
                 let parameters = Edm.getParameters(server, i);
                 operationSchema.function.push({
                     name: i,

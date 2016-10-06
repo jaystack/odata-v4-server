@@ -38,4 +38,6 @@ export declare namespace odata {
     function getBodyParameter(target: any, targetKey: any): any;
     function context(): (target: any, targetKey: any, parameterIndex: number) => void;
     function getContextParameter(target: any, targetKey: any): any;
+    function stream(): (target: any, targetKey: any, parameterIndex: number) => void;
+    function getStreamParameter(target: any, targetKey: any): any;
 }
