@@ -4,11 +4,9 @@
     "target": "es6",
     "module": "commonjs",
     "declaration": true,
-    "outDir": "lib",
     "experimentalDecorators": true
   },
   "exclude": [
-    "lib",
     "node_modules"
   ]
 }

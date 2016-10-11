@@ -1,8 +1,9 @@
 import { ServiceMetadata } from "odata-v4-service-metadata";
 import { ServiceDocument } from "odata-v4-service-document";
-import { Promise } from "es6-promise";
+import { Edm as Metadata } from "odata-v4-metadata";
+export { Promise } from "es6-promise";
 import * as express from "express";
-import { Transform } from "stream";
+import { Transform, TransformOptions } from "stream";
 import { ODataResult } from "./result";
 import { ODataController } from "./controller";
 import { NavigationPart } from "./visitor";
@@ -23,7 +24,10 @@ export declare class ODataProcessor extends Transform {
     private query;
     private entitySets;
     private odataContext;
+    private body;
     private streamStart;
+    private streamEnabled;
+    private resultCount;
     constructor(context: any, server: any);
     write(chunk: any, done?: Function): boolean;
     write(chunk: any, encoding?: string, done?: Function): any;
@@ -33,20 +37,32 @@ export declare class ODataProcessor extends Transform {
     __EntityNavigationProperty(part: NavigationPart): Function;
     __PrimitiveProperty(part: NavigationPart): Function;
     __PrimitiveCollectionProperty(part: NavigationPart): Function;
+    __ComplexProperty(part: NavigationPart): Function;
+    __ComplexCollectionProperty(part: NavigationPart): Function;
     __read(ctrl: typeof ODataController, part: any, params: any, data?: any, filter?: string): Promise<{}>;
     __EntitySetName(part: NavigationPart): Function;
     __actionOrFunctionImport(part: NavigationPart): Function;
     __actionOrFunction(part: NavigationPart): Function;
+    __appendODataContext(result: any, elementType: Function): void;
+    __convertEntity(context: any, result: any, elementType: any): any;
+    __enableStreaming(part: NavigationPart): void;
     __applyParams(container: any, name: string, params: any, queryString?: string): void;
     execute(body?: any): Promise<ODataResult>;
 }
-export declare class ODataServer {
+export declare class ODataServer extends Transform {
     private static _metadataCache;
     static namespace: string;
     static containerName: string;
+    private serverType;
     static requestHandler(): (req: any, res: any, next: any) => void;
+    static execute(url: string, method: string, body?: any): any;
+    static execute(context: any, body?: any): any;
+    constructor(opts?: TransformOptions);
+    _transform(chunk: any, encoding?: string, done?: Function): any;
+    _flush(done?: Function): void;
     static createProcessor(context: any): ODataProcessor;
     static $metadata(): ServiceMetadata;
+    static $metadata(metadata: Metadata.Edmx | any): any;
     static document(): ServiceDocument;
     static addController(controller: typeof ODataController, isPublic?: boolean): any;
     static addController(controller: typeof ODataController, isPublic?: boolean, elementType?: Function): any;

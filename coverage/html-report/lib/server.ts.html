@@ -1,0 +1,2633 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for lib\server.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">lib/</a> server.ts
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">36.77% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>196/533</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">26.16% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>90/344</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">47.83% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>22/46</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">37.84% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>182/481</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526
+527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+600
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+611
+612
+613
+614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635
+636
+637
+638
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+649
+650
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667
+668
+669
+670
+671
+672
+673
+674
+675
+676
+677
+678
+679
+680
+681
+682
+683
+684
+685
+686
+687
+688
+689
+690
+691
+692
+693
+694
+695
+696
+697
+698
+699
+700
+701
+702
+703
+704
+705
+706
+707
+708
+709
+710
+711
+712
+713
+714
+715
+716
+717
+718
+719
+720
+721
+722
+723
+724
+725
+726
+727
+728
+729
+730
+731
+732
+733
+734
+735
+736
+737
+738
+739
+740
+741
+742
+743
+744
+745
+746
+747
+748
+749
+750
+751
+752
+753
+754
+755
+756
+757
+758
+759
+760
+761
+762
+763
+764
+765
+766
+767
+768
+769
+770
+771
+772
+773
+774
+775
+776
+777
+778
+779
+780
+781
+782
+783
+784
+785
+786
+787
+788
+789
+790
+791
+792
+793
+794
+795
+796
+797
+798
+799
+800
+801
+802
+803
+804
+805
+806
+807
+808
+809
+810
+811
+812
+813
+814
+815
+816
+817
+818
+819
+820
+821
+822
+823
+824
+825
+826
+827
+828
+829
+830
+831
+832
+833
+834
+835
+836
+837
+838
+839
+840
+841
+842
+843
+844
+845
+846
+847
+848
+849
+850
+851
+852
+853
+854
+855
+856
+857</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { ServiceMetadata } from "odata-v4-service-metadata";
+import { ServiceDocument } from "odata-v4-service-document";
+import { Token, TokenType } from "odata-v4-parser/lib/lexer";
+import { Edm as Metadata } from "odata-v4-metadata";
+import * as ODataParser from "odata-v4-parser";
+import * as extend from "extend";
+export { Promise } from "es6-promise";
+import * as express from "express";
+import * as bodyParser from "body-parser";
+import * as cors from "cors";
+import * as url from "url";
+import * as qs from "qs";
+import { Transform, Readable, Duplex, TransformOptions } from "stream";
+import * as JSONStream from "JSONStream";
+import { getFunctionParameters } from "./utils";
+import { ODataResult, IODataResult } from "./result";
+import { ODataController } from "./controller";
+import { ResourcePathVisitor, NavigationPart } from "./visitor";
+import { Edm } from "./edm";
+import { odata } from "./odata";
+import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
+import { createMetadataJSON } from "./metadata";
+&nbsp;
+const createODataContext = function(context, entitySets, server:typeof ODataServer, resourcePath){
+    let odataContextBase = (context.protocol || "http") + "://" + (context.host || "localhost") + (context.base || "") + "/$metadata#";
+    let odataContext = "";
+    let prevResource = null;
+    resourcePath.navigation.forEach((baseResource) =&gt; {
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (baseResource.type == TokenType.EntitySetName){
+            prevResource = baseResource;
+            odataContext += baseResource.name;
+            if (baseResource.key &amp;&amp; resourcePath.navigation.indexOf(baseResource) == resourcePath.navigation.length - 1) return odataContext += "/$entity";
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (baseResource.key){
+<span class="cstat-no" title="statement not covered" >                return odataContext += "(" + baseResource.key.map((key) =&gt; <span class="cstat-no" title="statement not covered" >key.raw)</span>.join(",") + ")";</span>
+            }
+        }else <span class="cstat-no" title="statement not covered" >if (getResourcePartFunction(baseResource.type)){</span>
+<span class="cstat-no" title="statement not covered" >            odataContext = "";</span>
+<span class="cstat-no" title="statement not covered" >            if (prevResource){</span>
+<span class="cstat-no" title="statement not covered" >                let target = entitySets[prevResource.name];</span>
+<span class="cstat-no" title="statement not covered" >                if (!target) <span class="cstat-no" title="statement not covered" >return;</span></span>
+<span class="cstat-no" title="statement not covered" >                let propertyKey = baseResource.name.split(".").pop();</span>
+<span class="cstat-no" title="statement not covered" >                let returnType = Edm.getReturnType(target, propertyKey);</span>
+<span class="cstat-no" title="statement not covered" >                if (typeof returnType == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                    let returnTypeName = Edm.getReturnTypeName(target, propertyKey);</span>
+<span class="cstat-no" title="statement not covered" >                    let ctrl = server.getController(returnType);</span>
+<span class="cstat-no" title="statement not covered" >                    let entitySet = null;</span>
+<span class="cstat-no" title="statement not covered" >                    for (let prop in entitySets){</span>
+<span class="cstat-no" title="statement not covered" >                        if (entitySets[prop] == ctrl){</span>
+<span class="cstat-no" title="statement not covered" >                            entitySet = prop;</span>
+<span class="cstat-no" title="statement not covered" >                            break;</span>
+                        }
+                    }
+<span class="cstat-no" title="statement not covered" >                    returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? "" : "/$entity") : returnTypeName;</span>
+                }
+<span class="cstat-no" title="statement not covered" >                return odataContext += returnType;</span>
+            }else{
+<span class="cstat-no" title="statement not covered" >                let call = baseResource.name;</span>
+<span class="cstat-no" title="statement not covered" >                let returnType = Edm.getReturnType(server, call);</span>
+<span class="cstat-no" title="statement not covered" >                if (typeof returnType == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                    let returnTypeName = Edm.getReturnTypeName(server, call);</span>
+<span class="cstat-no" title="statement not covered" >                    let ctrl = server.getController(returnType);</span>
+<span class="cstat-no" title="statement not covered" >                    let entitySet = null;</span>
+<span class="cstat-no" title="statement not covered" >                    for (let prop in entitySets){</span>
+<span class="cstat-no" title="statement not covered" >                        if (entitySets[prop] == ctrl){</span>
+<span class="cstat-no" title="statement not covered" >                            entitySet = prop;</span>
+<span class="cstat-no" title="statement not covered" >                            break;</span>
+                        }
+                    }
+<span class="cstat-no" title="statement not covered" >                    returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? "" : "/$entity") : returnTypeName;</span>
+                }
+<span class="cstat-no" title="statement not covered" >                return odataContext += returnType;</span>
+            }
+        }
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (baseResource.type == TokenType.EntityCollectionNavigationProperty){
+<span class="cstat-no" title="statement not covered" >            prevResource = baseResource;</span>
+<span class="cstat-no" title="statement not covered" >            odataContext += "/" + baseResource.name;</span>
+<span class="cstat-no" title="statement not covered" >            if (baseResource.key &amp;&amp; resourcePath.navigation.indexOf(baseResource) == resourcePath.navigation.length - 1) <span class="cstat-no" title="statement not covered" >return odataContext += "/$entity";</span></span>
+<span class="cstat-no" title="statement not covered" >            if (baseResource.key){</span>
+<span class="cstat-no" title="statement not covered" >                return odataContext += "(" + baseResource.key.map((key) =&gt; <span class="cstat-no" title="statement not covered" >key.raw)</span>.join(",") + ")";</span>
+            }
+<span class="cstat-no" title="statement not covered" >            return odataContext;</span>
+        }
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (baseResource.type == TokenType.EntityNavigationProperty){
+<span class="cstat-no" title="statement not covered" >            prevResource = baseResource;</span>
+<span class="cstat-no" title="statement not covered" >            return odataContext += "/" + baseResource.name;</span>
+        }
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (baseResource.type == TokenType.PrimitiveProperty ||
+            baseResource.type == TokenType.PrimitiveCollectionProperty ||
+            baseResource.type == TokenType.ComplexProperty ||
+            baseResource.type == TokenType.ComplexCollectionProperty) <span class="cstat-no" title="statement not covered" >return odataContext += "/" + baseResource.name;</span>
+    });
+    return odataContextBase + odataContext;
+}
+&nbsp;
+const fnCaller = function(fn, body, params){
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (!params &amp;&amp; body){
+        params = body;
+        body = undefined;
+    }
+    params = params || <span class="branch-1 cbranch-no" title="branch not covered" >{};</span>
+    let fnParams:any[];
+    let paramsArray = Object.keys(params);
+    fnParams = getFunctionParameters(fn);
+    for (var i = 0; i &lt; fnParams.length; i++){
+        fnParams[i] = params[fnParams[i]];
+    }
+&nbsp;
+    fnParams = fnParams.concat(paramsArray.map((key) =&gt; &lt;any&gt;{ name: key, value: params[key] }));
+    fnParams = fnParams.filter((it) =&gt; typeof it != "undefined");
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (body){
+<span class="cstat-no" title="statement not covered" >        fnParams.unshift(body);</span>
+    }
+    return fn.apply(this, fnParams);
+};
+&nbsp;
+const ODataRequestMethods:string[] = ["get", "post", "put", "patch", "delete"];
+const ODataRequestResult:any = {
+    get: ODataResult.Ok,
+    post: ODataResult.Created,
+    put: ODataResult.NoContent,
+    patch: ODataResult.NoContent,
+    delete: ODataResult.NoContent
+};
+&nbsp;
+const expCalls = {
+    $count: <span class="fstat-no" title="function not covered" >function(){</span>
+<span class="cstat-no" title="statement not covered" >        return this.body &amp;&amp; this.body.value ? (this.body.value.length || 0) : 0;</span>
+    },
+    $value: <span class="fstat-no" title="function not covered" >function(){</span>
+<span class="cstat-no" title="statement not covered" >        if (this.stream) <span class="cstat-no" title="statement not covered" >return this.stream;</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        let result = this.body.value || this.body;</span>
+<span class="cstat-no" title="statement not covered" >        for (let prop in result){</span>
+<span class="cstat-no" title="statement not covered" >            if (prop.indexOf("@odata") &gt;= 0) <span class="cstat-no" title="statement not covered" >delete result[prop];</span></span>
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        return result.value || result;</span>
+    }
+};
+&nbsp;
+const getResourcePartFunction = (type) =&gt; {
+    switch (type){
+        case "PrimitiveFunctionImportCall":
+        case "PrimitiveCollectionFunctionImportCall":
+        case "ComplexFunctionImportCall":
+        case "ComplexCollectionFunctionImportCall":
+        case "EntityFunctionImportCall":
+        case "EntityCollectionFunctionImportCall":
+        case "ActionImportCall":
+        case "ActionImport":
+<span class="cstat-no" title="statement not covered" >            return "__actionOrFunctionImport";</span>
+        case "BoundPrimitiveFunctionCall":
+        case "BoundPrimitiveCollectionFunctionCall":
+        case "BoundComplexFunctionCall":
+        case "BoundComplexCollectionFunctionCall":
+        case "BoundEntityFunctionCall":
+        case "BoundEntityCollectionFunctionCall":
+        case "BoundActionCall":
+        case "BoundAction":
+<span class="cstat-no" title="statement not covered" >            return "__actionOrFunction";</span>
+    }
+};
+&nbsp;
+const writeMethods = [
+    "delete",
+    "post",
+    "put",
+    "patch"
+];
+&nbsp;
+function isIterator(value){
+    return value instanceof (<span class="fstat-no" title="function not covered" >function*() {</span>}).constructor;
+}
+&nbsp;
+function isPromise(value){
+    return value &amp;&amp; typeof value.then == "function";
+}
+&nbsp;
+function isStream(stream){
+    return stream !== null &amp;&amp; typeof stream == "object" &amp;&amp; typeof stream.pipe == "function";
+}
+&nbsp;
+export type GeneratorAction = (value?) =&gt; {};
+&nbsp;
+export namespace ODataGeneratorHandlers{
+    export function PromiseHandler(request:any, next:GeneratorAction){
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (isPromise(request)){
+<span class="cstat-no" title="statement not covered" >            return request.then(next);</span>
+        }
+    }
+&nbsp;
+    export function StreamHandler(request:any, next:GeneratorAction){
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (isStream(request)){
+<span class="cstat-no" title="statement not covered" >            return new Promise((resolve, reject) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                request.on("end", resolve);</span>
+<span class="cstat-no" title="statement not covered" >                request.on("error", reject);</span>
+            }).then(next);
+        }
+    }
+}
+&nbsp;
+function run(iterator, handlers){
+    function id(x){ return x; }
+    function iterate(value?){
+        let next = iterator.next(value);
+        let request = next.value;
+        let nextAction = next.done ? id : <span class="branch-1 cbranch-no" title="branch not covered" >iterate;</span>
+        
+        for (let handler of handlers){
+            let action = handler(request, nextAction);
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof action != "undefined") <span class="cstat-no" title="statement not covered" >return action;</span>
+        }
+        return nextAction(request);
+    }
+    return iterate();
+}
+&nbsp;
+export class ODataProcessor extends Transform{
+    private serverType:typeof ODataServer
+    private ctrl:typeof ODataController
+    private instance:ODataController
+    private resourcePath:ResourcePathVisitor
+    private workflow:any[]
+    private context:any
+    private method:string
+    private url:any
+    private query:any
+    private entitySets:string[]
+    private odataContext:string
+    private body:any
+    private streamStart = false;
+    private streamEnabled = false;
+    private resultCount = 0;
+&nbsp;
+    constructor(context, server){
+        super();
+&nbsp;
+        this.context = context;
+        this.serverType = server;
+&nbsp;
+        let method = this.method = context.method.toLowerCase();
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (ODataRequestMethods.indexOf(method) &lt; 0) <span class="cstat-no" title="statement not covered" >throw new MethodNotAllowedError();</span>
+        
+        this.url = url.parse(context.url);
+        this.query = qs.parse(this.url.query);
+        let ast = ODataParser.odataUri(context.url, { metadata: this.serverType.$metadata().edmx });
+        let resourcePath = this.resourcePath = new ResourcePathVisitor().Visit(ast);
+        let entitySets = this.entitySets = odata.getPublicControllers(this.serverType);
+        this.odataContext = createODataContext(context, entitySets, server, resourcePath);
+&nbsp;
+        this.workflow = resourcePath.navigation.map((part) =&gt; {
+            let fn = this[getResourcePartFunction(part.type) || ("__" + part.type)];
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (fn) return fn.call(this, part);
+<span class="cstat-no" title="statement not covered" >            console.log(`Unhandled navigation type: ${part.type}`);</span>
+        }).filter(it =&gt; !!it);
+    }
+&nbsp;
+    write(chunk:any, done?:Function):boolean;
+    write(chunk:any, encoding?:string, done?:Function);
+    write<span class="fstat-no" title="function not covered" >(chunk:any, encoding?:string | Function, done?:Function)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        if (typeof encoding == "function"){</span>
+<span class="cstat-no" title="statement not covered" >            done = encoding;</span>
+<span class="cstat-no" title="statement not covered" >            encoding = undefined;</span>
+        }
+<span class="cstat-no" title="statement not covered" >        if (this.streamEnabled){</span>
+<span class="cstat-no" title="statement not covered" >            if (!(chunk instanceof Buffer)){</span>
+<span class="cstat-no" title="statement not covered" >                if (!this.streamStart){</span>
+<span class="cstat-no" title="statement not covered" >                    super.write('{"@odata.context":"' + this.odataContext + '","value":[');</span>
+                }else <span class="cstat-no" title="statement not covered" >super.write(',');</span>
+<span class="cstat-no" title="statement not covered" >                try{</span>
+<span class="cstat-no" title="statement not covered" >                    let entity = {};</span>
+<span class="cstat-no" title="statement not covered" >                    this.__convertEntity(entity, chunk, this.ctrl.prototype.elementType);</span>
+<span class="cstat-no" title="statement not covered" >                    chunk = JSON.stringify(entity);</span>
+                }catch(err){
+<span class="cstat-no" title="statement not covered" >                    try{</span>
+<span class="cstat-no" title="statement not covered" >                        chunk = chunk.toString();</span>
+                    }catch(err){
+<span class="cstat-no" title="statement not covered" >                        super.end();</span>
+                    }
+                }finally{
+<span class="cstat-no" title="statement not covered" >                    this.streamStart = true;</span>
+<span class="cstat-no" title="statement not covered" >                    return super.write(chunk, done);</span>
+                }
+            }else <span class="cstat-no" title="statement not covered" >return super.write(chunk, done);</span>
+        }else{
+<span class="cstat-no" title="statement not covered" >            this.resultCount++;</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof done == "function") <span class="cstat-no" title="statement not covered" >done();</span></span>
+        }
+    }
+&nbsp;
+    _transform<span class="fstat-no" title="function not covered" >(chunk:any, encoding?:string, done?:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        this.push(chunk);</span>
+<span class="cstat-no" title="statement not covered" >        if (typeof done == "function") <span class="cstat-no" title="statement not covered" >done();</span></span>
+    }
+&nbsp;
+    _flush<span class="fstat-no" title="function not covered" >(done?:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        if (this.streamEnabled){</span>
+<span class="cstat-no" title="statement not covered" >            if (this.streamStart) <span class="cstat-no" title="statement not covered" >super.write("]}");</span></span>
+            else <span class="cstat-no" title="statement not covered" >super.write('{"@odata.context":"' + this.odataContext + '","value":[]}');</span>
+        }
+<span class="cstat-no" title="statement not covered" >        if (typeof done == "function") <span class="cstat-no" title="statement not covered" >done();</span></span>
+    }
+&nbsp;
+    __EntityCollectionNavigationProperty<span class="fstat-no" title="function not covered" >(part:NavigationPart)</span>:Function{
+<span class="cstat-no" title="statement not covered" >        return (result) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            let resultType = result.elementType;</span>
+<span class="cstat-no" title="statement not covered" >            let elementType = &lt;Function&gt;Edm.getType(resultType, part.name);</span>
+<span class="cstat-no" title="statement not covered" >            let ctrl = this.serverType.getController(elementType);</span>
+<span class="cstat-no" title="statement not covered" >            let foreignKeys = Edm.getForeignKeys(resultType, part.name);</span>
+<span class="cstat-no" title="statement not covered" >            let typeKeys = Edm.getKeyProperties(resultType);</span>
+<span class="cstat-no" title="statement not covered" >            result.foreignKeys = {};</span>
+<span class="cstat-no" title="statement not covered" >            let foreignFilter = foreignKeys.map((key) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                result.foreignKeys[key] = result.body[typeKeys[0]];</span>
+<span class="cstat-no" title="statement not covered" >                return `${key} eq ${Edm.escape(result.body[typeKeys[0]], Edm.getTypeName(elementType, key))}`;</span>
+            }).join(" and ");
+<span class="cstat-no" title="statement not covered" >            let params = {};</span>
+<span class="cstat-no" title="statement not covered" >            if (part.key) <span class="cstat-no" title="statement not covered" >part.key.forEach((key) =&gt; <span class="cstat-no" title="statement not covered" >params[key.name] = key.value)</span>;</span></span>
+<span class="cstat-no" title="statement not covered" >            return this.__read(ctrl, part, params, result, foreignFilter);</span>
+        };
+    }
+&nbsp;
+    __EntityNavigationProperty<span class="fstat-no" title="function not covered" >(part:NavigationPart)</span>:Function{
+<span class="cstat-no" title="statement not covered" >        return (result) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            let resultType = result.elementType;</span>
+<span class="cstat-no" title="statement not covered" >            let elementType = &lt;Function&gt;Edm.getType(resultType, part.name);</span>
+<span class="cstat-no" title="statement not covered" >            let ctrl = this.serverType.getController(elementType);</span>
+<span class="cstat-no" title="statement not covered" >            let foreignKeys = Edm.getForeignKeys(resultType, part.name);</span>
+<span class="cstat-no" title="statement not covered" >            let typeKeys = Edm.getKeyProperties(elementType);</span>
+<span class="cstat-no" title="statement not covered" >            let params = {};</span>
+<span class="cstat-no" title="statement not covered" >            result.foreignKeys = {};</span>
+            (&lt;any&gt;<span class="cstat-no" title="statement not covered" >part).key = foreignKeys.map((key) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                result.foreignKeys[key] = result.body[key];</span>
+<span class="cstat-no" title="statement not covered" >                return {</span>
+                    name: key,
+                    value: result.body[key]
+                };
+            });
+<span class="cstat-no" title="statement not covered" >            if (part.key) <span class="cstat-no" title="statement not covered" >part.key.forEach((key) =&gt; <span class="cstat-no" title="statement not covered" >params[key.name] = key.value)</span>;</span></span>
+<span class="cstat-no" title="statement not covered" >            return this.__read(ctrl, part, params, result);</span>
+        };
+    }
+&nbsp;
+    __PrimitiveProperty<span class="fstat-no" title="function not covered" >(part:NavigationPart)</span>:Function{
+<span class="cstat-no" title="statement not covered" >        return (result) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            return new Promise((resolve, reject) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                this.__enableStreaming(part);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                let value = result.body[part.name];</span>
+<span class="cstat-no" title="statement not covered" >                if (isStream(value)){</span>
+<span class="cstat-no" title="statement not covered" >                    value.pipe(this);</span>
+<span class="cstat-no" title="statement not covered" >                    value.on("end", resolve);</span>
+<span class="cstat-no" title="statement not covered" >                    value.on("error", reject);</span>
+                }else{
+<span class="cstat-no" title="statement not covered" >                    result.body = {</span>
+                        "@odata.context": result.body["@odata.context"],
+                        value: value
+                    };
+<span class="cstat-no" title="statement not covered" >                    resolve(result);</span>
+                }
+            });
+        };
+    }
+&nbsp;
+    __PrimitiveCollectionProperty<span class="fstat-no" title="function not covered" >(part:NavigationPart)</span>:Function{
+<span class="cstat-no" title="statement not covered" >        return this.__PrimitiveProperty(part);</span>
+    }
+&nbsp;
+    __ComplexProperty<span class="fstat-no" title="function not covered" >(part:NavigationPart)</span>:Function{
+<span class="cstat-no" title="statement not covered" >        return this.__PrimitiveProperty(part);</span>
+    }
+&nbsp;
+    __ComplexCollectionProperty<span class="fstat-no" title="function not covered" >(part:NavigationPart)</span>:Function{
+<span class="cstat-no" title="statement not covered" >        return this.__PrimitiveProperty(part);</span>
+    }
+&nbsp;
+    __read(ctrl:typeof ODataController, part:any, params:any, data?:any, filter?:string){
+        return new Promise((resolve, reject) =&gt; {
+            this.ctrl = ctrl;
+&nbsp;
+            let method = writeMethods.indexOf(this.method) &gt;= 0 &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >this.resourcePath.navigation.indexOf(part) &lt; this.resourcePath.navigation.length - 1</span>
+                ? <span class="branch-0 cbranch-no" title="branch not covered" >"get"</span>
+                : this.method;
+&nbsp;
+            this.instance = new ctrl();
+            let fn:any = odata.findODataMethod(ctrl, method, part.key);
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (!fn) <span class="cstat-no" title="statement not covered" >return reject(new ResourceNotFoundError());</span>
+&nbsp;
+            let queryString = filter ? <span class="branch-0 cbranch-no" title="branch not covered" >`$filter=${filter}` </span>: this.url.query;
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1){
+                queryString = Object.keys(this.query).map((p) =&gt; {
+<span class="cstat-no" title="statement not covered" >                    if (p == "$filter" &amp;&amp; filter){</span>
+<span class="cstat-no" title="statement not covered" >                        this.query[p] = `(${this.query[p]}) and (${filter})`;</span>
+                    }
+<span class="cstat-no" title="statement not covered" >                    return p + "=" + this.query[p];</span>
+                }).join("&amp;") || queryString;
+            }
+&nbsp;
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof fn != "function"){
+                let fnDesc = fn;
+                this.__applyParams(ctrl, fnDesc.call, params, queryString);
+                fn = ctrl.prototype[fnDesc.call];
+                if (fnDesc.key.length == 1 &amp;&amp; part.key.length == 1 &amp;&amp; fnDesc.key[0].to != part.key[0].name){
+                    params[fnDesc.key[0].to] = params[part.key[0].name];
+                    delete params[part.key[0].name];
+                }else{
+                    for (let i = 0; i &lt; fnDesc.key.length; i++){
+<span class="cstat-no" title="statement not covered" >                        if (fnDesc.key[i].to != fnDesc.key[i].from){</span>
+<span class="cstat-no" title="statement not covered" >                            params[fnDesc.key[i].to] = params[fnDesc.key[i].from];</span>
+<span class="cstat-no" title="statement not covered" >                            delete params[fnDesc.key[i].from];</span>
+                        }
+                    }
+                }
+            }else <span class="cstat-no" title="statement not covered" >this.__applyParams(ctrl, method, params, queryString);</span>
+&nbsp;
+            this.__enableStreaming(part);
+&nbsp;
+            let currentResult:any;
+            switch (method){
+                case "get":
+                case "delete":
+                    currentResult = fnCaller.call(ctrl, fn, params);
+                    break;
+<span class="branch-2 cbranch-no" title="branch not covered" >                case "post":</span>
+<span class="branch-3 cbranch-no" title="branch not covered" >                case "put":</span>
+<span class="branch-4 cbranch-no" title="branch not covered" >                case "patch":</span>
+<span class="cstat-no" title="statement not covered" >                    let bodyParam = odata.getBodyParameter(ctrl, fn.name);</span>
+<span class="cstat-no" title="statement not covered" >                    if (bodyParam) <span class="cstat-no" title="statement not covered" >params[bodyParam] = extend(this.body, data.foreignKeys);</span></span>
+<span class="cstat-no" title="statement not covered" >                    if (!part.key){</span>
+<span class="cstat-no" title="statement not covered" >                        let properties:string[] = Edm.getProperties(ctrl.prototype.elementType.prototype);</span>
+<span class="cstat-no" title="statement not covered" >                        properties.forEach((prop) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                            if (Edm.isKey(ctrl.prototype.elementType, prop)){</span>
+<span class="cstat-no" title="statement not covered" >                                params[prop] = this.body[prop] || data.body[prop];</span>
+                            }
+                        });
+                    }
+<span class="cstat-no" title="statement not covered" >                    currentResult = fnCaller.call(ctrl, fn, params);</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+            }
+&nbsp;
+            if (isIterator(fn)){
+                currentResult = run(currentResult, [
+                    ODataGeneratorHandlers.PromiseHandler,
+                    ODataGeneratorHandlers.StreamHandler
+                ]);
+            }
+&nbsp;
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (!isPromise(currentResult)){
+                currentResult = new Promise((resolve) =&gt; resolve(currentResult));
+            }
+&nbsp;
+            return currentResult.then((result:any):any =&gt; {
+                <span class="missing-if-branch" title="if path not taken" >I</span>if (isStream(result) &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >!Edm.isMediaEntity(this.ctrl.prototype.elementType))</span>{
+<span class="cstat-no" title="statement not covered" >                    return new Promise((resolve, reject) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                        result.on("end", resolve);</span>
+<span class="cstat-no" title="statement not covered" >                        result.on("error", reject);</span>
+                    });
+                }
+                <span class="missing-if-branch" title="else path not taken" >E</span>if (!(result instanceof ODataResult)){
+                    return (&lt;Promise&lt;ODataResult&gt;&gt;ODataRequestResult[method](result)).then((result) =&gt; {
+                        this.__appendODataContext(result, this.ctrl.prototype.elementType);
+                        resolve(result);
+                    }, reject);
+                }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                this.__appendODataContext(result, this.ctrl.prototype.elementType);</span>
+<span class="cstat-no" title="statement not covered" >                resolve(result);</span>
+            });
+        });
+    }
+&nbsp;
+    __EntitySetName(part:NavigationPart):Function{
+        let ctrl = this.entitySets[part.name];
+        let params = {};
+        if (part.key) part.key.forEach((key) =&gt; params[key.name] = key.value);
+        return (data) =&gt; {
+            return this.__read(ctrl, part, params, data);
+        };
+    }
+&nbsp;
+    __actionOrFunctionImport<span class="fstat-no" title="function not covered" >(part:NavigationPart)</span>:Function{
+<span class="cstat-no" title="statement not covered" >        let fn = this.serverType.prototype[part.name];</span>
+<span class="cstat-no" title="statement not covered" >        return (data) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            return new Promise((resolve, reject) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                try{</span>
+<span class="cstat-no" title="statement not covered" >                    this.__enableStreaming(part);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                    let returnType = &lt;Function&gt;Edm.getReturnType(this.serverType, part.name);</span>
+<span class="cstat-no" title="statement not covered" >                    this.__applyParams(this.serverType, part.name, part.params);</span>
+<span class="cstat-no" title="statement not covered" >                    let result = fnCaller.call(data, fn, part.params);</span>
+<span class="cstat-no" title="statement not covered" >                    let schemas = this.serverType.$metadata().edmx.dataServices.schemas;</span>
+<span class="cstat-no" title="statement not covered" >                    if (Edm.isActionImport(this.serverType, part.name) || </span>
+                        schemas.some(schema =&gt; <span class="cstat-no" title="statement not covered" >schema.entityContainer.some(container =&gt; <span class="cstat-no" title="statement not covered" >container.actionImports.some(actionImport =&gt; <span class="cstat-no" title="statement not covered" >actionImport.name == part.name)</span>)</span>)</span>
+                    ){
+<span class="cstat-no" title="statement not covered" >                        return ODataResult.NoContent(result).then(resolve, reject);</span>
+                    }else <span class="cstat-no" title="statement not covered" >if (Edm.isFunctionImport(this.serverType, part.name) ||</span>
+                        schemas.some(schema =&gt; <span class="cstat-no" title="statement not covered" >schema.entityContainer.some(container =&gt; <span class="cstat-no" title="statement not covered" >container.functionImports.some(functionImport =&gt; <span class="cstat-no" title="statement not covered" >functionImport.name == part.name)</span>)</span>)</span>
+                    ){
+<span class="cstat-no" title="statement not covered" >                        return ODataResult.Ok(result).then((result) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                            if (isStream(result.body)){</span>
+                                (&lt;any&gt;<span class="cstat-no" title="statement not covered" >result.body).on("end", resolve);</span>
+                                (&lt;any&gt;<span class="cstat-no" title="statement not covered" >result.body).on("error", reject);</span>
+                            }else{
+<span class="cstat-no" title="statement not covered" >                                this.__appendODataContext(result, returnType);</span>
+<span class="cstat-no" title="statement not covered" >                                resolve(result);</span>
+                            }
+                        }, reject);
+                    }
+                }catch(err){
+<span class="cstat-no" title="statement not covered" >                    reject(err);</span>
+                }
+            });
+        };
+    }
+&nbsp;
+    __actionOrFunction<span class="fstat-no" title="function not covered" >(part:NavigationPart)</span>:Function{
+<span class="cstat-no" title="statement not covered" >        return (result:ODataResult) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            return new Promise((resolve, reject) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                this.__enableStreaming(part);</span>
+<span class="cstat-no" title="statement not covered" >                if (!result) <span class="cstat-no" title="statement not covered" >return resolve();</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                let boundOpName = part.name.split(".").pop();</span>
+<span class="cstat-no" title="statement not covered" >                let elementType = result.elementType;</span>
+<span class="cstat-no" title="statement not covered" >                let entityBoundOp = elementType.prototype[boundOpName];</span>
+<span class="cstat-no" title="statement not covered" >                let ctrlBoundOp = this.instance[boundOpName];</span>
+<span class="cstat-no" title="statement not covered" >                let expOp = expCalls[boundOpName];</span>
+<span class="cstat-no" title="statement not covered" >                let scope:any= this.serverType;</span>
+<span class="cstat-no" title="statement not covered" >                let returnType:any = Object;</span>
+<span class="cstat-no" title="statement not covered" >                if (entityBoundOp){</span>
+<span class="cstat-no" title="statement not covered" >                    scope = result.body;</span>
+<span class="cstat-no" title="statement not covered" >                    returnType = &lt;Function&gt;Edm.getReturnType(elementType, boundOpName);</span>
+<span class="cstat-no" title="statement not covered" >                    this.__applyParams(elementType, boundOpName, part.params);</span>
+                }else <span class="cstat-no" title="statement not covered" >if (ctrlBoundOp){</span>
+<span class="cstat-no" title="statement not covered" >                    scope = this.instance;</span>
+<span class="cstat-no" title="statement not covered" >                    returnType = &lt;Function&gt;Edm.getReturnType(this.ctrl, boundOpName);</span>
+<span class="cstat-no" title="statement not covered" >                    this.__applyParams(this.ctrl, boundOpName, part.params);</span>
+                }else <span class="cstat-no" title="statement not covered" >if (expOp) <span class="cstat-no" title="statement not covered" >scope = result;</span></span>
+<span class="cstat-no" title="statement not covered" >                let boundOp = entityBoundOp || ctrlBoundOp || expOp;</span>
+<span class="cstat-no" title="statement not covered" >                try{</span>
+<span class="cstat-no" title="statement not covered" >                    let opResult = fnCaller.call(scope, boundOp, part.params);</span>
+<span class="cstat-no" title="statement not covered" >                    if (boundOp == expOp){</span>
+<span class="cstat-no" title="statement not covered" >                        let expResult = boundOpName == "$count" ? opResult || this.resultCount : opResult;</span>
+<span class="cstat-no" title="statement not covered" >                        if (Edm.isMediaEntity(elementType)){</span>
+<span class="cstat-no" title="statement not covered" >                            this.emit("contentType", Edm.getContentType(elementType));</span>
+<span class="cstat-no" title="statement not covered" >                            opResult.pipe(this);</span>
+<span class="cstat-no" title="statement not covered" >                            opResult.on("end", resolve);</span>
+<span class="cstat-no" title="statement not covered" >                            opResult.on("error", reject);</span>
+                        }else{
+<span class="cstat-no" title="statement not covered" >                            return resolve(ODataResult.Ok(expResult, typeof expResult == "object" ? "application/json" : "text/plain"));</span>
+                        }
+                    }
+<span class="cstat-no" title="statement not covered" >                    return ODataResult.Ok(opResult).then((result) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                        if (isStream(result.body)){</span>
+                            (&lt;any&gt;<span class="cstat-no" title="statement not covered" >result.body).on("end", resolve);</span>
+                            (&lt;any&gt;<span class="cstat-no" title="statement not covered" >result.body).on("error", reject);</span>
+                        }else{
+<span class="cstat-no" title="statement not covered" >                            this.__appendODataContext(result, returnType);</span>
+<span class="cstat-no" title="statement not covered" >                            resolve(result);</span>
+                        }
+                    }, reject);
+                }catch(err){
+<span class="cstat-no" title="statement not covered" >                    reject(err);</span>
+                }
+            });
+        };
+    }
+&nbsp;
+    __appendODataContext(result:any, elementType:Function){
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof result.body == "object" &amp;&amp; result.body){
+            let context:any = {
+                "@odata.context": this.odataContext
+            };
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (result.body["@odata.count"]) <span class="cstat-no" title="statement not covered" >context["@odata.count"] = result.body["@odata.count"];</span>
+&nbsp;
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (Edm.isMediaEntity(elementType)){
+<span class="cstat-no" title="statement not covered" >                context["@odata.mediaReadLink"] = (this.context.protocol || "http") + "://" + (this.context.host || "localhost") + (this.context.base || "") + this.context.url + "/$value";</span>
+<span class="cstat-no" title="statement not covered" >                context["@odata.mediaContentType"] = Edm.getContentType(elementType);</span>
+<span class="cstat-no" title="statement not covered" >                result.stream = result.body;</span>
+            }
+&nbsp;
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (!result.body["@odata.context"]){
+                if (Array.isArray(result.body.value)){
+                    context.value = result.body.value;
+                    result.body.value.forEach((entity, i) =&gt; {
+                        let item = {};
+                        this.__convertEntity(item, entity, elementType);
+                        context.value[i] = item;
+                    });
+                }else{
+                    this.__convertEntity(context, result.body, elementType);
+                }
+&nbsp;
+                result.body = context;
+            }
+        }
+        result.elementType = elementType;
+    }
+&nbsp;
+    __convertEntity(context, result, elementType){
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (elementType === Object) return extend(context, result);
+<span class="cstat-no" title="statement not covered" >        let props = Edm.isOpenType(elementType) ? Object.getOwnPropertyNames(result) : Edm.getProperties(elementType.prototype);</span>
+<span class="cstat-no" title="statement not covered" >        if (props.length &gt; 0){</span>
+<span class="cstat-no" title="statement not covered" >            props.forEach((prop) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                let type:any = Edm.getType(elementType, prop);</span>
+<span class="cstat-no" title="statement not covered" >                let converter:Function = Edm.getConverter(elementType, prop);</span>
+<span class="cstat-no" title="statement not covered" >                let isCollection = Edm.isCollection(elementType, prop);</span>
+<span class="cstat-no" title="statement not covered" >                let entity = result;</span>
+<span class="cstat-no" title="statement not covered" >                if (isCollection &amp;&amp; entity[prop]){</span>
+<span class="cstat-no" title="statement not covered" >                    let value = Array.isArray(entity[prop]) ? entity[prop] : [entity[prop]];</span>
+<span class="cstat-no" title="statement not covered" >                    if (typeof type == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                        context[prop] = value.map((it) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                            if (!it) <span class="cstat-no" title="statement not covered" >return it;</span></span>
+<span class="cstat-no" title="statement not covered" >                            let item = {};</span>
+<span class="cstat-no" title="statement not covered" >                            this.__convertEntity(item, it, type);</span>
+<span class="cstat-no" title="statement not covered" >                            return item;</span>
+                        });
+                    }else <span class="cstat-no" title="statement not covered" >if (typeof converter == "function") <span class="cstat-no" title="statement not covered" >context[prop] = value.map(it =&gt; <span class="cstat-no" title="statement not covered" >converter(it))</span>;</span></span>
+                    else <span class="cstat-no" title="statement not covered" >context[prop] = value;</span>
+                }else{
+<span class="cstat-no" title="statement not covered" >                    if (typeof type == "function" &amp;&amp; entity[prop]){</span>
+<span class="cstat-no" title="statement not covered" >                        context[prop] = {};</span>
+<span class="cstat-no" title="statement not covered" >                        this.__convertEntity(context[prop], entity[prop], type);</span>
+                    }else <span class="cstat-no" title="statement not covered" >if (typeof converter == "function") <span class="cstat-no" title="statement not covered" >context[prop] = converter(entity[prop]);</span></span>
+                    else <span class="cstat-no" title="statement not covered" >context[prop] = entity[prop];</span>
+                }
+            });
+        }
+    }
+&nbsp;
+    __enableStreaming(part:NavigationPart){
+        this.streamEnabled = part == this.resourcePath.navigation[this.resourcePath.navigation.length - 1] ||
+            (<span class="branch-1 cbranch-no" title="branch not covered" >this.resourcePath.navigation[this.resourcePath.navigation.indexOf(part) + 1] </span>&amp;&amp;
+<span class="branch-2 cbranch-no" title="branch not covered" >                this.resourcePath.navigation[this.resourcePath.navigation.indexOf(part) + 1].name == "$value")</span>;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.streamEnabled) <span class="cstat-no" title="statement not covered" >this.resultCount = 0;</span>
+    }
+&nbsp;
+    __applyParams(container:any, name:string, params:any, queryString?:string){
+        let queryParam, filterParam, contextParam, streamParam;
+&nbsp;
+        queryParam = odata.getQueryParameter(container, name);
+        filterParam = odata.getFilterParameter(container, name);
+        contextParam = odata.getContextParameter(container, name);
+        streamParam = odata.getStreamParameter(container, name);
+&nbsp;
+        queryString = queryString || this.url.query;
+        let queryAst = queryString ? <span class="branch-0 cbranch-no" title="branch not covered" >ODataParser.query(queryString, { metadata: this.serverType.$metadata().edmx }) </span>: null;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (queryParam){
+<span class="cstat-no" title="statement not covered" >            params[queryParam] = queryAst;</span>
+        }
+&nbsp;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (filterParam){
+<span class="cstat-no" title="statement not covered" >            let filter = queryString ? qs.parse(queryString).$filter : null;</span>
+<span class="cstat-no" title="statement not covered" >            let filterAst = filter ? ODataParser.filter(filter, { metadata: this.serverType.$metadata().edmx }) : null;</span>
+<span class="cstat-no" title="statement not covered" >            params[filterParam] = filterAst;</span>
+        }
+&nbsp;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (contextParam){
+<span class="cstat-no" title="statement not covered" >            params[contextParam] = this.context;</span>
+        }
+&nbsp;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (streamParam){
+<span class="cstat-no" title="statement not covered" >            params[streamParam] = this;</span>
+        }
+    }
+&nbsp;
+    execute(body?:any):Promise&lt;ODataResult&gt;{
+        this.body = body;
+        this.workflow[0] = this.workflow[0].call(this, body);
+        for (let i = 1; i &lt; this.workflow.length; i++){
+<span class="cstat-no" title="statement not covered" >            this.workflow[0] = this.workflow[0].then((...args) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                return this.workflow[i].apply(this, args);</span>
+            });
+        }
+        return this.workflow[0];
+    }
+}
+&nbsp;
+export class ODataServer extends Transform{
+    private static _metadataCache:any
+    static namespace:string
+    static containerName:string
+    private serverType:typeof ODataServer
+&nbsp;
+    static requestHandler<span class="fstat-no" title="function not covered" >(){</span>
+<span class="cstat-no" title="statement not covered" >        return (req, res, next) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            try{</span>
+<span class="cstat-no" title="statement not covered" >                res.setHeader("OData-Version", "4.0");</span>
+<span class="cstat-no" title="statement not covered" >                res.contentType("application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8");</span>
+<span class="cstat-no" title="statement not covered" >                let processor = this.createProcessor({</span>
+                    url: req.url,
+                    method: req.method,
+                    protocol: req.secure ? "https" : "http",
+                    host: req.headers.host,
+                    base: req.baseUrl,
+                    request: req,
+                    response: res
+                });
+<span class="cstat-no" title="statement not covered" >                processor.on("contentType", (contentType) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                    res.contentType(contentType);</span>
+                });
+<span class="cstat-no" title="statement not covered" >                processor.on("data", (chunk, encoding, done) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                    res.write(chunk, encoding, done);</span>
+                });
+<span class="cstat-no" title="statement not covered" >                processor.execute(req.body).then((result:ODataResult) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                    try{</span>
+<span class="cstat-no" title="statement not covered" >                        if (result){</span>
+<span class="cstat-no" title="statement not covered" >                            res.status(result.statusCode || 200);</span>
+<span class="cstat-no" title="statement not covered" >                            if (!res.headersSent) <span class="cstat-no" title="statement not covered" >res.contentType((result.contentType || "text/plain") + ";odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8");</span></span>
+<span class="cstat-no" title="statement not covered" >                            if (typeof result.body != "undefined"){</span>
+<span class="cstat-no" title="statement not covered" >                                if (typeof result.body != "object") <span class="cstat-no" title="statement not covered" >res.send("" + result.body);</span></span>
+                                else <span class="cstat-no" title="statement not covered" >res.send(result.body);</span>
+                            }
+                        }
+<span class="cstat-no" title="statement not covered" >                        res.end();</span>
+                    }catch(err){
+<span class="cstat-no" title="statement not covered" >                        next(err);</span>
+                    }
+                }, next);
+            }catch(err){
+<span class="cstat-no" title="statement not covered" >                next(err);</span>
+            }
+        };
+    }
+&nbsp;
+    static async execute(url:string, method:string, body?:any);
+    static async execute(context:any, body?:any);
+    static async execute(url:string | any, method:string | any, body?:any){
+        let context:any = {};
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof url == "object"){
+<span class="cstat-no" title="statement not covered" >            context = extend(context, url);</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof method == "object"){</span>
+<span class="cstat-no" title="statement not covered" >                body = method;</span>
+            }
+<span class="cstat-no" title="statement not covered" >            url = undefined;</span>
+<span class="cstat-no" title="statement not covered" >            method = undefined;</span>
+        }else <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof url == "string" &amp;&amp; typeof method == "string"){
+            context.url = url;
+            context.method = method;
+        }
+        let processor = this.createProcessor(context);
+        let response = "";
+        processor.on("data", (chunk) =&gt; <span class="cstat-no" title="statement not covered" >response += chunk.toString())</span>;
+        return processor.execute(context.body || body).then((result:ODataResult) =&gt; {
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (response) <span class="cstat-no" title="statement not covered" >result.body = JSON.parse(response);</span>
+            return result;
+        });
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    constructor(opts?:TransformOptions)</span>{
+<span class="cstat-no" title="statement not covered" >        super(extend(&lt;TransformOptions&gt;{</span>
+            objectMode: true
+        }, opts));
+<span class="cstat-no" title="statement not covered" >        this.serverType = Object.getPrototypeOf(this).constructor;</span>
+    }
+&nbsp;
+    _transform<span class="fstat-no" title="function not covered" >(chunk:any, encoding?:string, done?:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        if ((chunk instanceof Buffer) || typeof chunk == "string"){</span>
+<span class="cstat-no" title="statement not covered" >            try{</span>
+<span class="cstat-no" title="statement not covered" >                chunk = JSON.parse(chunk.toString());</span>
+            }catch(err){
+<span class="cstat-no" title="statement not covered" >                return done(err);</span>
+            }
+        }
+<span class="cstat-no" title="statement not covered" >        this.serverType.execute(chunk).then((result) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            this.push(result);</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof done == "function") <span class="cstat-no" title="statement not covered" >done();</span></span>
+        }, done);
+    }
+&nbsp;
+    _flush<span class="fstat-no" title="function not covered" >(done?:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        if (typeof done == "function") <span class="cstat-no" title="statement not covered" >done();</span></span>
+    }
+&nbsp;
+    static createProcessor(context:any){
+        return new ODataProcessor(context, this);
+    }
+&nbsp;
+    static $metadata():ServiceMetadata;
+    static $metadata(metadata:Metadata.Edmx | any);
+    static $metadata(metadata?):ServiceMetadata{
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (metadata){
+<span class="cstat-no" title="statement not covered" >            if (!(metadata instanceof Metadata.Edmx)){</span>
+<span class="cstat-no" title="statement not covered" >                if (metadata.version &amp;&amp; metadata.dataServices &amp;&amp; Array.isArray(metadata.dataServices.schema)) <span class="cstat-no" title="statement not covered" >this._metadataCache = ServiceMetadata.processMetadataJson(metadata);</span></span>
+                else <span class="cstat-no" title="statement not covered" >this._metadataCache = ServiceMetadata.defineEntities(metadata);</span>
+            }
+        }
+        return this._metadataCache || (this._metadataCache = ServiceMetadata.processMetadataJson(createMetadataJSON(this)));
+    }
+&nbsp;
+    static document<span class="fstat-no" title="function not covered" >():ServiceDocument{</span>
+<span class="cstat-no" title="statement not covered" >        return ServiceDocument.processEdmx(this.$metadata().edmx);</span>
+    }
+&nbsp;
+    static addController(controller:typeof ODataController, isPublic?:boolean);
+    static addController(controller:typeof ODataController, isPublic?:boolean, elementType?:Function);
+    static addController(controller:typeof ODataController, entitySetName?:string, elementType?:Function);
+    static addController<span class="fstat-no" title="function not covered" >(controller:typeof ODataController, entitySetName?:string | boolean, elementType?:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        odata.controller(controller, &lt;string&gt;entitySetName, elementType)(this);</span>
+    }
+    static getController<span class="fstat-no" title="function not covered" >(elementType:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        for (let i in this.prototype){</span>
+<span class="cstat-no" title="statement not covered" >            if (this.prototype[i].prototype instanceof ODataController &amp;&amp;</span>
+                this.prototype[i].prototype.elementType == elementType){
+<span class="cstat-no" title="statement not covered" >                    return this.prototype[i];</span>
+                }
+        }
+<span class="cstat-no" title="statement not covered" >        return null;</span>
+    }
+&nbsp;
+    static create():express.Router;
+    static create(port:number):void;
+    static create(path:string, port:number):void;
+    static create(port:number, hostname:string):void;
+    static create(path?:string | RegExp | number, port?:number | string, hostname?:string):void;
+    static create<span class="fstat-no" title="function not covered" >(path?:string | RegExp | number, port?:number | string, hostname?:string)</span>:void | express.Router{
+<span class="cstat-no" title="statement not covered" >        let server = this;</span>
+<span class="cstat-no" title="statement not covered" >        let router = express.Router();</span>
+<span class="cstat-no" title="statement not covered" >        router.use(bodyParser.json());</span>
+<span class="cstat-no" title="statement not covered" >        if ((&lt;any&gt;server).cors) <span class="cstat-no" title="statement not covered" >router.use(cors());</span></span>
+<span class="cstat-no" title="statement not covered" >        router.get("/", server.document().requestHandler());</span>
+<span class="cstat-no" title="statement not covered" >        router.get("/\\$metadata", server.$metadata().requestHandler());</span>
+<span class="cstat-no" title="statement not covered" >        router.use(server.requestHandler());</span>
+<span class="cstat-no" title="statement not covered" >        router.use(ODataErrorHandler);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        if (typeof path == "number"){</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof port == "string"){</span>
+<span class="cstat-no" title="statement not covered" >                hostname = "" + port;</span>
+            }
+<span class="cstat-no" title="statement not covered" >            port = parseInt(&lt;any&gt;path, 10);</span>
+<span class="cstat-no" title="statement not covered" >            path = undefined;</span>
+        }
+<span class="cstat-no" title="statement not covered" >        if (typeof port == "number"){</span>
+<span class="cstat-no" title="statement not covered" >            let app = express();</span>
+<span class="cstat-no" title="statement not covered" >            app.use((&lt;any&gt;path) || "/", router);</span>
+<span class="cstat-no" title="statement not covered" >            app.listen(port, &lt;any&gt;hostname);</span>
+        }
+<span class="cstat-no" title="statement not covered" >        return router;</span>
+    }
+}
+&nbsp;
+<span class="fstat-no" title="function not covered" >export function ODataErrorHandler(err, req, res, next)</span>{
+<span class="cstat-no" title="statement not covered" >    if (err){</span>
+<span class="cstat-no" title="statement not covered" >        console.log(err);</span>
+<span class="cstat-no" title="statement not covered" >        res.status(err.statusCode || 500);</span>
+<span class="cstat-no" title="statement not covered" >        res.send({</span>
+            error: err.message,
+            stack: err.stack
+        });
+    }else <span class="cstat-no" title="statement not covered" >next();</span>
+}
+&nbsp;
+export function createODataServer(server:typeof ODataServer):express.Router;
+export function createODataServer(server:typeof ODataServer, port:number):void;
+export function createODataServer(server:typeof ODataServer, path:string, port:number):void;
+export function createODataServer(server:typeof ODataServer, port:number, hostname:string):void;
+<span class="fstat-no" title="function not covered" >export function createODataServer(server:typeof ODataServer, path?:string | RegExp | number, port?:number | string, hostname?:string)</span>:void | express.Router{
+<span class="cstat-no" title="statement not covered" >    return server.create(path, port, hostname);</span>
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Oct 11 2016 16:38:04 GMT+0200 (Central Europe Daylight Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

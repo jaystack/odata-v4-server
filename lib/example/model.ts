@@ -1,5 +1,5 @@
 import { ObjectID } from "mongodb";
-import { Edm, odata, Entity } from "../index";
+import { Edm, odata } from "../index";
 
 const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFromHexString(_id) : _id;
 
@@ -7,10 +7,10 @@ const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFro
     term: "UI.DisplayName",
     string: "Products"
 })
-export class Product extends Entity{
-    @Edm.Key()
-    @Edm.Computed()
-    @Edm.String()
+export class Product{
+    @Edm.Key
+    @Edm.Computed
+    @Edm.String
     @Edm.Convert(toObjectID)
     @Edm.Annotate({
         term: "UI.DisplayName",
@@ -20,16 +20,21 @@ export class Product extends Entity{
         string: "ReadOnly"
     })
     _id:ObjectID
-    @Edm.String()
-    @Edm.Required()
+
+    @Edm.String
+    @Edm.Required
     @Edm.Convert(toObjectID)
     CategoryId:string
+
     @Edm.ForeignKey("CategoryId")
     @Edm.EntityType("Category")
+    @Edm.Partner("Products")
     Category:Category
-    @Edm.Boolean()
+
+    @Edm.Boolean
     Discontinued:boolean
-    @Edm.String()
+
+    @Edm.String
     @Edm.Annotate({
         term: "UI.DisplayName",
         string: "Product title"
@@ -38,7 +43,8 @@ export class Product extends Entity{
         string: "ShortText"
     })
     Name:string
-    @Edm.String()
+
+    @Edm.String
     @Edm.Annotate({
         term: "UI.DisplayName",
         string: "Product English name"
@@ -47,7 +53,8 @@ export class Product extends Entity{
         string: "ShortText"
     })
     QuantityPerUnit:string
-    @Edm.Decimal()
+
+    @Edm.Decimal
     @Edm.Annotate({
         term: "UI.DisplayName",
         string: "Unit price of product"
@@ -58,14 +65,15 @@ export class Product extends Entity{
     UnitPrice:number
 }
 
+@Edm.OpenType
 @Edm.Annotate({
     term: "UI.DisplayName",
     string: "Categories"
 })
-export class Category extends Entity{
-    @Edm.Key()
-    @Edm.Computed()
-    @Edm.String()
+export class Category{
+    @Edm.Key
+    @Edm.Computed
+    @Edm.String
     @Edm.Convert(toObjectID)
     @Edm.Annotate({
         term: "UI.DisplayName",
@@ -76,9 +84,11 @@ export class Category extends Entity{
         string: "ReadOnly"
     })
     _id:ObjectID
-    @Edm.String()
+
+    @Edm.String
     Description:string
-    @Edm.String()
+
+    @Edm.String
     @Edm.Annotate({
         term: "UI.DisplayName",
         string: "Category name"
@@ -88,7 +98,9 @@ export class Category extends Entity{
         string: "ShortText"
     })
     Name:string
+
     @Edm.ForeignKey("CategoryId")
     @Edm.Collection(Edm.EntityType("Product"))
+    @Edm.Partner("Category")
     Products:Product[]
 }

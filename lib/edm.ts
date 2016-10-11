@@ -2,29 +2,6 @@ import "reflect-metadata";
 import { ODataController } from "./controller";
 import { getFunctionParameters } from "./utils";
 
-export class Entity{
-    constructor(entity?:any){
-        if (typeof entity != "undefined"){
-            let proto = Object.getPrototypeOf(this);
-            Edm.getProperties(proto).forEach((prop) => {
-                let type:any = Edm.getType(proto.constructor, prop);
-                let converter:Function = Edm.getConverter(proto.constructor, prop);
-                let isCollection = Edm.isCollection(proto.constructor, prop);
-                if (isCollection && entity[prop]){
-                    let value = Array.isArray(entity[prop]) ? entity[prop] : [entity[prop]];
-                    if (typeof type == "function") this[prop] = value.map(it => new type(it));
-                    else if (typeof converter == "function") this[prop] = value.map(it => converter(it));
-                    else this[prop] = value;
-                }else{
-                    if (typeof type == "function" && entity[prop]) this[prop] = new type(entity[prop]);
-                    else if (typeof converter == "function") this[prop] = converter(entity[prop]);
-                    else this[prop] = entity[prop];
-                }
-            });
-        }
-    }
-}
-
 export namespace Edm{
     const EdmProperties:string = "edm:properties";
     const EdmKeyProperties:string = "edm:keyproperties";
@@ -33,6 +10,7 @@ export namespace Edm{
     const EdmComputedProperty:string = "edm:computedproperty";
     const EdmNullableProperty:string = "edm:nullableproperty";
     const EdmRequiredProperty:string = "edm:requiredproperty";
+    const EdmPartnerProperty:string = "edm:partnerproperty";
     const EdmType:string = "edm:type";
     const EdmElementType:string = "edm:elementtype";
     const EdmComplexType:string = "edm:complextype";
@@ -45,10 +23,12 @@ export namespace Edm{
     const EdmAnnotations:string = "edm:annotations";
     const EdmConverter:string = "edm:converter";
     const EdmEntitySet:string = "edm:entityset";
+    const EdmMediaEntity:string = "edm:mediaentity";
+    const EdmOpenType:string = "emd:opentype";
     const EdmContainer:Function[] = [];
 
     function typeDecoratorFactory(type:string){
-        return function(target, targetKey, parameterIndex?:number){
+        let decorator = function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex != "undefined"){
                 let parameterNames = getFunctionParameters(target, targetKey);
                 let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
@@ -75,106 +55,63 @@ export namespace Edm{
                 Reflect.defineMetadata(EdmType, type, target, targetKey);
             }
         };
+
+        return function(target?:any, targetKey?:string, parameterIndex?:number):any{
+            if (arguments.length == 0) return decorator;
+            else return decorator(target, targetKey, parameterIndex);
+        }
     }
-    export function Binary(){
-        return typeDecoratorFactory("Edm.Binary");
-    }
-    export function Boolean(){
-        return typeDecoratorFactory("Edm.Boolean");
-    }
-    export function Byte(){
-        return typeDecoratorFactory("Edm.Byte");
-    }
-    export function Date(){
-        return typeDecoratorFactory("Edm.Date");
-    }
-    export function DateTimeOffset(){
-        return typeDecoratorFactory("Edm.DateTimeOffset");
-    }
-    export function Decimal(){
-        return typeDecoratorFactory("Edm.Decimal");
-    }
-    export function Double(){
-        return typeDecoratorFactory("Edm.Double");
-    }
-    export function Duration(){
-        return typeDecoratorFactory("Edm.Duration");
-    }
-    export function Guid(){
-        return typeDecoratorFactory("Edm.Guid");
-    }
-    export function Int16(){
-        return typeDecoratorFactory("Edm.Int16");
-    }
-    export function Int32(){
-        return typeDecoratorFactory("Edm.Int32");
-    }
-    export function Int64(){
-        return typeDecoratorFactory("Edm.Int64");
-    }
-    export function SByte(){
-        return typeDecoratorFactory("Edm.SByte");
-    }
-    export function Single(){
-        return typeDecoratorFactory("Edm.Single");
-    }
-    export function Stream(){
-        return typeDecoratorFactory("Edm.Stream");
-    }
-    export function String(){
-        return typeDecoratorFactory("Edm.String");
-    }
-    export function TimeOfDay(){
-        return typeDecoratorFactory("Edm.TimeOfDay");
-    }
-    export function Geography(){
-        return typeDecoratorFactory("Edm.Geography");
-    }
-    export function GeographyPoint(){
-        return typeDecoratorFactory("Edm.GeographyPoint");
-    }
-    export function GeographyLineString(){
-        return typeDecoratorFactory("Edm.GeographyLineString");
-    }
-    export function GeographyPolygon(){
-        return typeDecoratorFactory("Edm.GeographyPolygon");
-    }
-    export function GeographyMultiPoint(){
-        return typeDecoratorFactory("Edm.GeographyMultiPoint");
-    }
-    export function GeographyMultiLineString(){
-        return typeDecoratorFactory("Edm.GeographyMultiLineString");
-    }
-    export function GeographyMultiPolygon(){
-        return typeDecoratorFactory("Edm.GeographyMultiPolygon");
-    }
-    export function GeographyCollection(){
+    export const Binary = typeDecoratorFactory("Edm.Binary");
+    export const Boolean = typeDecoratorFactory("Edm.Boolean");
+    export const Byte = typeDecoratorFactory("Edm.Byte");
+    export const Date = typeDecoratorFactory("Edm.Date");
+    export const DateTimeOffset = typeDecoratorFactory("Edm.DateTimeOffset");
+    export const Decimal = typeDecoratorFactory("Edm.Decimal");
+    export const Double = typeDecoratorFactory("Edm.Double");
+    export const Duration = typeDecoratorFactory("Edm.Duration");
+    export const Guid = typeDecoratorFactory("Edm.Guid");
+    export const Int16 = typeDecoratorFactory("Edm.Int16");
+    export const Int32 = typeDecoratorFactory("Edm.Int32");
+    export const Int64 = typeDecoratorFactory("Edm.Int64");
+    export const SByte = typeDecoratorFactory("Edm.SByte");
+    export const Single = typeDecoratorFactory("Edm.Single");
+    export const Stream = typeDecoratorFactory("Edm.Stream");
+    export const String = typeDecoratorFactory("Edm.String");
+    export const TimeOfDay = typeDecoratorFactory("Edm.TimeOfDay");
+    export const Geography = typeDecoratorFactory("Edm.Geography");
+    export const GeographyPoint = typeDecoratorFactory("Edm.GeographyPoint");
+    export const GeographyLineString = typeDecoratorFactory("Edm.GeographyLineString");
+    export const GeographyPolygon = typeDecoratorFactory("Edm.GeographyPolygon");
+    export const GeographyMultiPoint = typeDecoratorFactory("Edm.GeographyMultiPoint");
+    export const GeographyMultiLineString = typeDecoratorFactory("Edm.GeographyMultiLineString");
+    export const GeographyMultiPolygon = typeDecoratorFactory("Edm.GeographyMultiPolygon");
+    export const GeographyCollection = (function GeographyCollection(){
         return typeDecoratorFactory("Edm.GeographyCollection");
-    }
-    export function Geometry(){
+    })();
+    export const Geometry = (function Geometry(){
         return typeDecoratorFactory("Edm.Geometry");
-    }
-    export function GeometryPoint(){
+    })();
+    export const GeometryPoint = (function GeometryPoint(){
         return typeDecoratorFactory("Edm.GeometryPoint");
-    }
-    export function GeometryLineString(){
+    })();
+    export const GeometryLineString = (function GeometryLineString(){
         return typeDecoratorFactory("Edm.GeometryLineString");
-    }
-    export function GeometryPolygon(){
+    })();
+    export const GeometryPolygon = (function GeometryPolygon(){
         return typeDecoratorFactory("Edm.GeometryPolygon");
-    }
-    export function GeometryMultiPoint(){
+    })();
+    export const GeometryMultiPoint = (function GeometryMultiPoint(){
         return typeDecoratorFactory("Edm.GeometryMultiPoint");
-    }
-    export function GeometryMultiLineString(){
+    })();
+    export const GeometryMultiLineString = (function GeometryMultiLineString(){
         return typeDecoratorFactory("Edm.GeometryMultiLineString");
-    }
-    export function GeometryMultiPolygon(){
+    })();
+    export const GeometryMultiPolygon = (function GeometryMultiPolygon(){
         return typeDecoratorFactory("Edm.GeometryMultiPolygon");
-    }
-    export function GeometryCollection(){
+    })();
+    export const GeometryCollection = (function GeometryCollection(){
         return typeDecoratorFactory("Edm.GeometryCollection");
-    }
+    })();
     export function Collection(elementType:Function){
         return function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex != "undefined"){
@@ -283,7 +220,7 @@ export namespace Edm{
         return Reflect.getMetadata(EdmParameters, target.prototype, targetKey) || [];
     }
 
-    export function Key(){
+    export const Key = (function Key(){
         return function(target, targetKey){
             if (typeof target == "function"){
                 Edm.register(target);
@@ -293,7 +230,7 @@ export namespace Edm{
             Reflect.defineMetadata(EdmKeyProperties, properties, target);
             Reflect.defineMetadata(EdmKeyProperty, true, target, targetKey);
         };
-    }
+    })();
     export function isKey(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmKeyProperty, target.prototype, propertyKey) || false;
     }
@@ -320,19 +257,19 @@ export namespace Edm{
         }
     }
 
-    export function Computed(){
+    export const Computed = (function Computed(){
         return function(target, targetKey){
             if (typeof target == "function"){
                 Edm.register(target);
             }
             Reflect.defineMetadata(EdmComputedProperty, true, target, targetKey);
         };
-    }
+    })();
     export function isComputed(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmComputedProperty, target.prototype, propertyKey) || false;
     }
 
-    export function Nullable(){
+    export const Nullable = (function Nullable(){
         return function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex != "undefined"){
                 let parameterNames = getFunctionParameters(target, targetKey);
@@ -355,12 +292,12 @@ export namespace Edm{
                 Reflect.defineMetadata(EdmNullableProperty, true, target, targetKey);
             }
         }
-    }
+    })();
     export function isNullable(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmNullableProperty, target.prototype, propertyKey);
     }
 
-    export function Required(){
+    export const Required = (function Required(){
         return function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex != "undefined"){
                 let parameterNames = getFunctionParameters(target, targetKey);
@@ -383,7 +320,7 @@ export namespace Edm{
                 Reflect.defineMetadata(EdmNullableProperty, false, target, targetKey);
             }
         }
-    }
+    })();
     export function isRequired(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmNullableProperty, target.prototype, propertyKey) == false ? true : false;
     }
@@ -401,12 +338,8 @@ export namespace Edm{
             Reflect.defineMetadata(type, type, target, targetKey);
         };
     }
-    export function ActionImport(returnType?:Function){
-        return operationDecoratorFactory(EdmAction);
-    }
-    export function Action(returnType?:Function){
-        return operationDecoratorFactory(EdmAction);
-    }
+    export const ActionImport = operationDecoratorFactory(EdmAction);
+    export const Action = operationDecoratorFactory(EdmAction);
     export function FunctionImport(returnType:Function){
         return operationDecoratorFactory(EdmFunction, returnType);
     }
@@ -458,6 +391,23 @@ export namespace Edm{
     }
     export function isComplexType(target:Function, propertyKey:string):boolean{
         return Reflect.hasMetadata(EdmComplexType, target.prototype, propertyKey);
+    }
+
+    export function MediaEntity(contentType:string){
+        return Reflect.metadata(EdmMediaEntity, contentType);
+    }
+    export function isMediaEntity(target:Function){
+        return Reflect.hasMetadata(EdmMediaEntity, target);
+    }
+    export function getContentType(target:Function){
+        return Reflect.getMetadata(EdmMediaEntity, target);
+    }
+
+    export const OpenType = (function OpenType(){
+        return Reflect.metadata(EdmOpenType, true);
+    })();
+    export function isOpenType(target:Function){
+        return Reflect.hasMetadata(EdmOpenType, target) || false;
     }
 
     export function EntityType(type?:Function | string){
@@ -519,6 +469,13 @@ export namespace Edm{
     }
     export function getForeignKeys(target:Function, targetKey?:string):string[]{
         return Reflect.getOwnMetadata(EdmForeignKeys, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmForeignKeys, target, targetKey) || [];
+    }
+
+    export function Partner(property:string){
+        return Reflect.metadata(EdmPartnerProperty, property);
+    }
+    export function getPartner(target:any, targetKey:string){
+        return Reflect.getMetadata(EdmPartnerProperty, target, targetKey) || Reflect.getMetadata(EdmPartnerProperty, target.prototype, targetKey);
     }
 
     export function EntitySet(name:string){

@@ -1,4 +1,5 @@
 import * as extend from "extend";
+import { Edm as Metadata } from "odata-v4-metadata";
 import { ODataController } from "./controller";
 import { ODataServer } from "./server";
 import { Edm } from "./edm";
@@ -65,7 +66,9 @@ export function createMetadataJSON(server:typeof ODataServer){
                         key: [],
                         property: [],
                         navigationProperty: [],
-                        annotation: Edm.getAnnotations(elementType)
+                        annotation: Edm.getAnnotations(elementType),
+                        openType: Edm.isOpenType(elementType),
+                        hasStream: Edm.isMediaEntity(elementType)
                     };
                     let namespace = elementType.namespace || parent.namespace || server.namespace;
 
@@ -88,7 +91,8 @@ export function createMetadataJSON(server:typeof ODataServer){
                             name: prop,
                             type: Edm.getTypeName(elementType, prop),
                             nullable: Edm.isNullable(elementType, prop),
-                            annotation: Edm.getAnnotations(elementType, prop)
+                            annotation: Edm.getAnnotations(elementType, prop),
+                            partner: Edm.getPartner(elementType, prop)
                         };
                         if (Edm.isKey(elementType, prop)){
                             typeDefinition.key.push({

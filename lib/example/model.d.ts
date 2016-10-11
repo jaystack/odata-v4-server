@@ -1,6 +1,5 @@
 import { ObjectID } from "mongodb";
-import { Entity } from "../index";
-export declare class Product extends Entity {
+export declare class Product {
     _id: ObjectID;
     CategoryId: string;
     Category: Category;
@@ -9,7 +8,7 @@ export declare class Product extends Entity {
     QuantityPerUnit: string;
     UnitPrice: number;
 }
-export declare class Category extends Entity {
+export declare class Category {
     _id: ObjectID;
     Description: string;
     Name: string;

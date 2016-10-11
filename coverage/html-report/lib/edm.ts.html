@@ -1,0 +1,1520 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for lib\edm.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">lib/</a> edm.ts
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">45.21% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>170/376</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">7.65% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>15/196</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">32.88% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>24/73</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">40.56% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>131/323</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">33×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">33×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">41×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">41×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import "reflect-metadata";
+import { ODataController } from "./controller";
+import { getFunctionParameters } from "./utils";
+&nbsp;
+export namespace Edm{
+    const EdmProperties:string = "edm:properties";
+    const EdmKeyProperties:string = "edm:keyproperties";
+    const EdmKeyProperty:string = "edm:keyproperty";
+    const EdmForeignKeys:string = "edm:foreignkeys";
+    const EdmComputedProperty:string = "edm:computedproperty";
+    const EdmNullableProperty:string = "edm:nullableproperty";
+    const EdmRequiredProperty:string = "edm:requiredproperty";
+    const EdmPartnerProperty:string = "edm:partnerproperty";
+    const EdmType:string = "edm:type";
+    const EdmElementType:string = "edm:elementtype";
+    const EdmComplexType:string = "edm:complextype";
+    const EdmEntityType:string = "edm:entitytype";
+    const EdmOperations:string = "edm:operations";
+    const EdmAction:string = "edm:action";
+    const EdmFunction:string = "edm:function";
+    const EdmReturnType:string = "edm:returntype";
+    const EdmParameters:string = "edm:parameters";
+    const EdmAnnotations:string = "edm:annotations";
+    const EdmConverter:string = "edm:converter";
+    const EdmEntitySet:string = "edm:entityset";
+    const EdmMediaEntity:string = "edm:mediaentity";
+    const EdmOpenType:string = "emd:opentype";
+    const EdmContainer:Function[] = [];
+&nbsp;
+    function typeDecoratorFactory(type:string){
+        let decorator = <span class="fstat-no" title="function not covered" >function(target, targetKey, parameterIndex?:number)</span>{
+<span class="cstat-no" title="statement not covered" >            if (typeof parameterIndex != "undefined"){</span>
+<span class="cstat-no" title="statement not covered" >                let parameterNames = getFunctionParameters(target, targetKey);</span>
+<span class="cstat-no" title="statement not covered" >                let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];</span>
+<span class="cstat-no" title="statement not covered" >                let paramName = parameterNames[parameterIndex];</span>
+<span class="cstat-no" title="statement not covered" >                let param:any = existingParameters.filter(p =&gt; <span class="cstat-no" title="statement not covered" >p.name == paramName)</span>[0];</span>
+<span class="cstat-no" title="statement not covered" >                if (param){</span>
+<span class="cstat-no" title="statement not covered" >                    param.type = type;</span>
+                }else{
+<span class="cstat-no" title="statement not covered" >                    existingParameters.push({</span>
+                        name: paramName,
+                        type: type
+                    });
+                }
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);</span>
+            }else{
+<span class="cstat-no" title="statement not covered" >                if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                    Edm.register(target);</span>
+                }
+<span class="cstat-no" title="statement not covered" >                if (targetKey != EdmType){</span>
+<span class="cstat-no" title="statement not covered" >                    let properties:string[] = Reflect.getMetadata(EdmProperties, target) || [];</span>
+<span class="cstat-no" title="statement not covered" >                    if (properties.indexOf(targetKey) &lt; 0) <span class="cstat-no" title="statement not covered" >properties.push(targetKey);</span></span>
+<span class="cstat-no" title="statement not covered" >                    Reflect.defineMetadata(EdmProperties, properties, target);</span>
+                }
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmType, type, target, targetKey);</span>
+            }
+        };
+&nbsp;
+        return <span class="fstat-no" title="function not covered" >function(target?:any, targetKey?:string, parameterIndex?:number)</span>:any{
+<span class="cstat-no" title="statement not covered" >            if (arguments.length == 0) <span class="cstat-no" title="statement not covered" >return decorator;</span></span>
+            else <span class="cstat-no" title="statement not covered" >return decorator(target, targetKey, parameterIndex);</span>
+        }
+    }
+    export const Binary = typeDecoratorFactory("Edm.Binary");
+    export const Boolean = typeDecoratorFactory("Edm.Boolean");
+    export const Byte = typeDecoratorFactory("Edm.Byte");
+    export const Date = typeDecoratorFactory("Edm.Date");
+    export const DateTimeOffset = typeDecoratorFactory("Edm.DateTimeOffset");
+    export const Decimal = typeDecoratorFactory("Edm.Decimal");
+    export const Double = typeDecoratorFactory("Edm.Double");
+    export const Duration = typeDecoratorFactory("Edm.Duration");
+    export const Guid = typeDecoratorFactory("Edm.Guid");
+    export const Int16 = typeDecoratorFactory("Edm.Int16");
+    export const Int32 = typeDecoratorFactory("Edm.Int32");
+    export const Int64 = typeDecoratorFactory("Edm.Int64");
+    export const SByte = typeDecoratorFactory("Edm.SByte");
+    export const Single = typeDecoratorFactory("Edm.Single");
+    export const Stream = typeDecoratorFactory("Edm.Stream");
+    export const String = typeDecoratorFactory("Edm.String");
+    export const TimeOfDay = typeDecoratorFactory("Edm.TimeOfDay");
+    export const Geography = typeDecoratorFactory("Edm.Geography");
+    export const GeographyPoint = typeDecoratorFactory("Edm.GeographyPoint");
+    export const GeographyLineString = typeDecoratorFactory("Edm.GeographyLineString");
+    export const GeographyPolygon = typeDecoratorFactory("Edm.GeographyPolygon");
+    export const GeographyMultiPoint = typeDecoratorFactory("Edm.GeographyMultiPoint");
+    export const GeographyMultiLineString = typeDecoratorFactory("Edm.GeographyMultiLineString");
+    export const GeographyMultiPolygon = typeDecoratorFactory("Edm.GeographyMultiPolygon");
+    export const GeographyCollection = (function GeographyCollection(){
+        return typeDecoratorFactory("Edm.GeographyCollection");
+    })();
+    export const Geometry = (function Geometry(){
+        return typeDecoratorFactory("Edm.Geometry");
+    })();
+    export const GeometryPoint = (function GeometryPoint(){
+        return typeDecoratorFactory("Edm.GeometryPoint");
+    })();
+    export const GeometryLineString = (function GeometryLineString(){
+        return typeDecoratorFactory("Edm.GeometryLineString");
+    })();
+    export const GeometryPolygon = (function GeometryPolygon(){
+        return typeDecoratorFactory("Edm.GeometryPolygon");
+    })();
+    export const GeometryMultiPoint = (function GeometryMultiPoint(){
+        return typeDecoratorFactory("Edm.GeometryMultiPoint");
+    })();
+    export const GeometryMultiLineString = (function GeometryMultiLineString(){
+        return typeDecoratorFactory("Edm.GeometryMultiLineString");
+    })();
+    export const GeometryMultiPolygon = (function GeometryMultiPolygon(){
+        return typeDecoratorFactory("Edm.GeometryMultiPolygon");
+    })();
+    export const GeometryCollection = (function GeometryCollection(){
+        return typeDecoratorFactory("Edm.GeometryCollection");
+    })();
+<span class="fstat-no" title="function not covered" >    export function Collection(elementType:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        return <span class="fstat-no" title="function not covered" >function(target, targetKey, parameterIndex?:number)</span>{</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof parameterIndex != "undefined"){</span>
+<span class="cstat-no" title="statement not covered" >                let parameterNames = getFunctionParameters(target, targetKey);</span>
+<span class="cstat-no" title="statement not covered" >                let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];</span>
+<span class="cstat-no" title="statement not covered" >                let element = <span class="fstat-no" title="function not covered" >function Collection(){</span>};</span>
+<span class="cstat-no" title="statement not covered" >                Reflect.decorate([elementType()], element, EdmType);</span>
+<span class="cstat-no" title="statement not covered" >                let elementTypeName = Reflect.getMetadata(EdmType, element, EdmType);</span>
+<span class="cstat-no" title="statement not covered" >                if (typeof elementTypeName == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                    elementTypeName = ((&lt;any&gt;elementTypeName).namespace || (&lt;any&gt;target).namespace) + "." + (&lt;any&gt;elementTypeName).name;</span>
+                }
+<span class="cstat-no" title="statement not covered" >                let paramName = parameterNames[parameterIndex];</span>
+<span class="cstat-no" title="statement not covered" >                let param:any = existingParameters.filter(p =&gt; <span class="cstat-no" title="statement not covered" >p.name == paramName)</span>[0];</span>
+<span class="cstat-no" title="statement not covered" >                if (param){</span>
+<span class="cstat-no" title="statement not covered" >                    param.type = "Collection(" + elementTypeName + ")";</span>
+                }else{
+<span class="cstat-no" title="statement not covered" >                    existingParameters.push({</span>
+                        name: paramName,
+                        type: "Collection(" + elementTypeName + ")"
+                    });
+                }
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);</span>
+            }else{
+<span class="cstat-no" title="statement not covered" >                if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                    Edm.register(target);</span>
+                }
+<span class="cstat-no" title="statement not covered" >                let properties:string[] = Reflect.getMetadata(EdmProperties, target) || [];</span>
+<span class="cstat-no" title="statement not covered" >                if (properties.indexOf(targetKey) &lt; 0) <span class="cstat-no" title="statement not covered" >properties.push(targetKey);</span></span>
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmProperties, properties, target);</span>
+<span class="cstat-no" title="statement not covered" >                let element = <span class="fstat-no" title="function not covered" >function Collection(){</span>};</span>
+<span class="cstat-no" title="statement not covered" >                try{</span>
+<span class="cstat-no" title="statement not covered" >                    Reflect.decorate([elementType()], element, EdmType);</span>
+                }catch(err){
+<span class="cstat-no" title="statement not covered" >                    Reflect.decorate([&lt;any&gt;elementType], element, EdmType);</span>
+                }
+<span class="cstat-no" title="statement not covered" >                let type = Reflect.getMetadata(EdmComplexType, element, EdmType);</span>
+<span class="cstat-no" title="statement not covered" >                let elementTypeName = Reflect.getMetadata(EdmType, element, EdmType);</span>
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmType, "Collection", target, targetKey);</span>
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmElementType, elementTypeName, target, targetKey);</span>
+<span class="cstat-no" title="statement not covered" >                if (type){</span>
+<span class="cstat-no" title="statement not covered" >                    Reflect.defineMetadata(EdmComplexType, type, target, targetKey);</span>
+                }else{
+<span class="cstat-no" title="statement not covered" >                    type = Reflect.getMetadata(EdmEntityType, element, EdmType);</span>
+<span class="cstat-no" title="statement not covered" >                    Reflect.defineMetadata(EdmEntityType, type, target, targetKey);</span>
+                }
+            }
+        };
+    }
+<span class="fstat-no" title="function not covered" >    export function getTypeName(target:Function, propertyKey:string)</span>:string{
+<span class="cstat-no" title="statement not covered" >        let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey) || Reflect.getMetadata(EdmType, target.prototype);</span>
+<span class="cstat-no" title="statement not covered" >        let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey) || Reflect.getMetadata(EdmElementType, target.prototype);</span>
+<span class="cstat-no" title="statement not covered" >        if (typeof type == "string" &amp;&amp; type != "Collection" &amp;&amp; type.indexOf(".") &lt; 0){</span>
+<span class="cstat-no" title="statement not covered" >            for (let i = 0; i &lt; EdmContainer.length; i++){</span>
+<span class="cstat-no" title="statement not covered" >                let containerType = EdmContainer[i];</span>
+<span class="cstat-no" title="statement not covered" >                let namespace = (&lt;any&gt;containerType).namespace || (&lt;any&gt;target).namespace || "Default";</span>
+<span class="cstat-no" title="statement not covered" >                let containerTypeName = (&lt;any&gt;containerType).name;</span>
+<span class="cstat-no" title="statement not covered" >                if (containerTypeName == type){</span>
+<span class="cstat-no" title="statement not covered" >                    type = namespace + "." + type;</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                }
+            }
+        }else <span class="cstat-no" title="statement not covered" >if (typeof type == "function"){</span>
+<span class="cstat-no" title="statement not covered" >            type = ((&lt;any&gt;type).namespace || (&lt;any&gt;target).namespace || "Default") + "." + (&lt;any&gt;type).name;</span>
+        }
+<span class="cstat-no" title="statement not covered" >        if (typeof elementType == "string" &amp;&amp; elementType != "Collection" &amp;&amp; elementType.indexOf(".") &lt; 0){</span>
+<span class="cstat-no" title="statement not covered" >            for (let i = 0; i &lt; EdmContainer.length; i++){</span>
+<span class="cstat-no" title="statement not covered" >                let containerType = EdmContainer[i];</span>
+<span class="cstat-no" title="statement not covered" >                let namespace = (&lt;any&gt;containerType).namespace || (&lt;any&gt;target).namespace || "Default";</span>
+<span class="cstat-no" title="statement not covered" >                let containerTypeName = (&lt;any&gt;containerType).name;</span>
+<span class="cstat-no" title="statement not covered" >                if (containerTypeName == elementType){</span>
+<span class="cstat-no" title="statement not covered" >                    elementType = namespace + "." + elementType;</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                }
+            }
+        }else <span class="cstat-no" title="statement not covered" >if (typeof elementType == "function"){</span>
+<span class="cstat-no" title="statement not covered" >            elementType = ((&lt;any&gt;elementType).namespace || (&lt;any&gt;target).namespace || "Default") + "." + (&lt;any&gt;elementType).name;</span>
+        }
+<span class="cstat-no" title="statement not covered" >        return elementType ? type + "(" + elementType + ")" : type;</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function getType(target:Function, propertyKey:string)</span>:Function | string{
+<span class="cstat-no" title="statement not covered" >        let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey);</span>
+<span class="cstat-no" title="statement not covered" >        let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);</span>
+<span class="cstat-no" title="statement not covered" >        let isEntityType = Edm.isEntityType(target, propertyKey);</span>
+<span class="cstat-no" title="statement not covered" >        if (!elementType) <span class="cstat-no" title="statement not covered" >elementType = type;</span></span>
+<span class="cstat-no" title="statement not covered" >        if (isEntityType){</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof elementType == "string" &amp;&amp; elementType.indexOf(".") &lt; 0) <span class="cstat-no" title="statement not covered" >elementType = ((&lt;any&gt;target).namespace || "Default") + "." + elementType;</span></span>
+<span class="cstat-no" title="statement not covered" >            if (typeof type == "string" &amp;&amp; type.indexOf(".") &lt; 0) <span class="cstat-no" title="statement not covered" >type = ((&lt;any&gt;target).namespace || "Default") + "." + type;</span></span>
+        }
+<span class="cstat-no" title="statement not covered" >        for (let i = 0; i &lt; EdmContainer.length; i++){</span>
+<span class="cstat-no" title="statement not covered" >            let containerType = EdmContainer[i];</span>
+<span class="cstat-no" title="statement not covered" >            let namespace = (&lt;any&gt;containerType).namespace || (&lt;any&gt;target).namespace || "Default";</span>
+<span class="cstat-no" title="statement not covered" >            let containerTypeName = (namespace ? namespace + "." : "") + (&lt;any&gt;containerType).name;</span>
+<span class="cstat-no" title="statement not covered" >            if (containerTypeName == elementType){</span>
+<span class="cstat-no" title="statement not covered" >                return containerType;</span>
+            }
+        }
+<span class="cstat-no" title="statement not covered" >        return elementType;</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function isCollection(target:Function, propertyKey:string)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmType, target.prototype, propertyKey) == "Collection";</span>
+    }
+    export function getProperties(target:Function):string[]{
+        return Reflect.getMetadata(EdmProperties, target) || [];
+    }
+<span class="fstat-no" title="function not covered" >    export function getParameters(target:Function, targetKey:string)</span>:any[]{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmParameters, target.prototype, targetKey) || [];</span>
+    }
+&nbsp;
+    export const Key = (function Key(){
+        return <span class="fstat-no" title="function not covered" >function(target, targetKey)</span>{
+<span class="cstat-no" title="statement not covered" >            if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                Edm.register(target);</span>
+            }
+<span class="cstat-no" title="statement not covered" >            let properties:string[] = Reflect.getMetadata(EdmKeyProperties, target) || [];</span>
+<span class="cstat-no" title="statement not covered" >            if (properties.indexOf(targetKey) &lt; 0) <span class="cstat-no" title="statement not covered" >properties.push(targetKey);</span></span>
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmKeyProperties, properties, target);</span>
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmKeyProperty, true, target, targetKey);</span>
+        };
+    })();
+<span class="fstat-no" title="function not covered" >    export function isKey(target:Function, propertyKey:string)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmKeyProperty, target.prototype, propertyKey) || false;</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function getKeyProperties(target:Function)</span>:string[]{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmKeyProperties, target) || Reflect.getMetadata(EdmKeyProperties, target.prototype) || [];</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function escape(value:any, type:any)</span>{
+<span class="cstat-no" title="statement not covered" >        switch (type){</span>
+            case "Edm.Binary":
+<span class="cstat-no" title="statement not covered" >                return value.toString("hex");</span>
+            case "Edm.Boolean":
+            case "Edm.Byte":
+            case "Edm.Decimal":
+            case "Edm.Double":
+            case "Edm.Guid":
+            case "Edm.Int16":
+            case "Edm.Int32":
+            case "Edm.Int64":
+            case "Edm.SByte":
+            case "Edm.Single":
+<span class="cstat-no" title="statement not covered" >                return value.toString();</span>
+            case "Edm.String": <span class="cstat-no" title="statement not covered" >return "'" + ("" + value).replace(/'/g, "''") + "'";</span>
+        }
+    }
+&nbsp;
+    export const Computed = (function Computed(){
+        return <span class="fstat-no" title="function not covered" >function(target, targetKey)</span>{
+<span class="cstat-no" title="statement not covered" >            if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                Edm.register(target);</span>
+            }
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmComputedProperty, true, target, targetKey);</span>
+        };
+    })();
+<span class="fstat-no" title="function not covered" >    export function isComputed(target:Function, propertyKey:string)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmComputedProperty, target.prototype, propertyKey) || false;</span>
+    }
+&nbsp;
+    export const Nullable = (function Nullable(){
+        return <span class="fstat-no" title="function not covered" >function(target, targetKey, parameterIndex?:number)</span>{
+<span class="cstat-no" title="statement not covered" >            if (typeof parameterIndex != "undefined"){</span>
+<span class="cstat-no" title="statement not covered" >                let parameterNames = getFunctionParameters(target, targetKey);</span>
+<span class="cstat-no" title="statement not covered" >                let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];</span>
+<span class="cstat-no" title="statement not covered" >                let paramName = parameterNames[parameterIndex];</span>
+<span class="cstat-no" title="statement not covered" >                let param:any = existingParameters.filter(p =&gt; <span class="cstat-no" title="statement not covered" >p.name == paramName)</span>[0];</span>
+<span class="cstat-no" title="statement not covered" >                if (param){</span>
+<span class="cstat-no" title="statement not covered" >                    param.nullable = true;</span>
+                }else{
+<span class="cstat-no" title="statement not covered" >                    existingParameters.push({</span>
+                        name: parameterNames[parameterIndex],
+                        nullable: true
+                    });
+                }
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);</span>
+            }else{
+<span class="cstat-no" title="statement not covered" >                if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                    Edm.register(target);</span>
+                }
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmNullableProperty, true, target, targetKey);</span>
+            }
+        }
+    })();
+<span class="fstat-no" title="function not covered" >    export function isNullable(target:Function, propertyKey:string)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmNullableProperty, target.prototype, propertyKey);</span>
+    }
+&nbsp;
+    export const Required = (function Required(){
+        return <span class="fstat-no" title="function not covered" >function(target, targetKey, parameterIndex?:number)</span>{
+<span class="cstat-no" title="statement not covered" >            if (typeof parameterIndex != "undefined"){</span>
+<span class="cstat-no" title="statement not covered" >                let parameterNames = getFunctionParameters(target, targetKey);</span>
+<span class="cstat-no" title="statement not covered" >                let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];</span>
+<span class="cstat-no" title="statement not covered" >                let paramName = parameterNames[parameterIndex];</span>
+<span class="cstat-no" title="statement not covered" >                let param:any = existingParameters.filter(p =&gt; <span class="cstat-no" title="statement not covered" >p.name == paramName)</span>[0];</span>
+<span class="cstat-no" title="statement not covered" >                if (param){</span>
+<span class="cstat-no" title="statement not covered" >                    param.nullable = false;</span>
+                }else{
+<span class="cstat-no" title="statement not covered" >                    existingParameters.push({</span>
+                        name: parameterNames[parameterIndex],
+                        nullable: false
+                    });
+                }
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);</span>
+            }else{
+<span class="cstat-no" title="statement not covered" >                if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                    Edm.register(target);</span>
+                }
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmNullableProperty, false, target, targetKey);</span>
+            }
+        }
+    })();
+<span class="fstat-no" title="function not covered" >    export function isRequired(target:Function, propertyKey:string)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmNullableProperty, target.prototype, propertyKey) == false ? true : false;</span>
+    }
+&nbsp;
+    function operationDecoratorFactory(type, returnType?){
+        return <span class="fstat-no" title="function not covered" >function(target, targetKey)</span>{
+<span class="cstat-no" title="statement not covered" >            let element = target;</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof returnType != "undefined"){</span>
+<span class="cstat-no" title="statement not covered" >                try{</span>
+<span class="cstat-no" title="statement not covered" >                    Reflect.decorate([returnType()], element, EdmReturnType);</span>
+                }catch(err){
+<span class="cstat-no" title="statement not covered" >                    returnType(element, EdmReturnType);</span>
+                }
+            }
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(type, type, target, targetKey);</span>
+        };
+    }
+    export const ActionImport = operationDecoratorFactory(EdmAction);
+    export const Action = operationDecoratorFactory(EdmAction);
+<span class="fstat-no" title="function not covered" >    export function FunctionImport(returnType:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        return operationDecoratorFactory(EdmFunction, returnType);</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function Function(returnType:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        return <span class="fstat-no" title="function not covered" >function(target, targetKey)</span>{</span>
+<span class="cstat-no" title="statement not covered" >            let existingOperations:any[] = Reflect.getOwnMetadata(EdmOperations, target) || [];</span>
+<span class="cstat-no" title="statement not covered" >            existingOperations.push(targetKey);</span>
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmOperations, existingOperations, target);</span>
+<span class="cstat-no" title="statement not covered" >            operationDecoratorFactory(EdmFunction, returnType)(target, targetKey);</span>
+        };
+    }
+    export function getOperations(target:Function):string[]{
+        return Reflect.getOwnMetadata(EdmOperations, target.prototype) || [];
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function getReturnTypeName(target:Function, propertyKey:string)</span>:string{
+<span class="cstat-no" title="statement not covered" >        return Edm.getTypeName(target, EdmReturnType);</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function getReturnType(target:Function, propertyKey:string)</span>:Function | string{
+<span class="cstat-no" title="statement not covered" >        return Edm.getType(target, EdmReturnType);</span>
+    }
+&nbsp;
+    export function isActionImport(target:Function, propertyKey:string):boolean{
+        return Reflect.getMetadata(EdmAction, target.prototype, propertyKey) || false;
+    }
+    export function isFunctionImport(target:Function, propertyKey:string):boolean{
+        return Reflect.getMetadata(EdmFunction, target.prototype, propertyKey) || false;
+    }
+<span class="fstat-no" title="function not covered" >    export function isAction(target:Function, propertyKey:string)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmAction, target.prototype, propertyKey) || false;</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function isFunction(target:Function, propertyKey:string)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmFunction, target.prototype, propertyKey) || false;</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function ComplexType(type:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        return <span class="fstat-no" title="function not covered" >function(target, targetKey)</span>{</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                Edm.register(target);</span>
+            }
+<span class="cstat-no" title="statement not covered" >            if (targetKey != EdmType){</span>
+<span class="cstat-no" title="statement not covered" >                let properties:string[] = Reflect.getMetadata(EdmProperties, target) || [];</span>
+<span class="cstat-no" title="statement not covered" >                if (properties.indexOf(targetKey) &lt; 0) <span class="cstat-no" title="statement not covered" >properties.push(targetKey);</span></span>
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmProperties, properties, target);</span>
+            }
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmComplexType, type, target, targetKey);</span>
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmType, type, target, targetKey);</span>
+        };
+    }
+<span class="fstat-no" title="function not covered" >    export function isComplexType(target:Function, propertyKey:string)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        return Reflect.hasMetadata(EdmComplexType, target.prototype, propertyKey);</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function MediaEntity(contentType:string)</span>{
+<span class="cstat-no" title="statement not covered" >        return Reflect.metadata(EdmMediaEntity, contentType);</span>
+    }
+    export function isMediaEntity(target:Function){
+        return Reflect.hasMetadata(EdmMediaEntity, target);
+    }
+<span class="fstat-no" title="function not covered" >    export function getContentType(target:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmMediaEntity, target);</span>
+    }
+&nbsp;
+    export const OpenType = (function OpenType(){
+        return Reflect.metadata(EdmOpenType, true);
+    })();
+    export function isOpenType(target:Function){
+        return Reflect.hasMetadata(EdmOpenType, target) || false;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function EntityType(type?:Function | string)</span>{
+<span class="cstat-no" title="statement not covered" >        return <span class="fstat-no" title="function not covered" >function(target:any, targetKey?:string)</span>{</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                Edm.register(target);</span>
+            }
+<span class="cstat-no" title="statement not covered" >            if (targetKey != EdmType){</span>
+<span class="cstat-no" title="statement not covered" >                let properties:string[] = Reflect.getMetadata(EdmProperties, target) || [];</span>
+<span class="cstat-no" title="statement not covered" >                if (properties.indexOf(targetKey) &lt; 0) <span class="cstat-no" title="statement not covered" >properties.push(targetKey);</span></span>
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(EdmProperties, properties, target);</span>
+            }
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmEntityType, type, target, targetKey);</span>
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmType, type, target, targetKey);</span>
+        };
+    }
+<span class="fstat-no" title="function not covered" >    export function isEntityType(target:Function, propertyKey:string)</span>:boolean{
+<span class="cstat-no" title="statement not covered" >        return Reflect.hasMetadata(EdmEntityType, target.prototype, propertyKey);</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function register(type:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        if (EdmContainer.indexOf(type) &lt; 0) <span class="cstat-no" title="statement not covered" >EdmContainer.push(type);</span></span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function Convert(converter:Function)</span>{
+<span class="cstat-no" title="statement not covered" >        return <span class="fstat-no" title="function not covered" >function(target, targetKey)</span>{</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                Edm.register(target);</span>
+            }
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmConverter, converter, target, targetKey);</span>
+        };
+    }
+<span class="fstat-no" title="function not covered" >    export function getConverter(target:Function, propertyKey:string)</span>:Function{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmConverter, target.prototype, propertyKey);</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function Annotate(...annotation:any[])</span>{
+<span class="cstat-no" title="statement not covered" >        return <span class="fstat-no" title="function not covered" >function(target:any, targetKey?:string)</span>{</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                Edm.register(target);</span>
+            }
+<span class="cstat-no" title="statement not covered" >            let existingAnnotations:any[] = Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];</span>
+<span class="cstat-no" title="statement not covered" >            existingAnnotations = annotation.concat(existingAnnotations);</span>
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmAnnotations, existingAnnotations, target, targetKey);</span>
+        };
+    }
+    export function getAnnotations(target:Function, targetKey?:string):any[]{
+        return Reflect.getOwnMetadata(EdmAnnotations, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function ForeignKey(...keys:string[])</span>{
+<span class="cstat-no" title="statement not covered" >        return <span class="fstat-no" title="function not covered" >function(target:any, targetKey?:string)</span>{</span>
+<span class="cstat-no" title="statement not covered" >            if (typeof target == "function"){</span>
+<span class="cstat-no" title="statement not covered" >                Edm.register(target);</span>
+            }
+<span class="cstat-no" title="statement not covered" >            let existingForeignKeys:any[] = Reflect.getOwnMetadata(EdmForeignKeys, target, targetKey) || [];</span>
+<span class="cstat-no" title="statement not covered" >            existingForeignKeys = keys.concat(existingForeignKeys);</span>
+<span class="cstat-no" title="statement not covered" >            Reflect.defineMetadata(EdmForeignKeys, existingForeignKeys, target, targetKey);</span>
+        };
+    }
+<span class="fstat-no" title="function not covered" >    export function getForeignKeys(target:Function, targetKey?:string)</span>:string[]{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getOwnMetadata(EdmForeignKeys, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmForeignKeys, target, targetKey) || [];</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function Partner(property:string)</span>{
+<span class="cstat-no" title="statement not covered" >        return Reflect.metadata(EdmPartnerProperty, property);</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function getPartner(target:any, targetKey:string)</span>{
+<span class="cstat-no" title="statement not covered" >        return Reflect.getMetadata(EdmPartnerProperty, target, targetKey) || Reflect.getMetadata(EdmPartnerProperty, target.prototype, targetKey);</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function EntitySet(name:string)</span>{
+<span class="cstat-no" title="statement not covered" >        return <span class="fstat-no" title="function not covered" >function(controller:typeof ODataController)</span>{</span>
+<span class="cstat-no" title="statement not covered" >            controller.prototype.entitySetName = name;</span>
+        };
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Oct 11 2016 16:38:04 GMT+0200 (Central Europe Daylight Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

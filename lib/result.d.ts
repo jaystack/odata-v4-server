@@ -8,8 +8,9 @@ export declare class ODataResult {
     statusCode: number;
     body: IODataResult;
     elementType: Function;
-    constructor(statusCode: number, result?: any);
-    static Created: (result: any) => Promise<ODataResult>;
-    static Ok: (result: any, innercount?: number) => Promise<ODataResult>;
-    static NoContent: (result?: Promise<any>) => Promise<ODataResult>;
+    contentType: string;
+    constructor(statusCode: number, contentType?: string, result?: any);
+    static Created: (result: any, contentType?: string) => Promise<ODataResult>;
+    static Ok: (result: any, contentType?: string) => Promise<ODataResult>;
+    static NoContent: (result?: any, contentType?: string) => Promise<ODataResult>;
 }

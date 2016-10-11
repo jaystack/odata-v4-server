@@ -16,7 +16,7 @@ export class ODataController{
             fn = this.prototype[fnName];
             let parameterNames = getFunctionParameters(<Function>fn);
             keys.forEach((key) => {
-                odata.key()(this.prototype, fnName, parameterNames.indexOf(key));
+                odata.key(this.prototype, fnName, parameterNames.indexOf(key));
             });
         }
     }
@@ -24,6 +24,6 @@ export class ODataController{
         let fnName = <string>((<Function>fn).name || fn);
         fn = this.prototype[fnName];
         let parameterNames = getFunctionParameters(<Function>fn);
-        odata.filter()(this.prototype, fnName, parameterNames.indexOf(param || parameterNames[0]));
+        odata.filter(this.prototype, fnName, parameterNames.indexOf(param || parameterNames[0]));
     }
 }

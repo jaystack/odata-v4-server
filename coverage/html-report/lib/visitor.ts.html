@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for lib\visitor.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">lib/</a> visitor.ts
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">29.03% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>27/93</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">24.24% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>8/33</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">27.59% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>8/29</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">29.21% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>26/89</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-yes">12×</span>
+<span class="cline-any cline-yes">12×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Token, TokenType } from "odata-v4-parser/lib/lexer";
+import { Literal } from "odata-v4-literal";
+&nbsp;
+export interface KeyValuePair{
+    name:string
+    value:any,
+    raw?:string
+}
+&nbsp;
+export interface NavigationPart{
+    name:string
+    type:TokenType
+    key?:KeyValuePair[]
+    params?:any
+}
+&nbsp;
+export class ResourcePathVisitor{
+    navigation:NavigationPart[]
+    alias:any
+    path:string
+    singleton:string
+    inlinecount:boolean
+    ast:Token
+&nbsp;
+    constructor(){
+        this.navigation = [];
+        this.path = "";
+        this.alias = {};
+    }
+&nbsp;
+    Visit(node:Token, context?:any):ResourcePathVisitor{
+        this.ast = this.ast || node;
+        context = context || {};
+&nbsp;
+        if (node){
+            let visitor;
+            switch (node.type){
+<span class="branch-0 cbranch-no" title="branch not covered" >                case "PrimitiveFunctionImportCall":</span>
+<span class="branch-1 cbranch-no" title="branch not covered" >                case "PrimitiveCollectionFunctionImportCall":</span>
+<span class="branch-2 cbranch-no" title="branch not covered" >                case "ComplexFunctionImportCall":</span>
+<span class="branch-3 cbranch-no" title="branch not covered" >                case "ComplexCollectionFunctionImportCall":</span>
+<span class="branch-4 cbranch-no" title="branch not covered" >                case "EntityFunctionImportCall":</span>
+<span class="branch-5 cbranch-no" title="branch not covered" >                case "EntityCollectionFunctionImportCall":</span>
+<span class="cstat-no" title="statement not covered" >                    visitor = this.VisitFunctionImportCall;</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+<span class="branch-6 cbranch-no" title="branch not covered" >                case "BoundPrimitiveFunctionCall":</span>
+<span class="branch-7 cbranch-no" title="branch not covered" >                case "BoundPrimitiveCollectionFunctionCall":</span>
+<span class="branch-8 cbranch-no" title="branch not covered" >                case "BoundComplexFunctionCall":</span>
+<span class="branch-9 cbranch-no" title="branch not covered" >                case "BoundComplexCollectionFunctionCall":</span>
+<span class="branch-10 cbranch-no" title="branch not covered" >                case "BoundEntityFunctionCall":</span>
+<span class="branch-11 cbranch-no" title="branch not covered" >                case "BoundEntityCollectionFunctionCall":</span>
+<span class="cstat-no" title="statement not covered" >                    visitor = this.VisitBoundFunctionCall;</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+<span class="branch-12 cbranch-no" title="branch not covered" >                case "PrimitiveProperty":</span>
+<span class="branch-13 cbranch-no" title="branch not covered" >                case "PrimitiveCollectionProperty":</span>
+<span class="branch-14 cbranch-no" title="branch not covered" >                case "EntityNavigationProperty":</span>
+<span class="branch-15 cbranch-no" title="branch not covered" >                case "EntityCollectionNavigationProperty":</span>
+<span class="cstat-no" title="statement not covered" >                    visitor = this.VisitProperty;</span>
+<span class="cstat-no" title="statement not covered" >                    break;</span>
+                default:
+                    visitor = this[`Visit${node.type}`];
+            }
+            
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (visitor) visitor.call(this, node, context);
+            else <span class="cstat-no" title="statement not covered" >console.log(`Unhandled node type: ${node.type}`);</span>
+        }
+&nbsp;
+        return this;
+    }
+&nbsp;
+    protected VisitODataUri(node:Token, context:any){
+        this.Visit(node.value.query, context);
+        this.Visit(node.value.resource, context);
+    }
+&nbsp;
+    protected VisitQueryOptions<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        node.value.options.forEach((option) =&gt; <span class="cstat-no" title="statement not covered" >this.Visit(option, context))</span>;</span>
+    }
+&nbsp;
+    protected VisitInlineCount<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.inlinecount = Literal.convert(node.value.value, node.value.raw);</span>
+    }
+    
+    protected VisitAliasAndValue<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.Visit(node.value.value.value, context);</span>
+<span class="cstat-no" title="statement not covered" >        this.alias[node.value.alias.value.name] = context.literal;</span>
+<span class="cstat-no" title="statement not covered" >        delete context.literal;</span>
+    }
+    
+    protected VisitResourcePath(node:Token, context:any){
+        this.Visit(node.value.resource, context);
+        this.Visit(node.value.navigation, context);
+    }
+&nbsp;
+    protected VisitSingletonEntity<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.singleton = node.raw;</span>
+    }
+&nbsp;
+    protected VisitEntitySetName(node:Token, context:any){
+        this.navigation.push({ name: node.value.name, type: node.type });
+        this.path += "/" + node.value.name;
+    }
+&nbsp;
+    protected VisitCountExpression<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.navigation.push({</span>
+            name: "$count",
+            type: TokenType.BoundPrimitiveFunctionCall,
+            params: {}
+        });
+<span class="cstat-no" title="statement not covered" >        this.path += "/$count";</span>
+    };
+&nbsp;
+    protected VisitCollectionNavigation(node:Token, context:any){
+        this.Visit(node.value.path, context);
+    }
+&nbsp;
+    protected VisitCollectionNavigationPath(node:Token, context:any){
+        this.Visit(node.value.predicate, context);
+        this.Visit(node.value.navigation, context);
+    }
+&nbsp;
+    protected VisitSimpleKey(node:Token, context:any){
+        let lastNavigationPart = this.navigation[this.navigation.length - 1];
+        lastNavigationPart.key = [{
+            name: node.value.key,
+            value: Literal.convert(node.value.value.value, node.value.value.raw),
+            raw: node.value.value.raw
+        }];
+        this.path += "(\\(([^,]+)\\))";
+    }
+&nbsp;
+    protected VisitCompoundKey<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.path += "(\\(";</span>
+<span class="cstat-no" title="statement not covered" >        let lastNavigationPart = this.navigation[this.navigation.length - 1];</span>
+<span class="cstat-no" title="statement not covered" >        lastNavigationPart.key = node.value.map((pair, i) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            this.path += i == node.value.length -1 ? "([^,]+)" : "([^,]+,)";</span>
+<span class="cstat-no" title="statement not covered" >            return {</span>
+                name: pair.value.key.value.name,
+                value: Literal.convert(pair.value.value.value, pair.value.value.raw),
+                raw: pair.value.value.raw
+            };
+        });
+<span class="cstat-no" title="statement not covered" >        this.path += "\\))";</span>
+    }
+&nbsp;
+    protected VisitSingleNavigation<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.Visit(node.value.path, context);</span>
+    }
+&nbsp;
+    protected VisitPropertyPath<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.Visit(node.value.path, context);</span>
+<span class="cstat-no" title="statement not covered" >        this.Visit(node.value.navigation, context);</span>
+    }
+&nbsp;
+    protected VisitProperty<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.navigation.push({ name: node.value.name, type: node.type });</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "/" + node.value.name;</span>
+    };
+&nbsp;
+    protected VisitEntityNavigationProperty<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.navigation.push({ name: node.value.name, type: node.type });</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "/" + node.value.name;</span>
+    }
+&nbsp;
+    protected VisitEntityCollectionNavigationProperty<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.navigation.push({ name: node.value.name, type: node.type });</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "/" + node.value.name;</span>
+    }
+&nbsp;
+    protected VisitValueExpression<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.navigation.push({</span>
+            name: "$value",
+            type: TokenType.BoundPrimitiveFunctionCall,
+            params: {}
+        });
+<span class="cstat-no" title="statement not covered" >        this.path += "/$value";</span>
+    }
+&nbsp;
+    protected VisitRefExpression<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.navigation.push({</span>
+            name: "$ref",
+            type: TokenType.BoundPrimitiveFunctionCall,
+            params: {}
+        });
+<span class="cstat-no" title="statement not covered" >        this.path += "/$ref";</span>
+    }
+&nbsp;
+    protected VisitBoundOperation<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.Visit(node.value.operation, context);</span>
+<span class="cstat-no" title="statement not covered" >        this.Visit(node.value.navigation, context);</span>
+    }
+&nbsp;
+    protected VisitBoundActionCall<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        let part = {</span>
+            type: node.type,
+            name: node.raw
+        };
+<span class="cstat-no" title="statement not covered" >        this.navigation.push(part);</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "/" + part.name;</span>
+    }
+&nbsp;
+    protected VisitBoundFunctionCall<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        let part = {</span>
+            type: node.type,
+            name: node.value.call.value.namespace + "." + node.value.call.value.name,
+            params: {}
+        };
+<span class="cstat-no" title="statement not covered" >        this.navigation.push(part);</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "/" + part.name;</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "(\\(";</span>
+<span class="cstat-no" title="statement not covered" >        node.value.params.value.forEach((param, i) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            this.Visit(param, context);</span>
+<span class="cstat-no" title="statement not covered" >            if (i &lt; node.value.params.value.length - 1) <span class="cstat-no" title="statement not covered" >this.path += ",";</span></span>
+        });
+<span class="cstat-no" title="statement not covered" >        this.path += "\\))";</span>
+    }
+    
+    protected VisitFunctionImportCall<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        let part = {</span>
+            type: node.type,
+            name: node.value.import.value.name,
+            params: {}
+        };
+<span class="cstat-no" title="statement not covered" >        this.navigation.push(part);</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "/" + part.name;</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "(\\(";</span>
+<span class="cstat-no" title="statement not covered" >        node.value.params.forEach((param) =&gt; <span class="cstat-no" title="statement not covered" >this.Visit(param, context))</span>;</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "\\))";</span>
+    }
+    
+    protected VisitFunctionParameter<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        this.Visit(node.value.value, context);</span>
+<span class="cstat-no" title="statement not covered" >        let params = this.navigation[this.navigation.length - 1].params || {};</span>
+<span class="cstat-no" title="statement not covered" >        params[node.value.name.value.name] = this.alias[node.value.name.value.name] || context.literal;</span>
+<span class="cstat-no" title="statement not covered" >        this.path += node.value.name.value.name + "=([^,]+)";</span>
+<span class="cstat-no" title="statement not covered" >        delete context.literal;</span>
+    }
+&nbsp;
+    protected VisitActionImportCall<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        let part = {</span>
+            type: node.value.type,
+            name: node.value.value.name
+        };
+<span class="cstat-no" title="statement not covered" >        this.navigation.push(part);</span>
+<span class="cstat-no" title="statement not covered" >        this.path += "/" + part.name;</span>
+    }
+    
+    protected VisitParameterAlias<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        context.literal = this.alias[node.value.name];</span>
+    }
+    
+    protected VisitLiteral<span class="fstat-no" title="function not covered" >(node:Token, context:any)</span>{
+<span class="cstat-no" title="statement not covered" >        context.literal = Literal.convert(node.value, node.raw);</span>
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Oct 11 2016 16:38:04 GMT+0200 (Central Europe Daylight Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

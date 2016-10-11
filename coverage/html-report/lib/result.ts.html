@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for lib\result.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">lib/</a> result.ts
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">47.83% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>22/46</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">41.3% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>19/46</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">50% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>2/4</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">48.84% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>21/43</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Promise } from "es6-promise";
+import * as extend from "extend";
+&nbsp;
+export interface IODataResult{
+    "@odata.context":string
+    "@odata.count":number
+    value:any
+}
+&nbsp;
+export class ODataResult{
+    statusCode:number
+    body:IODataResult
+    elementType:Function
+    contentType:string
+&nbsp;
+    constructor(statusCode:number, contentType?:string, result?:any){
+        this.statusCode = statusCode;
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (result){
+            this.body = typeof result == "object" ? extend({}, result) : <span class="branch-1 cbranch-no" title="branch not covered" >result;</span>
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (result &amp;&amp; result.constructor) this.elementType = result.constructor;
+            this.contentType = contentType || "application/json";
+        }
+    }
+&nbsp;
+    static Created = <span class="fstat-no" title="function not covered" >function Created(result:any, contentType?:string)</span>:Promise&lt;ODataResult&gt;{
+<span class="cstat-no" title="statement not covered" >        if (result &amp;&amp; typeof result.then == 'function'){</span>
+<span class="cstat-no" title="statement not covered" >            return result.then((result) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                return new ODataResult(201, contentType, result);</span>
+            });
+        }else{
+<span class="cstat-no" title="statement not covered" >            return new Promise((resolve, reject) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                resolve(new ODataResult(201, contentType, result));</span>
+            });
+        }
+    }
+&nbsp;
+    static Ok = function Ok(result:any, contentType?:string):Promise&lt;ODataResult&gt;{
+        let inlinecount;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (result &amp;&amp; typeof result.then == 'function'){
+<span class="cstat-no" title="statement not covered" >            return result.then((result) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                if (result &amp;&amp; result.inlinecount){</span>
+<span class="cstat-no" title="statement not covered" >                    inlinecount = result.inlinecount;</span>
+<span class="cstat-no" title="statement not covered" >                    delete result.inlinecount;</span>
+                }
+<span class="cstat-no" title="statement not covered" >                if (Array.isArray(result)){</span>
+<span class="cstat-no" title="statement not covered" >                    result = { value: result };</span>
+<span class="cstat-no" title="statement not covered" >                    if (typeof inlinecount != "undefined") <span class="cstat-no" title="statement not covered" >result["@odata.count"] = inlinecount;</span></span>
+                }else{
+<span class="cstat-no" title="statement not covered" >                    if (typeof result == "object" &amp;&amp; result){</span>
+<span class="cstat-no" title="statement not covered" >                        result["@odata.count"] = inlinecount;</span>
+                    }
+                }
+<span class="cstat-no" title="statement not covered" >                return new ODataResult(200, contentType, result);</span>
+            });
+        }else{
+            return new Promise((resolve, reject) =&gt; {
+                <span class="missing-if-branch" title="if path not taken" >I</span>if (result &amp;&amp; result.inlinecount){
+<span class="cstat-no" title="statement not covered" >                    inlinecount = result.inlinecount;</span>
+<span class="cstat-no" title="statement not covered" >                    delete result.inlinecount;</span>
+                }
+                if (Array.isArray(result)){
+                    result = { value: result };
+                    <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof inlinecount != "undefined") <span class="cstat-no" title="statement not covered" >result["@odata.count"] = inlinecount;</span>
+                }else{
+                    <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof result == "object" &amp;&amp; result){
+                        result["@odata.count"] = inlinecount;
+                    }
+                }
+                resolve(new ODataResult(200, contentType, result));
+            });
+        }
+    };
+&nbsp;
+    static NoContent = <span class="fstat-no" title="function not covered" >function NoContent(result?:any, contentType?:string)</span>:Promise&lt;ODataResult&gt;{
+<span class="cstat-no" title="statement not covered" >        if (result &amp;&amp; typeof result.then == 'function'){</span>
+<span class="cstat-no" title="statement not covered" >            return result.then((result) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                return new ODataResult(204, contentType);</span>
+            });
+        }else{
+<span class="cstat-no" title="statement not covered" >            return new Promise((resolve, reject) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                resolve(new ODataResult(204, contentType));</span>
+            });
+        }
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Oct 11 2016 16:38:04 GMT+0200 (Central Europe Daylight Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

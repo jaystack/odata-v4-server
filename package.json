@@ -5,7 +5,16 @@
   "main": "lib/index.js",
   "typings": "lib/index",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "build:w": "tsc -w",
+    "lint": "tslint src/**/*.ts -t verbose --force > .tslint",
+    "pretest": "tsc",
+    "test": "mocha test/**/*.spec.js",
+    "coverage": "rm -rf coverage && tsc && node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha --config=.istanbul.yaml -x config/**/*.js && node node_modules/remap-istanbul/bin/remap-istanbul -i coverage/coverage.json -o coverage/html-report -t html"
+  },
+  "watch": {
+    "coverage": "{lib,test}/*.js",
+    "lint": "{lib}/*.js"
   },
   "repository": {
     "type": "git",
@@ -28,16 +37,24 @@
     "cors": "^2.8.0",
     "express": "^4.14.0",
     "extend": "^3.0.0",
-    "odata-v4-parser": "^0.1.10",
+    "odata-v4-parser": "^0.1.11",
     "odata-v4-service-document": "0.0.3",
     "odata-v4-service-metadata": "^0.1.5",
     "reflect-metadata": "^0.1.8"
   },
   "devDependencies": {
+    "JSONStream": "^1.2.1",
+    "chai": "^3.5.0",
+    "event-stream": "^3.3.4",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.2",
     "mongodb": "^2.2.6",
     "node-uuid": "^1.4.7",
-    "odata-v4-inmemory": "^0.1.6",
-    "odata-v4-mongodb": "^0.1.4",
+    "npm-watch": "^0.1.6",
+    "odata-v4-inmemory": "^0.1.7",
+    "odata-v4-mongodb": "^0.1.5",
+    "remap-istanbul": "^0.6.4",
+    "tslint": "^3.15.1",
     "typescript": "^2.0.3"
   }
 }
