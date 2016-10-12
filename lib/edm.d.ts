@@ -52,8 +52,8 @@ export declare namespace Edm {
     function isRequired(target: Function, propertyKey: string): boolean;
     const ActionImport: (target: any, targetKey: any) => void;
     const Action: (target: any, targetKey: any) => void;
-    function FunctionImport(returnType: Function): (target: any, targetKey: any) => void;
-    function Function(returnType: Function): (target: any, targetKey: any) => void;
+    function FunctionImport(returnType: any): (target: any, targetKey: any) => void;
+    function Function(returnType: any): (target: any, targetKey: any) => void;
     function getOperations(target: Function): string[];
     function getReturnTypeName(target: Function, propertyKey: string): string;
     function getReturnType(target: Function, propertyKey: string): Function | string;

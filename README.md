@@ -2,165 +2,86 @@
 
 OData V4 server for node.js
 
-## Using from TypeScript
+## Features
 
-Use compiler options:
-* experimentalDecorators
-* emitDecoratorMetadata
+* OASIS Standard OData Version 4.0 server
+* usable as a standalone server, as an Express router, as a node.js stream or as a library
+* expose service document and service metadata
+* setup metadata using decorators or [metadata JSON](https://github.com/jaystack/odata-v4-service-metadata])
+* supported data types are Edm primitives, complex types, navigation properties
+* support entity sets, action imports, function imports, collection and entity bound actions and functions
+* support for full OData query language using [odata-v4-parser](https://github.com/jaystack/odata-v4-parser)
+* support sync and async controller functions
+* support async controller functions using Promise, async/await or ES6 generator functions
+* support result streaming
+* support media entities
 
-## Northwind example server
+## Example Northwind server
 
 ```typescript
-import { Promise } from "es6-promise";
-import * as uuid from "node-uuid";
-import { ObjectID } from "mongodb";
-import { Edm, Entity, odata, ODataMongoDBController, MongoDBProvider, ODataServer, ODataErrorHandler, createODataServer } from "../index";
-let categories = require("./categories");
-let products = require("./products");
+export class ProductsController extends ODataController{
+    @odata.GET
+    find(@odata.filter filter:Token){
+        if (filter) return products.filter(createFilter(filter));
+        return products;
+    }
 
-const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFromHexString(_id) : _id;
+    @odata.GET
+    findOne(@odata.key key:string){
+        return products.filter(product => product._id == key)[0];
+    }
 
-@odata.namespace("Northwind")
-@Edm.Annotate({
-    term: "UI.DisplayName",
-    string: "Products"
-})
-export class Product extends Entity{
-    @Edm.Key()
-    @Edm.Computed()
-    @Edm.String()
-    @Edm.Convert(toObjectID)
-    @Edm.Annotate({
-        term: "UI.DisplayName",
-        string: "Product identifier"
-    }, {
-        term: "UI.ControlHint",
-        string: "ReadOnly"
-    })
-    _id:ObjectID
-    @Edm.String()
-    @Edm.Required()
-    @Edm.Convert(toObjectID)
-    CategoryId:string
-    @Edm.Boolean()
-    Discontinued:boolean
-    @Edm.String()
-    @Edm.Annotate({
-        term: "UI.DisplayName",
-        string: "Product title"
-    }, {
-        term: "UI.ControlHint",
-        string: "ShortText"
-    })
-    Name:string
-    @Edm.String()
-    @Edm.Annotate({
-        term: "UI.DisplayName",
-        string: "Product English name"
-    }, {
-        term: "UI.ControlHint",
-        string: "ShortText"
-    })
-    QuantityPerUnit:string
-    @Edm.Decimal()
-    @Edm.Annotate({
-        term: "UI.DisplayName",
-        string: "Unit price of product"
-    }, {
-        term: "UI.ControlHint",
-        string: "Decimal"
-    })
-    UnitPrice:number
-}
+    @odata.POST
+    insert(@odata.body product:any){
+        product._id = new ObjectID().toString();
+        products.push(product);
+        return product;
+    }
 
-@odata.namespace("Northwind")
-@Edm.Annotate({
-    term: "UI.DisplayName",
-    string: "Categories"
-})
-export class Category extends Entity{
-    @Edm.Key()
-    @Edm.Computed()
-    @Edm.String()
-    @Edm.Convert(toObjectID)
-    @Edm.Annotate({
-        term: "UI.DisplayName",
-        string: "Category identifier"
-    },
-    {
-        term: "UI.ControlHint",
-        string: "ReadOnly"
-    })
-    _id:ObjectID
-    @Edm.String()
-    Description:string
-    @Edm.String()
-    @Edm.Annotate({
-        term: "UI.DisplayName",
-        string: "Category name"
-    },
-    {
-        term: "UI.ControlHint",
-        string: "ShortText"
-    })
-    Name:string
-}
+    @odata.PATCH
+    update(@odata.key key:string, @odata.body delta:any){
+        extend(products.filter(product => product._id == key)[0], delta);
+    }
 
-@odata.namespace("Northwind")
-@odata.context("Products")
-@odata.type(Product)
-export class ProductsController<Product> extends ODataMongoDBController<Product>{}
-
-@odata.namespace("Northwind")
-@odata.context("Categories")
-@odata.type(Category)
-export class CategoriesController<Category> extends ODataMongoDBController<Category>{}
-
-@odata.namespace("JayStack")
-@odata.container("NorthwindContext")
-@odata.controller(ProductsController)
-@odata.controller(CategoriesController)
-@odata.config({
-    uri: "mongodb://localhost:27017/odataserver"
-})
-@odata.cors()
-export class NorthwindODataServer extends ODataServer{
-    @Edm.ActionImport()
-    initDb():Promise<any>{
-        let provider = new MongoDBProvider(this.configuration);
-        return provider.connect().then((db) => {
-            return db.dropDatabase().then(() => {
-                let categoryCollection = db.collection("Categories");
-                let productsCollection = db.collection("Products");
-                return Promise.all([categoryCollection.insertMany(categories), productsCollection.insertMany(products)]);
-            });
-        });
+    @odata.DELETE
+    remove(@odata.key key:string){
+        products.splice(products.indexOf(products.filter(product => product._id == key)[0]), 1);
     }
 }
 
-createODataServer(NorthwindODataServer, "/odata", 3000);
-```
+export class CategoriesController extends ODataController{
+    @odata.GET
+    find(@odata.filter filter:Token){
+        if (filter) return categories.filter(createFilter(filter));
+        return categories;
+    }
 
-To use an Express router instead of an Express server:
+    @odata.GET
+    findOne(@odata.key key:string){
+        return categories.filter(category => category._id == key)[0];
+    }
 
-```typescript
-let app = express();
-app.use("/odata", createODataServer(NorthwindODataServer));
-app.listen(3000);
-```
+    @odata.POST
+    insert(@odata.body category:any){
+        category._id = new ObjectID().toString();
+        categories.push(category);
+        return category;
+    }
 
-To use only the server middleware:
+    @odata.PATCH
+    update(@odata.key key:string, @odata.body delta:any){
+        extend(categories.filter(category => category._id == key)[0], delta);
+    }
 
-```typescript
-let router = express.Router();
-router.use(bodyParser.json());
-router.use(cors());
-router.get('/', server.document().requestHandler());
-router.get('/\\$metadata', server.$metadata().requestHandler());
-router.use(server.requestHandler(server));
-router.use(ODataErrorHandler);
+    @odata.DELETE
+    remove(@odata.key key:string){
+        categories.splice(categories.indexOf(categories.filter(category => category._id == key)[0]), 1);
+    }
+}
 
-let app = express();
-app.use("/odata", createODataServer(NorthwindODataServer));
-app.listen(3000);
+@odata.cors
+@odata.controller(ProductsController, true)
+@odata.controller(CategoriesController, true)
+export class NorthwindODataServer extends ODataServer{}
+NorthwindODataServer.create("/odata", 3000);
 ```

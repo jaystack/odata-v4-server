@@ -20,6 +20,7 @@ export namespace odata{
     const ODataBodyParameter:string = "odata:bodyparameter";
     const ODataContextParameter:string = "odata:contextparameter";
     const ODataStreamParameter:string = "odata:streamparameter";
+    const ODataResultParameter:string = "odata:resultparameter";
 
     export function type(elementType:Function){
         return function(constructor:Function){
@@ -147,6 +148,15 @@ export namespace odata{
         }
 
         for (let prop of propNames){
+            if (odata.getMethod(target, prop) == method.toUpperCase()){
+                return {
+                    call: prop,
+                    key: []
+                };
+            }
+        }
+
+        for (let prop of propNames){
             if (prop == method.toLowerCase()){
                 return {
                     call: prop,
@@ -161,7 +171,7 @@ export namespace odata{
             let parameterNames = getFunctionParameters(target, targetKey);
             let paramName = parameterNames[parameterIndex];
             Reflect.defineMetadata(ODataQueryParameter, paramName, target, targetKey);
-        }
+        };
     })();
     export function getQueryParameter(target, targetKey){
         return Reflect.getMetadata(ODataQueryParameter, target.prototype, targetKey);
@@ -172,7 +182,7 @@ export namespace odata{
             let parameterNames = getFunctionParameters(target, targetKey);
             let paramName = parameterNames[parameterIndex];
             Reflect.defineMetadata(ODataFilterParameter, paramName, target, targetKey);
-        }
+        };
     })();
     export function getFilterParameter(target, targetKey){
         return Reflect.getMetadata(ODataFilterParameter, target.prototype, targetKey);
@@ -183,7 +193,7 @@ export namespace odata{
             let parameterNames = getFunctionParameters(target, targetKey);
             let paramName = parameterNames[parameterIndex];
             Reflect.defineMetadata(ODataBodyParameter, paramName, target, targetKey);
-        }
+        };
     })();
     export function getBodyParameter(target, targetKey){
         return Reflect.getMetadata(ODataBodyParameter, target.prototype, targetKey);
@@ -194,8 +204,8 @@ export namespace odata{
             let parameterNames = getFunctionParameters(target, targetKey);
             let paramName = parameterNames[parameterIndex];
             Reflect.defineMetadata(ODataContextParameter, paramName, target, targetKey);
-        }
-    });
+        };
+    })();
     export function getContextParameter(target, targetKey){
         return Reflect.getMetadata(ODataContextParameter, target.prototype, targetKey);
     }
@@ -205,9 +215,20 @@ export namespace odata{
             let parameterNames = getFunctionParameters(target, targetKey);
             let paramName = parameterNames[parameterIndex];
             Reflect.defineMetadata(ODataStreamParameter, paramName, target, targetKey);
-        }
+        };
     })();
     export function getStreamParameter(target, targetKey){
         return Reflect.getMetadata(ODataStreamParameter, target.prototype, targetKey);
+    }
+
+    export const result = (function result(){
+        return function(target, targetKey, parameterIndex:number){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let paramName = parameterNames[parameterIndex];
+            Reflect.defineMetadata(ODataResultParameter, paramName, target, targetKey);
+        };
+    })();
+    export function getResultParameter(target, targetKey){
+        return Reflect.getMetadata(ODataResultParameter, target.prototype, targetKey);
     }
 }

@@ -37,8 +37,10 @@ export declare namespace odata {
     function getFilterParameter(target: any, targetKey: any): any;
     const body: (target: any, targetKey: any, parameterIndex: number) => void;
     function getBodyParameter(target: any, targetKey: any): any;
-    const context: () => (target: any, targetKey: any, parameterIndex: number) => void;
+    const context: (target: any, targetKey: any, parameterIndex: number) => void;
     function getContextParameter(target: any, targetKey: any): any;
     const stream: (target: any, targetKey: any, parameterIndex: number) => void;
     function getStreamParameter(target: any, targetKey: any): any;
+    const result: (target: any, targetKey: any, parameterIndex: number) => void;
+    function getResultParameter(target: any, targetKey: any): any;
 }

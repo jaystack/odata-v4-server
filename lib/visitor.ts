@@ -53,6 +53,8 @@ export class ResourcePathVisitor{
                     break;
                 case "PrimitiveProperty":
                 case "PrimitiveCollectionProperty":
+                case "ComplexProperty":
+                case "ComplexCollectionProperty":
                 case "EntityNavigationProperty":
                 case "EntityCollectionNavigationProperty":
                     visitor = this.VisitProperty;
@@ -62,7 +64,6 @@ export class ResourcePathVisitor{
             }
             
             if (visitor) visitor.call(this, node, context);
-            else console.log(`Unhandled node type: ${node.type}`);
         }
 
         return this;
@@ -157,16 +158,6 @@ export class ResourcePathVisitor{
         this.path += "/" + node.value.name;
     };
 
-    protected VisitEntityNavigationProperty(node:Token, context:any){
-        this.navigation.push({ name: node.value.name, type: node.type });
-        this.path += "/" + node.value.name;
-    }
-
-    protected VisitEntityCollectionNavigationProperty(node:Token, context:any){
-        this.navigation.push({ name: node.value.name, type: node.type });
-        this.path += "/" + node.value.name;
-    }
-
     protected VisitValueExpression(node:Token, context:any){
         this.navigation.push({
             name: "$value",
@@ -230,7 +221,7 @@ export class ResourcePathVisitor{
     
     protected VisitFunctionParameter(node:Token, context:any){
         this.Visit(node.value.value, context);
-        let params = this.navigation[this.navigation.length - 1].params || {};
+        let params = this.navigation[this.navigation.length - 1].params;
         params[node.value.name.value.name] = this.alias[node.value.name.value.name] || context.literal;
         this.path += node.value.name.value.name + "=([^,]+)";
         delete context.literal;

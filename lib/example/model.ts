@@ -103,4 +103,9 @@ export class Category{
     @Edm.Collection(Edm.EntityType("Product"))
     @Edm.Partner("Category")
     Products:Product[]
+
+    @Edm.Function(Edm.Collection(Edm.String))
+    echo(){
+        return ["echotest"];
+    }
 }

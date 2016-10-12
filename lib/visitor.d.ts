@@ -34,8 +34,6 @@ export declare class ResourcePathVisitor {
     protected VisitSingleNavigation(node: Token, context: any): void;
     protected VisitPropertyPath(node: Token, context: any): void;
     protected VisitProperty(node: Token, context: any): void;
-    protected VisitEntityNavigationProperty(node: Token, context: any): void;
-    protected VisitEntityCollectionNavigationProperty(node: Token, context: any): void;
     protected VisitValueExpression(node: Token, context: any): void;
     protected VisitRefExpression(node: Token, context: any): void;
     protected VisitBoundOperation(node: Token, context: any): void;

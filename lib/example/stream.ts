@@ -140,7 +140,7 @@ class MusicController extends ODataController{
 @odata.controller(MusicController, true)
 class StreamServer extends ODataServer{
     @Edm.FunctionImport(Edm.Stream)
-    async Fetch(@Edm.String filename:string, @odata.stream stream:Writable, @odata.context() context:any){
+    async Fetch(@Edm.String filename:string, @odata.stream stream:Writable, @odata.context context:any){
         let file = fs.createReadStream(filename);
         return file.on("open", () => {
             context.response.contentType(path.extname(filename));

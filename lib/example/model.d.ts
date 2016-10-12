@@ -13,4 +13,5 @@ export declare class Category {
     Description: string;
     Name: string;
     Products: Product[];
+    echo(): string[];
 }

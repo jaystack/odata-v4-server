@@ -20,9 +20,9 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">47.06% </span>
+        <span class="strong">94.12% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>8/17</span>
+        <span class='fraction'>16/17</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -30,18 +30,18 @@
         <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">80% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>0/5</span>
+        <span class='fraction'>4/5</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">47.06% </span>
+        <span class="strong">94.12% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>8/17</span>
+        <span class='fraction'>16/17</span>
       </div>
     </div>
   </div>
-  <div class='status-line low'></div>
+  <div class='status-line high'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -81,10 +81,10 @@
 36
 37</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -98,29 +98,29 @@
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export class CustomError extends Error{
-<span class="fstat-no" title="function not covered" >    constructor(message?:string)</span>{
-<span class="cstat-no" title="statement not covered" >        super(message);</span>
-<span class="cstat-no" title="statement not covered" >        this.message = message;</span>
-<span class="cstat-no" title="statement not covered" >        this.name = (this as any).constructor.name;</span>
-<span class="cstat-no" title="statement not covered" >        Error.captureStackTrace(this, CustomError);</span>
+    constructor(message?:string){
+        super(message);
+        this.message = message;
+        this.name = (this as any).constructor.name;
+        Error.captureStackTrace(this, CustomError);
     }
 }
 &nbsp;
@@ -133,23 +133,23 @@ export class NotImplementedError extends CustomError{
 &nbsp;
 export class HttpRequestError extends CustomError{
     statusCode:number
-<span class="fstat-no" title="function not covered" >    constructor(statusCode:number, message:string)</span>{
-<span class="cstat-no" title="statement not covered" >        super(message);</span>
-<span class="cstat-no" title="statement not covered" >        this.statusCode = statusCode;</span>
+    constructor(statusCode:number, message:string){
+        super(message);
+        this.statusCode = statusCode;
     }
 }
 &nbsp;
 export class ResourceNotFoundError extends HttpRequestError{
     static MESSAGE:string = "Resource not found.";
-<span class="fstat-no" title="function not covered" >    constructor(){</span>
-<span class="cstat-no" title="statement not covered" >        super(404, ResourceNotFoundError.MESSAGE);</span>
+    constructor(){
+        super(404, ResourceNotFoundError.MESSAGE);
     }
 }
 &nbsp;
 export class MethodNotAllowedError extends HttpRequestError{
     static MESSAGE:string = "Method not allowed.";
-<span class="fstat-no" title="function not covered" >    constructor(){</span>
-<span class="cstat-no" title="statement not covered" >        super(405, MethodNotAllowedError.MESSAGE);</span>
+    constructor(){
+        super(405, MethodNotAllowedError.MESSAGE);
     }
 }</pre></td></tr>
 </table></pre>
@@ -157,7 +157,7 @@ export class MethodNotAllowedError extends HttpRequestError{
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Oct 11 2016 16:38:04 GMT+0200 (Central Europe Daylight Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Oct 12 2016 18:07:41 GMT+0200 (Central Europe Daylight Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

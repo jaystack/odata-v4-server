@@ -18,7 +18,7 @@ export class ODataResult{
         if (result){
             this.body = typeof result == "object" ? extend({}, result) : result;
             if (result && result.constructor) this.elementType = result.constructor;
-            this.contentType = contentType || "application/json";
+            this.contentType = contentType || (typeof this.body == "object" ? "application/json" : "text/plain");
         }
     }
 
@@ -38,7 +38,7 @@ export class ODataResult{
         let inlinecount;
         if (result && typeof result.then == 'function'){
             return result.then((result) => {
-                if (result && result.inlinecount){
+                if (result && result.inlinecount && typeof result.inlinecount == "number"){
                     inlinecount = result.inlinecount;
                     delete result.inlinecount;
                 }
@@ -46,7 +46,7 @@ export class ODataResult{
                     result = { value: result };
                     if (typeof inlinecount != "undefined") result["@odata.count"] = inlinecount;
                 }else{
-                    if (typeof result == "object" && result){
+                    if (typeof result == "object" && result && typeof inlinecount == "number"){
                         result["@odata.count"] = inlinecount;
                     }
                 }
@@ -60,9 +60,9 @@ export class ODataResult{
                 }
                 if (Array.isArray(result)){
                     result = { value: result };
-                    if (typeof inlinecount != "undefined") result["@odata.count"] = inlinecount;
+                    if (typeof inlinecount == "number") result["@odata.count"] = inlinecount;
                 }else{
-                    if (typeof result == "object" && result){
+                    if (typeof result == "object" && result && typeof inlinecount == "number"){
                         result["@odata.count"] = inlinecount;
                     }
                 }

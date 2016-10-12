@@ -1,8 +1,9 @@
-const pattern = new RegExp("function[^(]*\\(([^)]*)\\)");
+const patternSource = "[^(]*\\(([^)]*)\\)";
+const pattern = new RegExp(patternSource);
 export const getFunctionParameters = function(fn:Function, name?:string){
-    let params;
-    if (!name) params = fn.toString().match(new RegExp("[^(]*\\(([^)]*)\\)"));
-    else params = fn[name].toString().match(new RegExp(name + "[^(]*\\(([^)]*)\\)")) || fn[name].toString().match(pattern);
+    let params = typeof name == "string" && typeof fn[name] == "function"
+        ? fn[name].toString().match(new RegExp(name + patternSource))
+        : fn.toString().match(pattern);
     return params[1].split(/,\s/);
 };
 export const getAllPropertyNames = function(proto:any):string[]{

@@ -46,7 +46,7 @@ export declare class ODataProcessor extends Transform {
     __appendODataContext(result: any, elementType: Function): void;
     __convertEntity(context: any, result: any, elementType: any): any;
     __enableStreaming(part: NavigationPart): void;
-    __applyParams(container: any, name: string, params: any, queryString?: string): void;
+    __applyParams(container: any, name: string, params: any, queryString?: string, result?: any): void;
     execute(body?: any): Promise<ODataResult>;
 }
 export declare class ODataServer extends Transform {

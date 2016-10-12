@@ -229,7 +229,12 @@ export function createMetadataJSON(server:typeof ODataServer){
                     }
                 });
             }
+        }
+    });
 
+    propNames.forEach((i) => {
+        if (i != "$metadata" && server.prototype[i]){
+            let containerSchema = definition.dataServices.schema.filter((schema) => schema.namespace == server.namespace)[0];
             let operationSchema = definition.dataServices.schema.filter((schema) => schema.namespace == (server.prototype[i].namespace || server.namespace))[0];
             if (!operationSchema){
                 operationSchema = {
@@ -273,5 +278,6 @@ export function createMetadataJSON(server:typeof ODataServer){
             }
         }
     });
+
     return definition;
 }

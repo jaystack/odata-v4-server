@@ -9,7 +9,7 @@
     "build:w": "tsc -w",
     "lint": "tslint src/**/*.ts -t verbose --force > .tslint",
     "pretest": "tsc",
-    "test": "mocha test/**/*.spec.js",
+    "test": "mocha test/**/*.spec.js --reporter mochawesome --reporter-options reportDir=test/report,reportName=odata-v4-server,reportTitle=\"OData V4 Server\"",
     "coverage": "rm -rf coverage && tsc && node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha --config=.istanbul.yaml -x config/**/*.js && node node_modules/remap-istanbul/bin/remap-istanbul -i coverage/coverage.json -o coverage/html-report -t html"
   },
   "watch": {
@@ -48,6 +48,7 @@
     "event-stream": "^3.3.4",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.2",
+    "mochawesome": "^1.5.3",
     "mongodb": "^2.2.6",
     "node-uuid": "^1.4.7",
     "npm-watch": "^0.1.6",
