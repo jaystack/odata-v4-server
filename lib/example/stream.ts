@@ -18,7 +18,7 @@ const mongodb = async function():Promise<Db>{
 @odata.type(Product)
 class ProductsController extends ODataController{
     @odata.GET
-    *find(@odata.query query:Token, @odata.stream stream:Writable){
+    *find(@odata.query query:Token, @odata.stream stream:Writable):any{
         let db:Db = yield mongodb();
         let mongodbQuery = createQuery(query);
         if (typeof mongodbQuery.query._id == "string") mongodbQuery.query._id = new ObjectID(mongodbQuery.query._id);

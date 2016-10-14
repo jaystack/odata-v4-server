@@ -29,7 +29,7 @@ export declare class ODataProcessor extends Transform {
     private streamEnabled;
     private resultCount;
     constructor(context: any, server: any);
-    _transform(chunk: any, encoding?: string, done?: Function): void;
+    _transform(chunk: any, encoding: string, done: Function): void;
     _flush(done?: Function): void;
     __EntityCollectionNavigationProperty(part: NavigationPart): Function;
     __EntityNavigationProperty(part: NavigationPart): Function;

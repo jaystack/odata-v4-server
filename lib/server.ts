@@ -253,7 +253,7 @@ export class ODataProcessor extends Transform{
         }).filter(it => !!it);
     }
 
-    _transform(chunk:any, encoding?:string, done?:Function){
+    _transform(chunk:any, encoding:string, done:Function){
         if (this.streamEnabled){
             if (!(chunk instanceof Buffer)){
                 if (!this.streamStart){
@@ -276,7 +276,6 @@ export class ODataProcessor extends Transform{
             }else this.push(chunk);
         }else{
             this.resultCount++;
-            if (typeof done == "function") done();
         }
         if (typeof done == "function") done();
     }
@@ -447,7 +446,7 @@ export class ODataProcessor extends Transform{
                 }
                 if (!(result instanceof ODataResult)){
                     return (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
-                        if (typeof result.body != "undefined") this.__appendODataContext(result, this.ctrl.prototype.elementType);
+                        this.__appendODataContext(result, this.ctrl.prototype.elementType);
                         resolve(result);
                     }, reject);
                 }
@@ -510,7 +509,7 @@ export class ODataProcessor extends Transform{
 
                 let boundOpName = part.name.split(".").pop();
                 let elementType = result.elementType;
-                let entityBoundOp = elementType.prototype[boundOpName];
+                let entityBoundOp = typeof elementType == "function" ? elementType.prototype[boundOpName] : null;
                 let ctrlBoundOp = this.instance[boundOpName];
                 let expOp = expCalls[boundOpName];
                 let scope:any= this.serverType;
@@ -579,6 +578,7 @@ export class ODataProcessor extends Transform{
     }
 
     __appendODataContext(result:any, elementType:Function){
+        if (typeof result.body == "undefined") return;
         let context:any = {
             "@odata.context": this.odataContext
         };
