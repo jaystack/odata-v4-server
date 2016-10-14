@@ -13,9 +13,9 @@ const assert = require("assert");
 const extend = require("extend");
 const odata_v4_inmemory_1 = require("odata-v4-inmemory");
 const index_1 = require("../lib/index");
-const model_1 = require("../lib/example/model");
-let categories = require("../lib/example/categories");
-let products = require("../lib/example/products");
+const model_1 = require("../example/model");
+let categories = require("../example/categories");
+let products = require("../example/products");
 class Foobar {
     Foo() { }
     Bar() {

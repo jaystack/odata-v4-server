@@ -5,9 +5,9 @@ import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ObjectID } from "mongodb";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata } from "../lib/index";
-import { Product, Category } from "../lib/example/model";
-let categories = require("../lib/example/categories");
-let products = require("../lib/example/products");
+import { Product, Category } from "../example/model";
+let categories = require("../example/categories");
+let products = require("../example/products");
 
 class Foobar{
     @Edm.Key
