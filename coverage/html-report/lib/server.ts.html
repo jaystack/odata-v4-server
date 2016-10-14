@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">69.88% </span>
+        <span class="strong">70.38% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>392/561</span>
+        <span class='fraction'>392/557</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">64.54% </span>
+        <span class="strong">65.05% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>253/392</span>
+        <span class='fraction'>255/392</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">68.09% </span>
+        <span class="strong">69.57% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>32/47</span>
+        <span class='fraction'>32/46</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">71.2% </span>
+        <span class="strong">71.77% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>361/507</span>
+        <span class='fraction'>361/503</span>
       </div>
     </div>
   </div>
@@ -928,14 +928,7 @@
 883
 884
 885
-886
-887
-888
-889
-890
-891
-892
-893</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+886</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
@@ -1169,6 +1162,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">36×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">36×</span>
 <span class="cline-any cline-yes">36×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1189,12 +1184,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1219,10 +1208,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1667,6 +1652,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2059,7 +2045,9 @@ export class ODataProcessor extends Transform{
     private resultCount = 0;
 &nbsp;
     constructor(context, server){
-        super();
+        super(&lt;TransformOptions&gt;{
+            objectMode: true
+        });
 &nbsp;
         this.context = context;
         this.serverType = server;
@@ -2080,18 +2068,12 @@ export class ODataProcessor extends Transform{
         }).filter(it =&gt; !!it);
     }
 &nbsp;
-    write(chunk:any, done?:Function):boolean;
-    write(chunk:any, encoding?:string, done?:Function);
-    write<span class="fstat-no" title="function not covered" >(chunk:any, encoding?:string | Function, done?:Function)</span>:boolean{
-<span class="cstat-no" title="statement not covered" >        if (typeof encoding == "function"){</span>
-<span class="cstat-no" title="statement not covered" >            done = encoding;</span>
-<span class="cstat-no" title="statement not covered" >            encoding = undefined;</span>
-        }
+    _transform<span class="fstat-no" title="function not covered" >(chunk:any, encoding?:string, done?:Function)</span>{
 <span class="cstat-no" title="statement not covered" >        if (this.streamEnabled){</span>
 <span class="cstat-no" title="statement not covered" >            if (!(chunk instanceof Buffer)){</span>
 <span class="cstat-no" title="statement not covered" >                if (!this.streamStart){</span>
-<span class="cstat-no" title="statement not covered" >                    super.write('{"@odata.context":"' + this.odataContext + '","value":[');</span>
-                }else <span class="cstat-no" title="statement not covered" >super.write(',');</span>
+<span class="cstat-no" title="statement not covered" >                    this.push('{"@odata.context":"' + this.odataContext + '","value":[');</span>
+                }else <span class="cstat-no" title="statement not covered" >this.push(',');</span>
 <span class="cstat-no" title="statement not covered" >                try{</span>
 <span class="cstat-no" title="statement not covered" >                    let entity = {};</span>
 <span class="cstat-no" title="statement not covered" >                    this.__convertEntity(entity, chunk, this.ctrl.prototype.elementType);</span>
@@ -2104,24 +2086,20 @@ export class ODataProcessor extends Transform{
                     }
                 }finally{
 <span class="cstat-no" title="statement not covered" >                    this.streamStart = true;</span>
-<span class="cstat-no" title="statement not covered" >                    return super.write(chunk, done);</span>
+<span class="cstat-no" title="statement not covered" >                    this.push(chunk);</span>
                 }
-            }else <span class="cstat-no" title="statement not covered" >return super.write(chunk, done);</span>
+            }else <span class="cstat-no" title="statement not covered" >this.push(chunk);</span>
         }else{
 <span class="cstat-no" title="statement not covered" >            this.resultCount++;</span>
 <span class="cstat-no" title="statement not covered" >            if (typeof done == "function") <span class="cstat-no" title="statement not covered" >done();</span></span>
         }
-    }
-&nbsp;
-    _transform<span class="fstat-no" title="function not covered" >(chunk:any, encoding?:string, done?:Function)</span>{
-<span class="cstat-no" title="statement not covered" >        this.push(chunk);</span>
 <span class="cstat-no" title="statement not covered" >        if (typeof done == "function") <span class="cstat-no" title="statement not covered" >done();</span></span>
     }
 &nbsp;
     _flush<span class="fstat-no" title="function not covered" >(done?:Function)</span>{
 <span class="cstat-no" title="statement not covered" >        if (this.streamEnabled){</span>
-<span class="cstat-no" title="statement not covered" >            if (this.streamStart) <span class="cstat-no" title="statement not covered" >super.write("]}");</span></span>
-            else <span class="cstat-no" title="statement not covered" >super.write('{"@odata.context":"' + this.odataContext + '","value":[]}');</span>
+<span class="cstat-no" title="statement not covered" >            if (this.streamStart) <span class="cstat-no" title="statement not covered" >this.push("]}");</span></span>
+            else <span class="cstat-no" title="statement not covered" >this.push('{"@odata.context":"' + this.odataContext + '","value":[]}');</span>
         }
 <span class="cstat-no" title="statement not covered" >        if (typeof done == "function") <span class="cstat-no" title="statement not covered" >done();</span></span>
     }
@@ -2450,7 +2428,7 @@ export class ODataProcessor extends Transform{
     }
 &nbsp;
     __convertEntity(context, result, elementType){
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (elementType === Object) <span class="cstat-no" title="statement not covered" >return extend(context, result);</span>
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (elementType === Object || this.context.disableEntityConversion) <span class="cstat-no" title="statement not covered" >return extend(context, result);</span>
         let props = Edm.isOpenType(elementType) ? Object.getOwnPropertyNames(result) : Edm.getProperties(elementType.prototype);
         <span class="missing-if-branch" title="else path not taken" >E</span>if (props.length &gt; 0){
             props.forEach((prop) =&gt; {
@@ -2557,7 +2535,8 @@ export class ODataServer extends Transform{
                     host: req.headers.host,
                     base: req.baseUrl,
                     request: req,
-                    response: res
+                    response: res,
+                    disableEntityConversion: true
                 });
 <span class="cstat-no" title="statement not covered" >                processor.on("contentType", (contentType) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >                    res.contentType(contentType);</span>
@@ -2725,7 +2704,7 @@ export function createODataServer(server:typeof ODataServer, port:number, hostna
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Oct 12 2016 18:07:41 GMT+0200 (Central Europe Daylight Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Oct 14 2016 11:28:46 GMT+0200 (Central Europe Daylight Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

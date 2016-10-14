@@ -67,7 +67,7 @@ export function createMetadataJSON(server:typeof ODataServer){
                         property: [],
                         navigationProperty: [],
                         annotation: Edm.getAnnotations(elementType),
-                        openType: Edm.isOpenType(elementType),
+                        openType: Edm.isOpenType(elementType) || elementType === Object,
                         hasStream: Edm.isMediaEntity(elementType)
                     };
                     let namespace = elementType.namespace || parent.namespace || server.namespace;

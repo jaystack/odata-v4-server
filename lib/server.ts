@@ -230,7 +230,9 @@ export class ODataProcessor extends Transform{
     private resultCount = 0;
 
     constructor(context, server){
-        super();
+        super(<TransformOptions>{
+            objectMode: true
+        });
 
         this.context = context;
         this.serverType = server;
@@ -251,18 +253,12 @@ export class ODataProcessor extends Transform{
         }).filter(it => !!it);
     }
 
-    write(chunk:any, done?:Function):boolean;
-    write(chunk:any, encoding?:string, done?:Function);
-    write(chunk:any, encoding?:string | Function, done?:Function):boolean{
-        if (typeof encoding == "function"){
-            done = encoding;
-            encoding = undefined;
-        }
+    _transform(chunk:any, encoding?:string, done?:Function){
         if (this.streamEnabled){
             if (!(chunk instanceof Buffer)){
                 if (!this.streamStart){
-                    super.write('{"@odata.context":"' + this.odataContext + '","value":[');
-                }else super.write(',');
+                    this.push('{"@odata.context":"' + this.odataContext + '","value":[');
+                }else this.push(',');
                 try{
                     let entity = {};
                     this.__convertEntity(entity, chunk, this.ctrl.prototype.elementType);
@@ -275,24 +271,20 @@ export class ODataProcessor extends Transform{
                     }
                 }finally{
                     this.streamStart = true;
-                    return super.write(chunk, done);
+                    this.push(chunk);
                 }
-            }else return super.write(chunk, done);
+            }else this.push(chunk);
         }else{
             this.resultCount++;
             if (typeof done == "function") done();
         }
-    }
-
-    _transform(chunk:any, encoding?:string, done?:Function){
-        this.push(chunk);
         if (typeof done == "function") done();
     }
 
     _flush(done?:Function){
         if (this.streamEnabled){
-            if (this.streamStart) super.write("]}");
-            else super.write('{"@odata.context":"' + this.odataContext + '","value":[]}');
+            if (this.streamStart) this.push("]}");
+            else this.push('{"@odata.context":"' + this.odataContext + '","value":[]}');
         }
         if (typeof done == "function") done();
     }
@@ -621,7 +613,7 @@ export class ODataProcessor extends Transform{
     }
 
     __convertEntity(context, result, elementType){
-        if (elementType === Object) return extend(context, result);
+        if (elementType === Object || this.context.disableEntityConversion) return extend(context, result);
         let props = Edm.isOpenType(elementType) ? Object.getOwnPropertyNames(result) : Edm.getProperties(elementType.prototype);
         if (props.length > 0){
             props.forEach((prop) => {
@@ -728,7 +720,8 @@ export class ODataServer extends Transform{
                     host: req.headers.host,
                     base: req.baseUrl,
                     request: req,
-                    response: res
+                    response: res,
+                    disableEntityConversion: true
                 });
                 processor.on("contentType", (contentType) => {
                     res.contentType(contentType);
