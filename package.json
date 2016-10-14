@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "JSONStream": "^1.2.1",
+    "benchmark": "^2.1.1",
     "chai": "^3.5.0",
     "event-stream": "^3.3.4",
     "istanbul": "^0.4.5",

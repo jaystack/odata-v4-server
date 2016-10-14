@@ -1,5 +1,6 @@
 {
   "globalDependencies": {
+    "benchmark": "registry:dt/benchmark#1.0.0+20160317120654",
     "cors": "registry:dt/cors#0.0.0+20160708202709",
     "event-stream": "registry:dt/event-stream#0.0.0+20160216030252",
     "extend": "registry:dt/extend#2.0.0+20160316155526",

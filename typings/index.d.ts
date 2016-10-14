@@ -1,3 +1,4 @@
+/// <reference path="globals/benchmark/index.d.ts" />
 /// <reference path="globals/cors/index.d.ts" />
 /// <reference path="globals/event-stream/index.d.ts" />
 /// <reference path="globals/extend/index.d.ts" />
