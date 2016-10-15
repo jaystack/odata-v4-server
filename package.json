@@ -10,7 +10,7 @@
     "lint": "tslint src/**/*.ts -t verbose --force > .tslint",
     "pretest": "tsc",
     "test": "mocha test/**/*.spec.js --reporter mochawesome --reporter-options reportDir=test/report,reportName=odata-v4-server,reportTitle=\"OData V4 Server\"",
-    "coverage": "rm -rf coverage && tsc && node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha --config=.istanbul.yaml -x config/**/*.js && node node_modules/remap-istanbul/bin/remap-istanbul -i coverage/coverage.json -o coverage/html-report -t html"
+    "coverage": "rm -rf coverage && tsc && node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test/**/*.spec.js --config=.istanbul.yaml -x config/**/*.js && node node_modules/remap-istanbul/bin/remap-istanbul -i coverage/coverage.json -o coverage/html-report -t html"
   },
   "watch": {
     "coverage": "{lib,test}/*.js",
