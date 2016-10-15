@@ -19,6 +19,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const mongodb_1 = require("mongodb");
 const odata_v4_inmemory_1 = require("odata-v4-inmemory");
 const odata_v4_mongodb_1 = require("odata-v4-mongodb");
+const extend = require("extend");
 const index_1 = require("../lib/index");
 const model_1 = require("./model");
 let categories = require("./categories");
@@ -33,15 +34,21 @@ let ProductsController = class ProductsController extends index_1.ODataControlle
         if (filter) {
             let filterFn = odata_v4_inmemory_1.createFilter(filter);
             return products.map((product) => {
-                product._id = product._id.toString();
-                product.CategoryId = product.CategoryId.toString();
-                return product;
+                let result = extend({}, product);
+                result._id = result._id.toString();
+                result.CategoryId = result.CategoryId.toString();
+                return result;
             }).filter((product) => filterFn(product));
         }
         return products;
     }
     findOne(key) {
         return products.filter(product => product._id.toString() == key)[0] || null;
+    }
+    getCategory(result) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield (yield mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
+        });
     }
 };
 __decorate([
@@ -52,6 +59,10 @@ __decorate([
     index_1.odata.GET,
     __param(0, index_1.odata.key)
 ], ProductsController.prototype, "findOne", null);
+__decorate([
+    index_1.odata.GET("Category"),
+    __param(0, index_1.odata.result)
+], ProductsController.prototype, "getCategory", null);
 ProductsController = __decorate([
     index_1.odata.type(model_1.Product),
     index_1.Edm.EntitySet("Products")
@@ -72,6 +83,13 @@ let CategoriesController = class CategoriesController extends index_1.ODataContr
             });
         });
     }
+    getProducts(result, query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let mongodbQuery = odata_v4_mongodb_1.createQuery(query);
+            mongodbQuery.query = { $and: [mongodbQuery.query, { CategoryId: result._id }] };
+            return yield (yield mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
+        });
+    }
     GetFirstProduct() {
         return products[0];
     }
@@ -85,6 +103,11 @@ __decorate([
     __param(0, index_1.odata.key()),
     __param(1, index_1.odata.query)
 ], CategoriesController.prototype, "findOne", null);
+__decorate([
+    index_1.odata.GET("Products"),
+    __param(0, index_1.odata.result),
+    __param(1, index_1.odata.query)
+], CategoriesController.prototype, "getProducts", null);
 __decorate([
     index_1.Edm.Function(index_1.Edm.EntityType(model_1.Product))
 ], CategoriesController.prototype, "GetFirstProduct", null);

@@ -15,8 +15,8 @@ export class ODataResult{
 
     constructor(statusCode:number, contentType?:string, result?:any){
         this.statusCode = statusCode;
-        if (result){
-            this.body = typeof result == "object" ? extend({}, result) : result;
+        if (typeof result != "undefined"){
+            this.body = typeof result == "object" && result ? extend({}, result) : result;
             if (result && result.constructor) this.elementType = result.constructor;
             this.contentType = contentType || (typeof this.body == "object" ? "application/json" : "text/plain");
         }
@@ -38,11 +38,11 @@ export class ODataResult{
         let inlinecount;
         if (result && typeof result.then == 'function'){
             return result.then((result) => {
-                if (result && result.inlinecount && typeof result.inlinecount == "number"){
-                    inlinecount = result.inlinecount;
-                    delete result.inlinecount;
-                }
                 if (Array.isArray(result)){
+                    if (result && (<any>result).inlinecount && typeof (<any>result).inlinecount == "number"){
+                        inlinecount = (<any>result).inlinecount;
+                        delete (<any>result).inlinecount;
+                    }
                     result = { value: result };
                     if (typeof inlinecount != "undefined") result["@odata.count"] = inlinecount;
                 }else{
@@ -54,11 +54,11 @@ export class ODataResult{
             });
         }else{
             return new Promise((resolve, reject) => {
-                if (result && result.inlinecount){
-                    inlinecount = result.inlinecount;
-                    delete result.inlinecount;
-                }
                 if (Array.isArray(result)){
+                    if (result && (<any>result).inlinecount && typeof (<any>result).inlinecount == "number"){
+                        inlinecount = (<any>result).inlinecount;
+                        delete (<any>result).inlinecount;
+                    }
                     result = { value: result };
                     if (typeof inlinecount == "number") result["@odata.count"] = inlinecount;
                 }else{

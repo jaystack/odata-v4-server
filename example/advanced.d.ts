@@ -4,10 +4,12 @@ import { Product } from "./model";
 export declare class ProductsController extends ODataController {
     find(filter: Token): Product[];
     findOne(key: string): Product;
+    getCategory(result: any): Promise<any>;
 }
 export declare class CategoriesController extends ODataController {
     find(query: Token): Promise<any[]>;
     findOne(key: string, query: Token): Promise<any>;
+    getProducts(result: any, query: Token): Promise<any[]>;
     GetFirstProduct(): any;
 }
 export declare class NorthwindODataServer extends ODataServer {

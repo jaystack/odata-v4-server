@@ -2,6 +2,7 @@ import { MongoClient, ObjectID, Collection, Db } from "mongodb";
 import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { createQuery } from "odata-v4-mongodb";
+import * as extend from "extend";
 import { Edm, odata, ODataController, ODataServer, ODataErrorHandler, createODataServer } from "../lib/index";
 import { Category, Product } from "./model";
 let categories = require("./categories");
@@ -19,9 +20,10 @@ export class ProductsController extends ODataController{
         if (filter){
             let filterFn = createFilter(filter);
             return products.map((product) => {
-                product._id = product._id.toString();
-                product.CategoryId = product.CategoryId.toString();
-                return product;
+                let result = extend({}, product);
+                result._id = result._id.toString();
+                result.CategoryId = result.CategoryId.toString();
+                return result;
             }).filter((product) => filterFn(product));
         }
         return products;
@@ -30,6 +32,11 @@ export class ProductsController extends ODataController{
     @odata.GET
     findOne(@odata.key key:string):Product{
         return products.filter(product => product._id.toString() == key)[0] || null;
+    }
+
+    @odata.GET("Category")
+    async getCategory(@odata.result result:any){
+        return await (await mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
     }
 }
 
@@ -48,6 +55,13 @@ export class CategoriesController extends ODataController{
         return await (await mongodb()).collection("Categories").findOne({ _id: new ObjectID(key) }, {
             fields: mongodbQuery.projection
         });
+    }
+
+    @odata.GET("Products")
+    async getProducts(@odata.result result:any, @odata.query query:Token){
+        let mongodbQuery = createQuery(query);
+        mongodbQuery.query = { $and: [mongodbQuery.query, { CategoryId: result._id }] };
+        return await (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
     }
 
     @Edm.Function(Edm.EntityType(Product))

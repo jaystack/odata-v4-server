@@ -71,25 +71,73 @@ export namespace odata{
         };
     })();
 
-    function odataMethodFactory(type:string){
+    function odataMethodFactory(type:string, navigationProperty?:string){
+        type = type.toLowerCase();
+        if (typeof navigationProperty == "string") type += "/" + navigationProperty;
         let decorator = function(target, targetKey){
             Reflect.defineMetadata(ODataMethod, type, target, targetKey);
         }
 
-        return function(target?:any, targetKey?:string):any{
+        return function(target:any, targetKey?:string):any{
             if (arguments.length == 0) return decorator;
             else return decorator(target, targetKey);
         }
     }
 
-    export const GET = odataMethodFactory("GET");
-    export const POST = odataMethodFactory("POST");
-    export const PUT = odataMethodFactory("PUT");
-    export const PATCH = odataMethodFactory("PATCH");
-    export const DELETE = odataMethodFactory("DELETE");
+    /** Annotate function for OData GET operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    export function GET(navigationProperty:string);
+    export function GET();
+    export function GET(target?:any, targetKey?:string);
+    export function GET(target?:any, targetKey?:string){
+        if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("GET", target);
+        odataMethodFactory("GET", target)(target, targetKey);
+    }
+    /** Annotate function for OData POST operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    export function POST(navigationProperty:string);
+    export function POST();
+    export function POST(target?:any, targetKey?:string);
+    export function POST(target?:any, targetKey?:string){
+        if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("POST", target);
+        odataMethodFactory("POST", target)(target, targetKey);
+    }
+    /** Annotate function for OData PUT operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    export function PUT(navigationProperty:string);
+    export function PUT();
+    export function PUT(target?:any, targetKey?:string);
+    export function PUT(target?:any, targetKey?:string){
+        if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("PUT", target);
+        odataMethodFactory("PUT", target)(target, targetKey);
+    }
+    /** Annotate function for OData PATCH operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    export function PATCH(navigationProperty:string);
+    export function PATCH();
+    export function PATCH(target?:any, targetKey?:string);
+    export function PATCH(target?:any, targetKey?:string){
+        if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("PATCH", target);
+        odataMethodFactory("PATCH", target)(target, targetKey);
+    }
+    /** Annotate function for OData DELETE operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    export function DELETE(navigationProperty:string);
+    export function DELETE();
+    export function DELETE(target?:any, targetKey?:string);
+    export function DELETE(target?:any, targetKey?:string){
+        if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("DELETE", target);
+        odataMethodFactory("DELETE", target)(target, targetKey);
+    }
 
-    export function method(method:string){
-        return odataMethodFactory(method.toUpperCase());
+    /** Annotate function for a specified OData method operation */
+    export function method(method:string, navigationProperty?:string){
+        return odataMethodFactory(method.toUpperCase(), navigationProperty);
     }
     export function getMethod(target, targetKey){
         return Reflect.getMetadata(ODataMethod, target.prototype, targetKey);
@@ -124,7 +172,7 @@ export namespace odata{
         keys = keys || [];
         let propNames = getAllPropertyNames(target.prototype);
         for (let prop of propNames){
-            if (odata.getMethod(target, prop) == method.toUpperCase()){
+            if (odata.getMethod(target, prop) == method){
                 let fnKeys = odata.getKeys(target, prop);
                 if (keys.length == fnKeys.length){
                     return {
@@ -148,7 +196,7 @@ export namespace odata{
         }
 
         for (let prop of propNames){
-            if (odata.getMethod(target, prop) == method.toUpperCase()){
+            if (odata.getMethod(target, prop) == method){
                 return {
                     call: prop,
                     key: []

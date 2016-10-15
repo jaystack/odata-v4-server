@@ -32,7 +32,7 @@ export declare class ODataProcessor extends Transform {
     __PrimitiveCollectionProperty(part: NavigationPart): Function;
     __ComplexProperty(part: NavigationPart): Function;
     __ComplexCollectionProperty(part: NavigationPart): Function;
-    __read(ctrl: typeof ODataController, part: any, params: any, data?: any, filter?: string): Promise<{}>;
+    __read(ctrl: typeof ODataController, part: any, params: any, data?: any, filter?: string | Function, elementType?: any): Promise<{}>;
     __EntitySetName(part: NavigationPart): Function;
     __actionOrFunctionImport(part: NavigationPart): Function;
     __actionOrFunction(part: NavigationPart): Function;

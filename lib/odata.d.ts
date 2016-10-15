@@ -17,12 +17,38 @@ export declare namespace odata {
     function controller(controller: typeof ODataController, entitySetName?: string, elementType?: Function): any;
     function getPublicControllers(server: typeof ODataServer): any;
     const cors: (server: typeof ODataServer) => void;
-    const GET: (target?: any, targetKey?: string) => any;
-    const POST: (target?: any, targetKey?: string) => any;
-    const PUT: (target?: any, targetKey?: string) => any;
-    const PATCH: (target?: any, targetKey?: string) => any;
-    const DELETE: (target?: any, targetKey?: string) => any;
-    function method(method: string): (target?: any, targetKey?: string) => any;
+    /** Annotate function for OData GET operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    function GET(navigationProperty: string): any;
+    function GET(): any;
+    function GET(target?: any, targetKey?: string): any;
+    /** Annotate function for OData POST operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    function POST(navigationProperty: string): any;
+    function POST(): any;
+    function POST(target?: any, targetKey?: string): any;
+    /** Annotate function for OData PUT operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    function PUT(navigationProperty: string): any;
+    function PUT(): any;
+    function PUT(target?: any, targetKey?: string): any;
+    /** Annotate function for OData PATCH operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    function PATCH(navigationProperty: string): any;
+    function PATCH(): any;
+    function PATCH(target?: any, targetKey?: string): any;
+    /** Annotate function for OData DELETE operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    function DELETE(navigationProperty: string): any;
+    function DELETE(): any;
+    function DELETE(target?: any, targetKey?: string): any;
+    /** Annotate function for a specified OData method operation */
+    function method(method: string, navigationProperty?: string): (target: any, targetKey?: string) => any;
     function getMethod(target: any, targetKey: any): any;
     function key(name?: string): any;
     function key(target: any, targetKey: string, parameterIndex: number): any;
