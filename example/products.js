@@ -76,6 +76,6 @@ module.exports = [
     { "_id": new mongodb_1.ObjectID("578f2b8c12eaebabec4af285"), "QuantityPerUnit": "5 kg pkg.", "UnitPrice": 10.0, "CategoryId": new mongodb_1.ObjectID("578f2baa12eaebabec4af28c"), "Name": "Longlife Tofu", "Discontinued": false },
     { "_id": new mongodb_1.ObjectID("578f2b8c12eaebabec4af286"), "QuantityPerUnit": "24 - 0.5 l bottles", "UnitPrice": 7.75, "CategoryId": new mongodb_1.ObjectID("578f2baa12eaebabec4af289"), "Name": "Rhönbräu Klosterbier", "Discontinued": true },
     { "_id": new mongodb_1.ObjectID("578f2b8c12eaebabec4af287"), "QuantityPerUnit": "500 ml", "UnitPrice": 18.0, "CategoryId": new mongodb_1.ObjectID("578f2baa12eaebabec4af289"), "Name": "Lakkalikööri", "Discontinued": false },
-    { "_id": new mongodb_1.ObjectID("578f2b8c12eaebabec4af288"), "QuantityPerUnit": "12 boxes", "UnitPrice": 13.0, "CategoryId": new mongodb_1.ObjectID("578f2baa12eaebabec4af28e"), "Name": "Original Frankfurter grüne Soße" }
+    { "_id": new mongodb_1.ObjectID("578f2b8c12eaebabec4af288"), "QuantityPerUnit": "12 boxes", "UnitPrice": 13.0, "CategoryId": new mongodb_1.ObjectID("578f2baa12eaebabec4af28e"), "Name": "Original Frankfurter grüne Soße", "Discontinued": false }
 ];
 //# sourceMappingURL=products.js.map

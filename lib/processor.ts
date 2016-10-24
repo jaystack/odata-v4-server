@@ -468,7 +468,7 @@ export class ODataProcessor extends Transform{
                         let properties:string[] = Edm.getProperties((elementType || ctrl.prototype.elementType).prototype);
                         properties.forEach((prop) => {
                             if (Edm.isKey(elementType || ctrl.prototype.elementType, prop)){
-                                params[prop] = this.body[prop] || ((data || {}).body || {})[prop];
+                                params[prop] = (this.body || {})[prop] || ((data || {}).body || {})[prop];
                             }
                         });
                     }
@@ -524,16 +524,19 @@ export class ODataProcessor extends Transform{
                     this.__enableStreaming(part);
 
                     let returnType = <Function>Edm.getReturnType(this.serverType, part.name);
-                    this.__applyParams(this.serverType, part.name, part.params);
-                    let result = fnCaller.call(data, fn, part.params);
+                    let isAction = false;
                     let schemas = this.serverType.$metadata().edmx.dataServices.schemas;
                     if (Edm.isActionImport(this.serverType, part.name) || 
                         schemas.some(schema => schema.entityContainer.some(container => container.actionImports.some(actionImport => actionImport.name == part.name)))
                     ){
+                        isAction = true;
+                        part.params = extend(part.params, this.body);
+                    }
+                    this.__applyParams(this.serverType, part.name, part.params);
+                    let result = fnCaller.call(data, fn, part.params);
+                    if (isAction){
                         return ODataResult.NoContent(result).then(resolve, reject);
-                    }else if (Edm.isFunctionImport(this.serverType, part.name) ||
-                        schemas.some(schema => schema.entityContainer.some(container => container.functionImports.some(functionImport => functionImport.name == part.name)))
-                    ){
+                    }else{
                         return ODataResult.Ok(result).then((result) => {
                             if (isStream(result.body)){
                                 (<any>result.body).on("end", resolve);
@@ -576,6 +579,7 @@ export class ODataProcessor extends Transform{
                                     parameter.name == "bindingParameter" && parameter.type == ((<any>elementType).namespace + "." + elementType.name))))
                     ){
                         isAction = true;
+                        part.params = extend(part.params, this.body);
                     }
                     this.__applyParams(elementType, boundOpName, part.params, null, result);
                 }else if (ctrlBoundOp){
@@ -588,6 +592,7 @@ export class ODataProcessor extends Transform{
                                     parameter.name == "bindingParameter" && parameter.type == "Collection(" + ((<any>elementType).namespace + "." + elementType.name) + ")")))
                     ){
                         isAction = true;
+                        part.params = extend(part.params, this.body);
                     }
                     this.__applyParams(this.ctrl, boundOpName, part.params, null, result);
                 }else if (expOp) scope = result;

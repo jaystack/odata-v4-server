@@ -298,6 +298,10 @@ let TestServer = class TestServer extends index_1.ODataServer {
             setTimeout(resolve);
         });
     }
+    ActionImportParams(value) {
+        if (typeof value != "number")
+            throw new Error("value is not a number!");
+    }
     FunctionImport(value) {
         return `The number is ${value}.`;
     }
@@ -308,6 +312,10 @@ let TestServer = class TestServer extends index_1.ODataServer {
 __decorate([
     index_1.Edm.ActionImport
 ], TestServer.prototype, "ActionImport", null);
+__decorate([
+    index_1.Edm.ActionImport,
+    __param(0, index_1.Edm.Int32)
+], TestServer.prototype, "ActionImportParams", null);
 __decorate([
     index_1.Edm.FunctionImport(index_1.Edm.String),
     __param(0, index_1.Edm.Int64)
@@ -460,6 +468,11 @@ describe("ODataServer", () => {
         });
         createTest("should call action import", TestServer, "POST /ActionImport", {
             statusCode: 204
+        });
+        createTest("should call action import with parameters", TestServer, "POST /ActionImportParams", {
+            statusCode: 204
+        }, {
+            value: 42
         });
         createTest("should call function import", TestServer, "GET /FunctionImport(value=42)", {
             statusCode: 200,

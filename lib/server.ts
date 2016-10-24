@@ -41,7 +41,7 @@ export class ODataServer extends Transform{
                 processor.on("data", (chunk, encoding, done) => {
                     res.write(chunk, encoding, done);
                 });
-                processor.execute(req.body).then((result:ODataResult) => {
+                processor.execute(req.body || req).then((result:ODataResult) => {
                     try{
                         if (result){
                             res.status(result.statusCode || 200);

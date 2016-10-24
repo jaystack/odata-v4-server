@@ -243,6 +243,11 @@ class TestServer extends ODataServer{
         });
     }
 
+    @Edm.ActionImport
+    ActionImportParams(@Edm.Int32 value:number){
+        if (typeof value != "number") throw new Error("value is not a number!");
+    }
+
     @Edm.FunctionImport(Edm.String)
     FunctionImport(@Edm.Int64 value:number){
         return `The number is ${value}.`;
@@ -394,6 +399,12 @@ describe("ODataServer", () => {
 
         createTest("should call action import", TestServer, "POST /ActionImport", {
             statusCode: 204
+        });
+
+        createTest("should call action import with parameters", TestServer, "POST /ActionImportParams", {
+            statusCode: 204
+        }, {
+            value: 42
         });
 
         createTest("should call function import", TestServer, "GET /FunctionImport(value=42)", {

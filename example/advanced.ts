@@ -3,7 +3,7 @@ import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { createQuery } from "odata-v4-mongodb";
 import * as extend from "extend";
-import { Edm, odata, ODataController, ODataServer, ODataErrorHandler, createODataServer } from "../lib/index";
+import { Edm, odata, ODataController, ODataServer, ODataErrorHandler, ResourceNotFoundError, createODataServer } from "../lib/index";
 import { Category, Product } from "./model";
 let categories = require("./categories");
 let products = require("./products");
@@ -38,6 +38,21 @@ export class ProductsController extends ODataController{
     async getCategory(@odata.result result:any){
         return await (await mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
     }
+
+    /*@odata.createRef("Category")
+    async createCategoryRef(@odata.key key:string, @odata.result result:any){
+
+    }
+
+    @odata.updateRef("Category")
+    async createCategoryRef(@odata.key key:string, @odata.result result:any){
+
+    }
+
+    @odata.deleteRef("Category")
+    async deleteCategoryRef(@odata.key key:string, @odata.result result:any){
+
+    }*/
 }
 
 @odata.type(Category)
