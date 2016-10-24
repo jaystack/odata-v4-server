@@ -1,8 +1,7 @@
 import { ObjectID } from "mongodb";
-import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import * as extend from "extend";
-import { odata, ODataController, ODataServer } from "../lib/index";
+import { odata, ODataController, ODataServer, ODataQuery } from "../lib/index";
 let categories = require("./categories").map((category) => {
     category._id = category._id.toString();
     return category;
@@ -15,7 +14,7 @@ let products = require("./products").map((product) => {
 
 export class ProductsController extends ODataController{
     @odata.GET
-    find(@odata.filter filter:Token){
+    find(@odata.filter filter:ODataQuery){
         if (filter) return products.filter(createFilter(filter));
         return products;
     }
@@ -34,7 +33,10 @@ export class ProductsController extends ODataController{
 
     @odata.PATCH
     update(@odata.key key:string, @odata.body delta:any){
-        extend(products.filter(product => product._id == key)[0], delta);
+        let product = products.filter(product => product._id == key)[0];
+        for (let prop in delta){
+            product[prop] = delta[prop];
+        }
     }
 
     @odata.DELETE
@@ -45,7 +47,7 @@ export class ProductsController extends ODataController{
 
 export class CategoriesController extends ODataController{
     @odata.GET
-    find(@odata.filter filter:Token){
+    find(@odata.filter filter:ODataQuery){
         if (filter) return categories.filter(createFilter(filter));
         return categories;
     }
@@ -64,7 +66,10 @@ export class CategoriesController extends ODataController{
 
     @odata.PATCH
     update(@odata.key key:string, @odata.body delta:any){
-        extend(categories.filter(category => category._id == key)[0], delta);
+        let category = categories.filter(category => category._id == key)[0];
+        for (let prop in delta){
+            category[prop] = delta[prop];
+        }
     }
 
     @odata.DELETE

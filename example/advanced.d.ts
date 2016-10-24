@@ -5,6 +5,9 @@ export declare class ProductsController extends ODataController {
     find(filter: Token): Product[];
     findOne(key: string): Product;
     getCategory(result: any): Promise<any>;
+    createCategoryRef(key: string, result: any): Promise<void>;
+    updateCategoryRef(key: string, result: any): Promise<void>;
+    deleteCategoryRef(key: string, result: any): Promise<void>;
 }
 export declare class CategoriesController extends ODataController {
     find(query: Token): Promise<any[]>;

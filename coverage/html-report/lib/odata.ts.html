@@ -20,9 +20,9 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">93.18% </span>
+        <span class="strong">90.53% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>164/176</span>
+        <span class='fraction'>172/190</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">78.57% </span>
@@ -30,14 +30,14 @@
         <span class='fraction'>55/70</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">93.18% </span>
+        <span class="strong">85.42% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>41/44</span>
+        <span class='fraction'>41/48</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">95.92% </span>
+        <span class="strong">91.82% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>141/147</span>
+        <span class='fraction'>146/159</span>
       </div>
     </div>
   </div>
@@ -324,7 +324,25 @@
 279
 280
 281
-282</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
@@ -403,11 +421,19 @@
 <span class="cline-any cline-yes">17×</span>
 <span class="cline-any cline-yes">17×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">17×</span>
 <span class="cline-any cline-yes">17×</span>
 <span class="cline-any cline-yes">17×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -458,6 +484,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -680,15 +716,23 @@ export namespace odata{
 &nbsp;
     function odataMethodFactory(type:string, navigationProperty?:string){
         type = type.toLowerCase();
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof navigationProperty == "string") <span class="cstat-no" title="statement not covered" >type += "/" + navigationProperty;</span>
-        let decorator = function(target, targetKey){
+        let decorator:any = function(target, targetKey){
             Reflect.defineMetadata(ODataMethod, type, target, targetKey);
+            return decorator;
         }
-&nbsp;
-        return function(target:any, targetKey?:string):any{
+        let fn:any = function(target:any, targetKey?:string):any{
             <span class="missing-if-branch" title="if path not taken" >I</span>if (arguments.length == 0) <span class="cstat-no" title="statement not covered" >return decorator;</span>
             else return decorator(target, targetKey);
+        };
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof navigationProperty == "string"){
+<span class="cstat-no" title="statement not covered" >            type += "/" + navigationProperty;</span>
+<span class="cstat-no" title="statement not covered" >            fn.$ref = decorator.$ref = <span class="fstat-no" title="function not covered" >function(target, targetKey)</span>{</span>
+<span class="cstat-no" title="statement not covered" >                type += "/$ref";</span>
+<span class="cstat-no" title="statement not covered" >                Reflect.defineMetadata(ODataMethod, type, target, targetKey);</span>
+            };
         }
+&nbsp;
+        return fn;
     }
 &nbsp;
     /** Annotate function for OData GET operation
@@ -740,6 +784,16 @@ export namespace odata{
 <span class="fstat-no" title="function not covered" >    export function DELETE(target?:any, targetKey?:string)</span>{
 <span class="cstat-no" title="statement not covered" >        if (typeof target == "string" || typeof target == "undefined") <span class="cstat-no" title="statement not covered" >return odataMethodFactory("DELETE", target);</span></span>
 <span class="cstat-no" title="statement not covered" >        odataMethodFactory("DELETE", target)(target, targetKey);</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    export function createRef(navigationProperty:string)</span>{
+<span class="cstat-no" title="statement not covered" >        return POST(navigationProperty).$ref;</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function updateRef(navigationProperty:string)</span>{
+<span class="cstat-no" title="statement not covered" >        return PUT(navigationProperty).$ref;</span>
+    }
+<span class="fstat-no" title="function not covered" >    export function deleteRef(navigationProperty:string)</span>{
+<span class="cstat-no" title="statement not covered" >        return DELETE(navigationProperty).$ref;</span>
     }
 &nbsp;
     /** Annotate function for a specified OData method operation */
@@ -892,7 +946,7 @@ export namespace odata{
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Oct 24 2016 09:49:55 GMT+0200 (Central Europe Daylight Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Oct 24 2016 17:28:50 GMT+0200 (Central Europe Daylight Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

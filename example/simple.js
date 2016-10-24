@@ -10,7 +10,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 const mongodb_1 = require("mongodb");
 const odata_v4_inmemory_1 = require("odata-v4-inmemory");
-const extend = require("extend");
 const index_1 = require("../lib/index");
 let categories = require("./categories").map((category) => {
     category._id = category._id.toString();
@@ -36,7 +35,10 @@ class ProductsController extends index_1.ODataController {
         return product;
     }
     update(key, delta) {
-        extend(products.filter(product => product._id == key)[0], delta);
+        let product = products.filter(product => product._id == key)[0];
+        for (let prop in delta) {
+            product[prop] = delta[prop];
+        }
     }
     remove(key) {
         products.splice(products.indexOf(products.filter(product => product._id == key)[0]), 1);
@@ -79,7 +81,10 @@ class CategoriesController extends index_1.ODataController {
         return category;
     }
     update(key, delta) {
-        extend(categories.filter(category => category._id == key)[0], delta);
+        let category = categories.filter(category => category._id == key)[0];
+        for (let prop in delta) {
+            category[prop] = delta[prop];
+        }
     }
     remove(key) {
         categories.splice(categories.indexOf(categories.filter(category => category._id == key)[0]), 1);

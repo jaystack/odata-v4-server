@@ -39,20 +39,20 @@ export class ProductsController extends ODataController{
         return await (await mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
     }
 
-    /*@odata.createRef("Category")
+    @odata.POST("Category").$ref
     async createCategoryRef(@odata.key key:string, @odata.result result:any){
 
     }
 
     @odata.updateRef("Category")
-    async createCategoryRef(@odata.key key:string, @odata.result result:any){
+    async updateCategoryRef(@odata.key key:string, @odata.result result:any){
 
     }
 
     @odata.deleteRef("Category")
     async deleteCategoryRef(@odata.key key:string, @odata.result result:any){
 
-    }*/
+    }
 }
 
 @odata.type(Category)
@@ -79,7 +79,8 @@ export class CategoriesController extends ODataController{
         return await (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
     }
 
-    @Edm.Function(Edm.EntityType(Product))
+    @Edm.EntityType(Product)
+    @Edm.Function
     GetFirstProduct(){
         return products[0];
     }
@@ -91,7 +92,8 @@ export class CategoriesController extends ODataController{
 @odata.controller(CategoriesController)
 @odata.cors
 export class NorthwindODataServer extends ODataServer{
-    @Edm.FunctionImport(Edm.EntityType(Category))
+    @Edm.EntityType(Category)
+    @Edm.FunctionImport
     GetCategoryById(@Edm.String id:string){
         return categories.filter((category) => category._id.toString() == id)[0];
     }

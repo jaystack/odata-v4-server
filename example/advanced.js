@@ -50,6 +50,18 @@ let ProductsController = class ProductsController extends index_1.ODataControlle
             return yield (yield mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
         });
     }
+    createCategoryRef(key, result) {
+        return __awaiter(this, void 0, void 0, function* () {
+        });
+    }
+    updateCategoryRef(key, result) {
+        return __awaiter(this, void 0, void 0, function* () {
+        });
+    }
+    deleteCategoryRef(key, result) {
+        return __awaiter(this, void 0, void 0, function* () {
+        });
+    }
 };
 __decorate([
     index_1.odata.GET,
@@ -63,6 +75,21 @@ __decorate([
     index_1.odata.GET("Category"),
     __param(0, index_1.odata.result)
 ], ProductsController.prototype, "getCategory", null);
+__decorate([
+    index_1.odata.POST("Category").$ref,
+    __param(0, index_1.odata.key),
+    __param(1, index_1.odata.result)
+], ProductsController.prototype, "createCategoryRef", null);
+__decorate([
+    index_1.odata.updateRef("Category"),
+    __param(0, index_1.odata.key),
+    __param(1, index_1.odata.result)
+], ProductsController.prototype, "updateCategoryRef", null);
+__decorate([
+    index_1.odata.deleteRef("Category"),
+    __param(0, index_1.odata.key),
+    __param(1, index_1.odata.result)
+], ProductsController.prototype, "deleteCategoryRef", null);
 ProductsController = __decorate([
     index_1.odata.type(model_1.Product),
     index_1.Edm.EntitySet("Products")
@@ -109,7 +136,8 @@ __decorate([
     __param(1, index_1.odata.query)
 ], CategoriesController.prototype, "getProducts", null);
 __decorate([
-    index_1.Edm.Function(index_1.Edm.EntityType(model_1.Product))
+    index_1.Edm.EntityType(model_1.Product),
+    index_1.Edm.Function
 ], CategoriesController.prototype, "GetFirstProduct", null);
 CategoriesController = __decorate([
     index_1.odata.type(model_1.Category),
@@ -132,7 +160,8 @@ let NorthwindODataServer = class NorthwindODataServer extends index_1.ODataServe
     }
 };
 __decorate([
-    index_1.Edm.FunctionImport(index_1.Edm.EntityType(model_1.Category)),
+    index_1.Edm.EntityType(model_1.Category),
+    index_1.Edm.FunctionImport,
     __param(0, index_1.Edm.String)
 ], NorthwindODataServer.prototype, "GetCategoryById", null);
 __decorate([

@@ -38,6 +38,7 @@ export function createMetadataJSON(server:typeof ODataServer){
     };
     let propNames = getAllPropertyNames(server.prototype).filter(it => it != "constructor");
     let entitySets = odata.getPublicControllers(server);
+    let resolvingTypes = [];
     propNames.forEach((i) => {
         if (i != "$metadata" && server.prototype[i]){
             let containerSchema = definition.dataServices.schema.filter((schema) => schema.namespace == server.namespace)[0];
@@ -54,7 +55,6 @@ export function createMetadataJSON(server:typeof ODataServer){
                     }
                 }
 
-                let resolvingTypes = [];
                 let resolveType = (elementType, parent) => {
                     if (resolvingTypes.indexOf(elementType) >= 0) return null;
                     resolvingTypes.push(elementType);
@@ -248,13 +248,11 @@ export function createMetadataJSON(server:typeof ODataServer){
                 definition.dataServices.schema.unshift(operationSchema);
             }
             if (Edm.isActionImport(server, i)){
-                let returnType = Edm.getReturnTypeName(server, i);
                 let parameters = Edm.getParameters(server, i);
                 operationSchema.action.push({
                     name: i,
                     isBound: false,
-                    parameter: parameters,
-                    returnType: { type: returnType }
+                    parameter: parameters
                 });
                 containerSchema.entityContainer.actionImport.push({
                     name: i,

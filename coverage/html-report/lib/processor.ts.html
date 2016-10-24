@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">75.9% </span>
+        <span class="strong">75.5% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>378/498</span>
+        <span class='fraction'>379/502</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">69.33% </span>
+        <span class="strong">69.58% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>260/375</span>
+        <span class='fraction'>263/378</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">84.85% </span>
+        <span class="strong">82.35% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>28/33</span>
+        <span class='fraction'>28/34</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">77.09% </span>
+        <span class="strong">76.69% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>350/454</span>
+        <span class='fraction'>352/459</span>
       </div>
     </div>
   </div>
@@ -800,7 +800,18 @@
 755
 756
 757
-758</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+758
+759
+760
+761
+762
+763
+764
+765
+766
+767
+768
+769</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
@@ -928,6 +939,11 @@
 <span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">81×</span>
@@ -940,6 +956,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">14×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1377,7 +1396,7 @@
 <span class="cline-any cline-yes">3×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6×</span>
-<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-yes">10×</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
@@ -1390,7 +1409,7 @@
 <span class="cline-any cline-yes">6×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">18×</span>
-<span class="cline-any cline-yes">48×</span>
+<span class="cline-any cline-yes">28×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
@@ -1398,6 +1417,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6×</span>
 <span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">12×</span>
 <span class="cline-any cline-yes">12×</span>
 <span class="cline-any cline-yes">12×</span>
@@ -1683,6 +1705,11 @@ const expCalls = {
         }
 &nbsp;
         return result.value || result;
+    },
+    $ref: <span class="fstat-no" title="function not covered" >function(processor)</span>{
+<span class="cstat-no" title="statement not covered" >        let part = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];</span>
+<span class="cstat-no" title="statement not covered" >        console.log(this, part, processor.body);</span>
+<span class="cstat-no" title="statement not covered" >        return this;</span>
     }
 };
 &nbsp;
@@ -1705,6 +1732,9 @@ const getResourcePartFunction = (type) =&gt; {
         case "BoundEntityCollectionFunctionCall":
         case "BoundActionCall":
         case "BoundAction":
+        case "CountExpression":
+        case "ValueExpression":
+        case "RefExpression":
             return "__actionOrFunction";
     }
 };
@@ -2154,7 +2184,10 @@ export class ODataProcessor extends Transform{
                         part.params = extend(part.params, this.body);
                     }
                     this.__applyParams(this.ctrl, boundOpName, part.params, null, result);
-                }else <span class="missing-if-branch" title="else path not taken" >E</span>if (expOp) scope = result;
+                }else <span class="missing-if-branch" title="else path not taken" >E</span>if (expOp){
+                    scope = result;
+                    part.params["processor"] = this;
+                }
                 let boundOp = entityBoundOp || ctrlBoundOp || expOp;
                 try{
                     let opResult = fnCaller.call(scope, boundOp, part.params);
@@ -2320,7 +2353,7 @@ export class ODataProcessor extends Transform{
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Oct 24 2016 09:49:55 GMT+0200 (Central Europe Daylight Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Oct 24 2016 17:28:50 GMT+0200 (Central Europe Daylight Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

@@ -73,15 +73,23 @@ export namespace odata{
 
     function odataMethodFactory(type:string, navigationProperty?:string){
         type = type.toLowerCase();
-        if (typeof navigationProperty == "string") type += "/" + navigationProperty;
-        let decorator = function(target, targetKey){
+        let decorator:any = function(target, targetKey){
             Reflect.defineMetadata(ODataMethod, type, target, targetKey);
+            return decorator;
         }
-
-        return function(target:any, targetKey?:string):any{
+        let fn:any = function(target:any, targetKey?:string):any{
             if (arguments.length == 0) return decorator;
             else return decorator(target, targetKey);
+        };
+        if (typeof navigationProperty == "string"){
+            type += "/" + navigationProperty;
+            fn.$ref = decorator.$ref = function(target, targetKey){
+                type += "/$ref";
+                Reflect.defineMetadata(ODataMethod, type, target, targetKey);
+            };
         }
+
+        return fn;
     }
 
     /** Annotate function for OData GET operation
@@ -133,6 +141,16 @@ export namespace odata{
     export function DELETE(target?:any, targetKey?:string){
         if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("DELETE", target);
         odataMethodFactory("DELETE", target)(target, targetKey);
+    }
+
+    export function createRef(navigationProperty:string){
+        return POST(navigationProperty).$ref;
+    }
+    export function updateRef(navigationProperty:string){
+        return PUT(navigationProperty).$ref;
+    }
+    export function deleteRef(navigationProperty:string){
+        return DELETE(navigationProperty).$ref;
     }
 
     /** Annotate function for a specified OData method operation */

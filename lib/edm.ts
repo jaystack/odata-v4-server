@@ -2,6 +2,10 @@ import "reflect-metadata";
 import { ODataController } from "./controller";
 import { getFunctionParameters } from "./utils";
 
+//type Decorator = ((target?:any) => any) | ((target?:any, targetKey?:string) => any) | ((target?:any, targetKey?:string, parameterIndex?:number) => any) | ((...args:any[]) => any);
+//type Decorator = ((target?:any, targetKey?:string) => any) | ((target?:any, targetKey?:string, parameterIndex?:number) => any);
+export type Decorator = ((target?:any, targetKey?:string, parameterIndex?:number | TypedPropertyDescriptor<any>) => any);
+
 export namespace Edm{
     const EdmProperties:string = "edm:properties";
     const EdmKeyProperties:string = "edm:keyproperties";
@@ -27,9 +31,9 @@ export namespace Edm{
     const EdmOpenType:string = "emd:opentype";
     const EdmContainer:Function[] = [];
 
-    function typeDecoratorFactory(type:string){
-        let decorator = function(target, targetKey, parameterIndex?:number){
-            if (typeof parameterIndex != "undefined"){
+    function typeDecoratorFactory(type:string):any{
+        let decorator = function(target?:any, targetKey?:string, parameterIndex?:number){
+            if (typeof parameterIndex == "number"){
                 let parameterNames = getFunctionParameters(target, targetKey);
                 let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
                 let paramName = parameterNames[parameterIndex];
@@ -56,10 +60,10 @@ export namespace Edm{
             }
         };
 
-        return function(target?:any, targetKey?:string, parameterIndex?:number):any{
+        return function(...args:any[]){
             if (arguments.length == 0) return decorator;
-            else return decorator(target, targetKey, parameterIndex);
-        }
+            else return decorator.apply(this, args);
+        };
     }
     export const Binary = typeDecoratorFactory("Edm.Binary");
     export const Boolean = typeDecoratorFactory("Edm.Boolean");
@@ -112,9 +116,9 @@ export namespace Edm{
     export const GeometryCollection = (function GeometryCollection(){
         return typeDecoratorFactory("Edm.GeometryCollection");
     })();
-    export function Collection(elementType:Function){
+    export function Collection(elementType:Function):Decorator{
         return function(target, targetKey, parameterIndex?:number){
-            if (typeof parameterIndex != "undefined"){
+            if (typeof parameterIndex == "number"){
                 let parameterNames = getFunctionParameters(target, targetKey);
                 let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
                 let element = function Collection(){};
@@ -271,7 +275,7 @@ export namespace Edm{
 
     export const Nullable = (function Nullable(){
         return function(target, targetKey, parameterIndex?:number){
-            if (typeof parameterIndex != "undefined"){
+            if (typeof parameterIndex == "number"){
                 let parameterNames = getFunctionParameters(target, targetKey);
                 let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
                 let paramName = parameterNames[parameterIndex];
@@ -299,7 +303,7 @@ export namespace Edm{
 
     export const Required = (function Required(){
         return function(target, targetKey, parameterIndex?:number){
-            if (typeof parameterIndex != "undefined"){
+            if (typeof parameterIndex == "number"){
                 let parameterNames = getFunctionParameters(target, targetKey);
                 let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
                 let paramName = parameterNames[parameterIndex];
@@ -330,7 +334,7 @@ export namespace Edm{
             let element = function(){};
             (<any>element).target = target;
             (<any>element).targetKey = targetKey;
-            if (typeof returnType != "undefined") {
+            if (typeof returnType == "function"){
                 try {
                     Reflect.decorate([returnType()], element.prototype, EdmReturnType);
                 }
@@ -347,11 +351,19 @@ export namespace Edm{
     }
     export const ActionImport = operationDecoratorFactory(EdmAction);
     export const Action = operationDecoratorFactory(EdmAction);
-    export function FunctionImport(returnType:any){
-        return operationDecoratorFactory(EdmFunction, returnType);
+    export function FunctionImport();
+    export function FunctionImport(returnType?:any);
+    export function FunctionImport(target?:any, targetKey?:string);
+    export function FunctionImport(target?:any, targetKey?:string){
+        if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
+        else return operationDecoratorFactory(EdmFunction, target);
     }
-    export function Function(returnType:any){
-        return operationDecoratorFactory(EdmFunction, returnType);
+    export function Function();
+    export function Function(returnType?:any);
+    export function Function(target?:any, targetKey?:string);
+    export function Function(target?:any, targetKey?:string){
+        if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
+        else return operationDecoratorFactory(EdmFunction, target);
     }
     export function getOperations(target:Function):string[]{
         return Reflect.getOwnMetadata(EdmOperations, target.prototype) || [];
@@ -359,11 +371,11 @@ export namespace Edm{
 
     export function getReturnTypeName(target:Function, propertyKey:string):string{
         let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
-        return Edm.getTypeName(returnType, EdmReturnType);
+        return Edm.getTypeName(returnType, EdmReturnType) || Edm.getTypeName(target, propertyKey);
     }
     export function getReturnType(target:Function, propertyKey:string):Function | string{
         let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
-        return Edm.getType(returnType, EdmReturnType);
+        return Edm.getType(returnType, EdmReturnType) || Edm.getType(target, propertyKey);
     }
 
     export function isActionImport(target:Function, propertyKey:string):boolean{

@@ -105,7 +105,7 @@ export class ResourcePathVisitor{
     protected VisitCountExpression(node:Token, context:any){
         this.navigation.push({
             name: "$count",
-            type: TokenType.BoundPrimitiveFunctionCall,
+            type: node.type,
             params: {}
         });
         this.path += "/$count";
@@ -161,7 +161,7 @@ export class ResourcePathVisitor{
     protected VisitValueExpression(node:Token, context:any){
         this.navigation.push({
             name: "$value",
-            type: TokenType.BoundPrimitiveFunctionCall,
+            type: node.type,
             params: {}
         });
         this.path += "/$value";
@@ -170,7 +170,7 @@ export class ResourcePathVisitor{
     protected VisitRefExpression(node:Token, context:any){
         this.navigation.push({
             name: "$ref",
-            type: TokenType.BoundPrimitiveFunctionCall,
+            type: node.type,
             params: {}
         });
         this.path += "/$ref";

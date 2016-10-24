@@ -47,8 +47,11 @@ export declare namespace odata {
     function DELETE(navigationProperty: string): any;
     function DELETE(): any;
     function DELETE(target?: any, targetKey?: string): any;
+    function createRef(navigationProperty: string): any;
+    function updateRef(navigationProperty: string): any;
+    function deleteRef(navigationProperty: string): any;
     /** Annotate function for a specified OData method operation */
-    function method(method: string, navigationProperty?: string): (target: any, targetKey?: string) => any;
+    function method(method: string, navigationProperty?: string): any;
     function getMethod(target: any, targetKey: any): any;
     function key(name?: string): any;
     function key(target: any, targetKey: string, parameterIndex: number): any;

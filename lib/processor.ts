@@ -124,6 +124,11 @@ const expCalls = {
         }
 
         return result.value || result;
+    },
+    $ref: function(processor){
+        let part = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
+        console.log(this, part, processor.body);
+        return this;
     }
 };
 
@@ -146,6 +151,9 @@ const getResourcePartFunction = (type) => {
         case "BoundEntityCollectionFunctionCall":
         case "BoundActionCall":
         case "BoundAction":
+        case "CountExpression":
+        case "ValueExpression":
+        case "RefExpression":
             return "__actionOrFunction";
     }
 };
@@ -595,7 +603,10 @@ export class ODataProcessor extends Transform{
                         part.params = extend(part.params, this.body);
                     }
                     this.__applyParams(this.ctrl, boundOpName, part.params, null, result);
-                }else if (expOp) scope = result;
+                }else if (expOp){
+                    scope = result;
+                    part.params["processor"] = this;
+                }
                 let boundOp = entityBoundOp || ctrlBoundOp || expOp;
                 try{
                     let opResult = fnCaller.call(scope, boundOp, part.params);
