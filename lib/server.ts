@@ -140,7 +140,9 @@ export class ODataServer extends Transform{
     }
     static getController(elementType:Function){
         for (let i in this.prototype){
-            if (this.prototype[i].prototype instanceof ODataController &&
+            if (this.prototype[i] &&
+                this.prototype[i].prototype &&
+                this.prototype[i].prototype instanceof ODataController &&
                 this.prototype[i].prototype.elementType == elementType){
                     return this.prototype[i];
                 }
