@@ -136,7 +136,7 @@ __decorate([
     __param(1, index_1.odata.query)
 ], CategoriesController.prototype, "getProducts", null);
 __decorate([
-    index_1.Edm.EntityType(model_1.Product),
+    index_1.Edm.EntityType(Object),
     index_1.Edm.Function
 ], CategoriesController.prototype, "GetFirstProduct", null);
 CategoriesController = __decorate([

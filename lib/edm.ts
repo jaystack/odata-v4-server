@@ -2,8 +2,6 @@ import "reflect-metadata";
 import { ODataController } from "./controller";
 import { getFunctionParameters } from "./utils";
 
-//type Decorator = ((target?:any) => any) | ((target?:any, targetKey?:string) => any) | ((target?:any, targetKey?:string, parameterIndex?:number) => any) | ((...args:any[]) => any);
-//type Decorator = ((target?:any, targetKey?:string) => any) | ((target?:any, targetKey?:string, parameterIndex?:number) => any);
 export type Decorator = ((target?:any, targetKey?:string, parameterIndex?:number | TypedPropertyDescriptor<any>) => any);
 
 export namespace Edm{

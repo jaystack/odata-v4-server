@@ -39,6 +39,139 @@ export function createMetadataJSON(server:typeof ODataServer){
     let propNames = getAllPropertyNames(server.prototype).filter(it => it != "constructor");
     let entitySets = odata.getPublicControllers(server);
     let resolvingTypes = [];
+    let resolveType = (elementType, parent) => {
+        if (resolvingTypes.indexOf(elementType) >= 0) return null;
+        resolvingTypes.push(elementType);
+
+        if (!elementType.namespace) elementType.namespace = parent.namespace;
+        
+        let typeDefinition:any = {
+            name: elementType.name,
+            key: [],
+            property: [],
+            navigationProperty: [],
+            annotation: Edm.getAnnotations(elementType),
+            openType: Edm.isOpenType(elementType) || elementType === Object,
+            hasStream: Edm.isMediaEntity(elementType)
+        };
+        let namespace = elementType.namespace || parent.namespace || server.namespace;
+
+        let typeSchema = definition.dataServices.schema.filter((schema) => schema.namespace == namespace)[0];
+        if (!typeSchema){
+            typeSchema = {
+                namespace: namespace,
+                entityType: [],
+                complexType: [],
+                action: [],
+                function: [],
+                annotations: []
+            };
+            definition.dataServices.schema.unshift(typeSchema);
+        }
+
+        let properties:string[] = Edm.getProperties(elementType.prototype);
+        properties.forEach((prop) => {
+            let propertyDefinition = {
+                name: prop,
+                type: Edm.getTypeName(elementType, prop),
+                nullable: Edm.isNullable(elementType, prop),
+                annotation: Edm.getAnnotations(elementType, prop),
+                partner: Edm.getPartner(elementType, prop)
+            };
+            if (Edm.isKey(elementType, prop)){
+                typeDefinition.key.push({
+                    propertyRef: [{
+                        name: prop
+                    }]
+                });
+            }
+            if (Edm.isComputed(elementType, prop)){
+                propertyDefinition.annotation.unshift({
+                    term: "Org.OData.Core.V1.Computed",
+                    bool: true
+                });
+            }
+
+            let type = Edm.getType(elementType, prop);
+            if (typeof type == "function"){
+                let definitionContainer = Edm.isComplexType(elementType, prop) ? "complexType" : "entityType";
+                let resolvedType = resolveType(type, elementType);
+                if (resolvedType && !resolvedType.schema[definitionContainer].filter(et => et.name == resolvedType.definition.name)[0]){
+                    resolvedType.schema[definitionContainer].push(resolvedType.definition);
+                }
+
+                if (definitionContainer == "entityType"){
+                    typeDefinition.navigationProperty.push(propertyDefinition);
+                    return;
+                }
+            }
+
+            typeDefinition.property.push(propertyDefinition);
+        });
+
+        let operations:any = getAllOperations(elementType);
+        Object.keys(operations).forEach((operation) => {
+            let namespace = operations[operation].prototype[operation].namespace || elementType.namespace || parent.namespace || server.namespace;
+            let elementTypeNamespace = elementType.namespace || parent.namespace || server.namespace;
+            let operationSchema = definition.dataServices.schema.filter((schema) => schema.namespace == namespace)[0];
+            if (!operationSchema){
+                operationSchema = {
+                    namespace: namespace,
+                    entityType: [],
+                    complexType: [],
+                    action: [],
+                    function: [],
+                    annotations: []
+                };
+                definition.dataServices.schema.unshift(operationSchema);
+            }
+
+            if (Edm.isFunction(operations[operation], operation)){
+                let type = Edm.getReturnType(operations[operation], operation);
+                if (typeof type == "function"){
+                    operations[operation].namespace = namespace;
+                    let definitionContainer = Edm.isComplexType(operations[operation], operation) ? "complexType" : "entityType";
+                    let resolvedType = resolveType(type, operations[operation]);
+                    if (resolvedType && !resolvedType.schema[definitionContainer].filter(et => et.name == resolvedType.definition.name)[0]){
+                        resolvedType.schema[definitionContainer].push(resolvedType.definition);
+                    }
+                }
+
+                let returnType = Edm.getReturnTypeName(operations[operation], operation);
+                let parameters = Edm.getParameters(operations[operation], operation);
+                let definition = {
+                    name: operation,
+                    isBound: true,
+                    parameter: [{
+                        name: "bindingParameter",
+                        type: elementTypeNamespace + "." + elementType.name
+                    }].concat(parameters),
+                    returnType: { type: returnType }
+                };
+                operationSchema.function.push(definition);
+            }
+
+            if (Edm.isAction(operations[operation], operation)){
+                let returnType = Edm.getReturnTypeName(operations[operation], operation);
+                let parameters = Edm.getParameters(operations[operation], operation);
+                let definition = {
+                    name: operation,
+                    isBound: true,
+                    parameter: [{
+                        name: "bindingParameter",
+                        type: elementTypeNamespace + "." + elementType.name
+                    }].concat(parameters),
+                    returnType: { type: returnType }
+                };
+                operationSchema.action.push(definition);
+            }
+        });
+
+        return {
+            schema: typeSchema,
+            definition: typeDefinition
+        };
+    };
     propNames.forEach((i) => {
         if (i != "$metadata" && server.prototype[i]){
             let containerSchema = definition.dataServices.schema.filter((schema) => schema.namespace == server.namespace)[0];
@@ -55,129 +188,6 @@ export function createMetadataJSON(server:typeof ODataServer){
                     }
                 }
 
-                let resolveType = (elementType, parent) => {
-                    if (resolvingTypes.indexOf(elementType) >= 0) return null;
-                    resolvingTypes.push(elementType);
-
-                    if (!elementType.namespace) elementType.namespace = parent.namespace;
-                    
-                    let typeDefinition:any = {
-                        name: elementType.name,
-                        key: [],
-                        property: [],
-                        navigationProperty: [],
-                        annotation: Edm.getAnnotations(elementType),
-                        openType: Edm.isOpenType(elementType) || elementType === Object,
-                        hasStream: Edm.isMediaEntity(elementType)
-                    };
-                    let namespace = elementType.namespace || parent.namespace || server.namespace;
-
-                    let typeSchema = definition.dataServices.schema.filter((schema) => schema.namespace == namespace)[0];
-                    if (!typeSchema){
-                        typeSchema = {
-                            namespace: namespace,
-                            entityType: [],
-                            complexType: [],
-                            action: [],
-                            function: [],
-                            annotations: []
-                        };
-                        definition.dataServices.schema.unshift(typeSchema);
-                    }
-
-                    let properties:string[] = Edm.getProperties(elementType.prototype);
-                    properties.forEach((prop) => {
-                        let propertyDefinition = {
-                            name: prop,
-                            type: Edm.getTypeName(elementType, prop),
-                            nullable: Edm.isNullable(elementType, prop),
-                            annotation: Edm.getAnnotations(elementType, prop),
-                            partner: Edm.getPartner(elementType, prop)
-                        };
-                        if (Edm.isKey(elementType, prop)){
-                            typeDefinition.key.push({
-                                propertyRef: [{
-                                    name: prop
-                                }]
-                            });
-                        }
-                        if (Edm.isComputed(elementType, prop)){
-                            propertyDefinition.annotation.unshift({
-                                term: "Org.OData.Core.V1.Computed",
-                                bool: true
-                            });
-                        }
-
-                        let type = Edm.getType(elementType, prop);
-                        if (typeof type == "function"){
-                            let definitionContainer = Edm.isComplexType(elementType, prop) ? "complexType" : "entityType";
-                            let resolvedType = resolveType(type, elementType);
-                            if (resolvedType && !resolvedType.schema[definitionContainer].filter(et => et.name == resolvedType.definition.name)[0]){
-                                resolvedType.schema[definitionContainer].push(resolvedType.definition);
-                            }
-
-                            if (definitionContainer == "entityType"){
-                                typeDefinition.navigationProperty.push(propertyDefinition);
-                                return;
-                            }
-                        }
-
-                        typeDefinition.property.push(propertyDefinition);
-                    });
-
-                    let operations:any = getAllOperations(elementType);
-                    Object.keys(operations).forEach((operation) => {
-                        let namespace = operations[operation].prototype[operation].namespace || elementType.namespace || parent.namespace || server.namespace;
-                        let elementTypeNamespace = elementType.namespace || parent.namespace || server.namespace;
-                        let operationSchema = definition.dataServices.schema.filter((schema) => schema.namespace == namespace)[0];
-                        if (!operationSchema){
-                            operationSchema = {
-                                namespace: namespace,
-                                entityType: [],
-                                complexType: [],
-                                action: [],
-                                function: [],
-                                annotations: []
-                            };
-                            definition.dataServices.schema.unshift(operationSchema);
-                        }
-
-                        if (Edm.isFunction(operations[operation], operation)){
-                            let returnType = Edm.getReturnTypeName(operations[operation], operation);
-                            let parameters = Edm.getParameters(operations[operation], operation);
-                            let definition = {
-                                name: operation,
-                                isBound: true,
-                                parameter: [{
-                                    name: "bindingParameter",
-                                    type: elementTypeNamespace + "." + elementType.name
-                                }].concat(parameters),
-                                returnType: { type: returnType }
-                            };
-                            operationSchema.function.push(definition);
-                        }
-
-                        if (Edm.isAction(operations[operation], operation)){
-                            let returnType = Edm.getReturnTypeName(operations[operation], operation);
-                            let parameters = Edm.getParameters(operations[operation], operation);
-                            let definition = {
-                                name: operation,
-                                isBound: true,
-                                parameter: [{
-                                    name: "bindingParameter",
-                                    type: elementTypeNamespace + "." + elementType.name
-                                }].concat(parameters),
-                                returnType: { type: returnType }
-                            };
-                            operationSchema.action.push(definition);
-                        }
-                    });
-
-                    return {
-                        schema: typeSchema,
-                        definition: typeDefinition
-                    };
-                };
                 let resolvedType = resolveType(elementType, server);
                 if (resolvedType && !resolvedType.schema.entityType.filter(et => et.name == resolvedType.definition.name)[0]){
                     resolvedType.schema.entityType.push(resolvedType.definition);
@@ -201,6 +211,16 @@ export function createMetadataJSON(server:typeof ODataServer){
                     }
 
                     if (Edm.isFunction(operations[operation], operation)){
+                        let type = Edm.getReturnType(operations[operation], operation);
+                        if (typeof type == "function"){
+                            operations[operation].namespace = namespace;
+                            let definitionContainer = Edm.isComplexType(operations[operation], operation) ? "complexType" : "entityType";
+                            let resolvedType = resolveType(type, operations[operation]);
+                            if (resolvedType && !resolvedType.schema[definitionContainer].filter(et => et.name == resolvedType.definition.name)[0]){
+                                resolvedType.schema[definitionContainer].push(resolvedType.definition);
+                            }
+                        }
+
                         let returnType = Edm.getReturnTypeName(operations[operation], operation);
                         let parameters = Edm.getParameters(operations[operation], operation);
                         operationSchema.function.push({
@@ -261,6 +281,15 @@ export function createMetadataJSON(server:typeof ODataServer){
             }
 
             if (Edm.isFunctionImport(server, i)){
+                let type = Edm.getReturnType(server, i);
+                if (typeof type == "function"){
+                    let definitionContainer = Edm.isComplexType(server, i) ? "complexType" : "entityType";
+                    let resolvedType = resolveType(type, server);
+                    if (resolvedType && !resolvedType.schema[definitionContainer].filter(et => et.name == resolvedType.definition.name)[0]){
+                        resolvedType.schema[definitionContainer].push(resolvedType.definition);
+                    }
+                }
+
                 let returnType = Edm.getReturnTypeName(server, i);
                 let parameters = Edm.getParameters(server, i);
                 operationSchema.function.push({

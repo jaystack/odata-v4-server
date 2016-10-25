@@ -34,7 +34,6 @@ OData V4 server for node.js
 ## TODO
 
 Object
-operation return type decorator
 
 ## Example Northwind server
 

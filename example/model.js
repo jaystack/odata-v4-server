@@ -74,6 +74,9 @@ Product = __decorate([
 ], Product);
 exports.Product = Product;
 let Category = class Category {
+    echo() {
+        return ["echotest"];
+    }
 };
 __decorate([
     index_1.Edm.Key,
@@ -106,6 +109,10 @@ __decorate([
     index_1.Edm.Collection(index_1.Edm.EntityType("Product")),
     index_1.Edm.Partner("Category")
 ], Category.prototype, "Products", void 0);
+__decorate([
+    index_1.Edm.Collection(index_1.Edm.String),
+    index_1.Edm.Function
+], Category.prototype, "echo", null);
 Category = __decorate([
     index_1.Edm.OpenType,
     index_1.Edm.Annotate({

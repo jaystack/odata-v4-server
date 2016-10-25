@@ -104,8 +104,9 @@ export class Category{
     @Edm.Partner("Category")
     Products:Product[]
 
-    /*@Edm.Function(Edm.Collection(Edm.String))
+    @Edm.Collection(Edm.String)
+    @Edm.Function
     echo(){
         return ["echotest"];
-    }*/
+    }
 }

@@ -79,7 +79,7 @@ export class CategoriesController extends ODataController{
         return await (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
     }
 
-    @Edm.EntityType(Product)
+    @Edm.EntityType(Object)
     @Edm.Function
     GetFirstProduct(){
         return products[0];
