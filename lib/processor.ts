@@ -13,8 +13,12 @@ import { odata } from "./odata";
 import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { ODataServer } from "./server";
 
+const getODataRoot = function(context){
+    return (context.protocol || "http") + "://" + (context.host || "localhost") + (context.base || "");
+}
+
 const createODataContext = function(context, entitySets, server:typeof ODataServer, resourcePath){
-    let odataContextBase = (context.protocol || "http") + "://" + (context.host || "localhost") + (context.base || "") + "/$metadata#";
+    let odataContextBase = getODataRoot(context) + "/$metadata#";
     let odataContext = "";
     let prevResource = null;
     let prevType:any = server;
@@ -126,8 +130,51 @@ const expCalls = {
         return result.value || result;
     },
     $ref: function(processor){
-        let part = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
-        console.log(this, part, processor.body);
+        let part = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 1];
+        let prevPart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
+        let routePart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 3];
+
+        let fn = odata.findODataMethod(processor.ctrl, processor.method + "/" + prevPart.name + "/$ref", routePart.key || []);
+
+        let linkUrl = processor.resourcePath.id.replace(getODataRoot(processor.context), "");
+        let linkAst = ODataParser.odataUri(linkUrl, { metadata: processor.serverType.$metadata().edmx });
+        let linkPath = new ResourcePathVisitor().Visit(linkAst);
+        let linkPart = linkPath.navigation[linkPath.navigation.length - 1];
+
+        let ctrl = processor.ctrl;
+        let params = {};
+        if (linkPart.key) linkPart.key.forEach((key) => params[key.name] = key.value);
+        let fnDesc = fn;
+
+        processor.__applyParams(ctrl, fnDesc.call, params, processor.url.query);
+
+        fn = ctrl.prototype[fnDesc.call];
+        if (fnDesc.key.length == 1 && routePart.key.length == 1 && fnDesc.key[0].to != routePart.key[0].name){
+            params[fnDesc.key[0].to] = params[routePart.key[0].name];
+            delete params[routePart.key[0].name];
+        }else{
+            for (let i = 0; i < fnDesc.key.length; i++){
+                if (fnDesc.key[i].to != fnDesc.key[i].from){
+                    params[fnDesc.key[i].to] = params[fnDesc.key[i].from];
+                    delete params[fnDesc.key[i].from];
+                }
+            }
+        }
+
+        let currentResult = fnCaller.call(ctrl, fn, params);
+
+        if (isIterator(fn)){
+            currentResult = run(currentResult, [
+                ODataGeneratorHandlers.PromiseHandler,
+                ODataGeneratorHandlers.StreamHandler
+            ]);
+        }
+
+        if (!isPromise(currentResult)){
+            currentResult = new Promise((resolve) => resolve(currentResult));
+        }
+
+        console.log(this, prevPart, routePart, fn, linkPath);
         return this;
     }
 };
@@ -548,6 +595,14 @@ export class ODataProcessor extends Transform{
                     }
                     this.__applyParams(this.serverType, part.name, part.params);
                     let result = fnCaller.call(data, fn, part.params);
+
+                    if (isIterator(fn)){
+                        result = run(result, [
+                            ODataGeneratorHandlers.PromiseHandler,
+                            ODataGeneratorHandlers.StreamHandler
+                        ]);
+                    }
+
                     if (isAction){
                         return ODataResult.NoContent(result).then(resolve, reject);
                     }else{
@@ -616,6 +671,14 @@ export class ODataProcessor extends Transform{
                 let boundOp = entityBoundOp || ctrlBoundOp || expOp;
                 try{
                     let opResult = fnCaller.call(scope, boundOp, part.params);
+
+                    if (isIterator(boundOp)){
+                        opResult = run(opResult, [
+                            ODataGeneratorHandlers.PromiseHandler,
+                            ODataGeneratorHandlers.StreamHandler
+                        ]);
+                    }
+
                     if (boundOp == expOp){
                         let expResult = boundOpName == "$count" ? opResult || this.resultCount : opResult;
                         if (Edm.isMediaEntity(elementType)){

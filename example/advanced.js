@@ -50,6 +50,10 @@ let ProductsController = class ProductsController extends index_1.ODataControlle
             return yield (yield mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
         });
     }
+    getCategoryRef(key, result) {
+        return __awaiter(this, void 0, void 0, function* () {
+        });
+    }
     createCategoryRef(key, result) {
         return __awaiter(this, void 0, void 0, function* () {
         });
@@ -75,6 +79,11 @@ __decorate([
     index_1.odata.GET("Category"),
     __param(0, index_1.odata.result)
 ], ProductsController.prototype, "getCategory", null);
+__decorate([
+    index_1.odata.GET("Category").$ref,
+    __param(0, index_1.odata.key),
+    __param(1, index_1.odata.result)
+], ProductsController.prototype, "getCategoryRef", null);
 __decorate([
     index_1.odata.POST("Category").$ref,
     __param(0, index_1.odata.key),
@@ -145,8 +154,8 @@ CategoriesController = __decorate([
 ], CategoriesController);
 exports.CategoriesController = CategoriesController;
 let NorthwindODataServer = class NorthwindODataServer extends index_1.ODataServer {
-    GetCategoryById(id) {
-        return categories.filter((category) => category._id.toString() == id)[0];
+    *GetCategoryById(id) {
+        return yield categories.filter((category) => category._id.toString() == id)[0];
     }
     initDb() {
         return __awaiter(this, void 0, void 0, function* () {

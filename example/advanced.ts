@@ -39,6 +39,11 @@ export class ProductsController extends ODataController{
         return await (await mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
     }
 
+    @odata.GET("Category").$ref
+    async getCategoryRef(@odata.key key:string, @odata.result result:any){
+
+    }
+
     @odata.POST("Category").$ref
     async createCategoryRef(@odata.key key:string, @odata.result result:any){
 
@@ -94,8 +99,8 @@ export class CategoriesController extends ODataController{
 export class NorthwindODataServer extends ODataServer{
     @Edm.EntityType(Category)
     @Edm.FunctionImport
-    GetCategoryById(@Edm.String id:string){
-        return categories.filter((category) => category._id.toString() == id)[0];
+    *GetCategoryById(@Edm.String id:string){
+        return yield categories.filter((category) => category._id.toString() == id)[0];
     }
 
     @Edm.ActionImport

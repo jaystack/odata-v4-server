@@ -20,6 +20,7 @@ export class ResourcePathVisitor{
     path:string
     singleton:string
     inlinecount:boolean
+    id:string
     ast:Token
 
     constructor(){
@@ -76,6 +77,10 @@ export class ResourcePathVisitor{
 
     protected VisitQueryOptions(node:Token, context:any){
         node.value.options.forEach((option) => this.Visit(option, context));
+    }
+
+    protected VisitId(node:Token, context:any){
+        this.id = node.value;
     }
 
     protected VisitInlineCount(node:Token, context:any){

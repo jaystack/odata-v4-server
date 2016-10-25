@@ -5,6 +5,7 @@ export declare class ProductsController extends ODataController {
     find(filter: Token): Product[];
     findOne(key: string): Product;
     getCategory(result: any): Promise<any>;
+    getCategoryRef(key: string, result: any): Promise<void>;
     createCategoryRef(key: string, result: any): Promise<void>;
     updateCategoryRef(key: string, result: any): Promise<void>;
     deleteCategoryRef(key: string, result: any): Promise<void>;
@@ -16,6 +17,6 @@ export declare class CategoriesController extends ODataController {
     GetFirstProduct(): any;
 }
 export declare class NorthwindODataServer extends ODataServer {
-    GetCategoryById(id: string): any;
+    GetCategoryById(id: string): IterableIterator<any>;
     initDb(): Promise<void>;
 }

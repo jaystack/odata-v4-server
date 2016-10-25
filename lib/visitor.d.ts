@@ -16,11 +16,13 @@ export declare class ResourcePathVisitor {
     path: string;
     singleton: string;
     inlinecount: boolean;
+    id: string;
     ast: Token;
     constructor();
     Visit(node: Token, context?: any): ResourcePathVisitor;
     protected VisitODataUri(node: Token, context: any): void;
     protected VisitQueryOptions(node: Token, context: any): void;
+    protected VisitId(node: Token, context: any): void;
     protected VisitInlineCount(node: Token, context: any): void;
     protected VisitAliasAndValue(node: Token, context: any): void;
     protected VisitResourcePath(node: Token, context: any): void;
