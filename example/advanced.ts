@@ -1,9 +1,8 @@
 import { MongoClient, ObjectID, Collection, Db } from "mongodb";
-import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { createQuery } from "odata-v4-mongodb";
 import * as extend from "extend";
-import { Edm, odata, ODataController, ODataServer, ODataErrorHandler, ResourceNotFoundError, createODataServer } from "../lib/index";
+import { Edm, odata, ODataController, ODataServer, ODataQuery, ODataErrorHandler, ResourceNotFoundError, createODataServer } from "../lib/index";
 import { Category, Product } from "./model";
 let categories = require("./categories");
 let products = require("./products");
@@ -16,7 +15,7 @@ const mongodb = async function():Promise<Db>{
 @Edm.EntitySet("Products")
 export class ProductsController extends ODataController{
     @odata.GET
-    find(@odata.filter filter:Token):Product[]{
+    find(@odata.filter filter:ODataQuery):Product[]{
         if (filter){
             let filterFn = createFilter(filter);
             return products.map((product) => {
@@ -38,39 +37,19 @@ export class ProductsController extends ODataController{
     async getCategory(@odata.result result:any){
         return await (await mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
     }
-
-    @odata.GET("Category").$ref
-    async getCategoryRef(@odata.key key:string, @odata.result result:any){
-
-    }
-
-    @odata.POST("Category").$ref
-    async createCategoryRef(@odata.key key:string, @odata.result result:any){
-
-    }
-
-    @odata.updateRef("Category")
-    async updateCategoryRef(@odata.key key:string, @odata.result result:any){
-
-    }
-
-    @odata.deleteRef("Category")
-    async deleteCategoryRef(@odata.key key:string, @odata.result result:any){
-
-    }
 }
 
 @odata.type(Category)
 @Edm.EntitySet("Categories")
 export class CategoriesController extends ODataController{
     @odata.GET
-    async find(@odata.query query:Token){
+    async find(@odata.query query:ODataQuery){
         let mongodbQuery = createQuery(query);
         return await (await mongodb()).collection("Categories").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
     }
 
     @odata.GET
-    async findOne(@odata.key() key:string, @odata.query query:Token){
+    async findOne(@odata.key() key:string, @odata.query query:ODataQuery){
         let mongodbQuery = createQuery(query);
         return await (await mongodb()).collection("Categories").findOne({ _id: new ObjectID(key) }, {
             fields: mongodbQuery.projection
@@ -78,7 +57,7 @@ export class CategoriesController extends ODataController{
     }
 
     @odata.GET("Products")
-    async getProducts(@odata.result result:any, @odata.query query:Token){
+    async getProducts(@odata.result result:any, @odata.query query:ODataQuery){
         let mongodbQuery = createQuery(query);
         mongodbQuery.query = { $and: [mongodbQuery.query, { CategoryId: result._id }] };
         return await (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();

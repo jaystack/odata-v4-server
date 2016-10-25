@@ -22,7 +22,9 @@ const createODataContext = function(context, entitySets, server:typeof ODataServ
     let odataContext = "";
     let prevResource = null;
     let prevType:any = server;
-    resourcePath.navigation.forEach((baseResource) => {
+    resourcePath.navigation.forEach((baseResource, i) => {
+        let next = resourcePath.navigation[i + 1];
+        if (next && next.type == TokenType.RefExpression) return;
         if (baseResource.type == TokenType.EntitySetName){
             prevResource = baseResource;
             prevType = baseResource.key ? entitySets[baseResource.name].prototype.elementType : entitySets[baseResource.name];
@@ -134,19 +136,23 @@ const expCalls = {
         let prevPart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
         let routePart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 3];
 
-        let fn = odata.findODataMethod(processor.ctrl, processor.method + "/" + prevPart.name + "/$ref", routePart.key || []);
+        let fn = odata.findODataMethod(processor.prevCtrl, processor.method + "/" + prevPart.name + "/$ref", routePart.key || []);
+        if (!fn) throw new ResourceNotFoundError();
 
-        let linkUrl = processor.resourcePath.id.replace(getODataRoot(processor.context), "");
-        let linkAst = ODataParser.odataUri(linkUrl, { metadata: processor.serverType.$metadata().edmx });
-        let linkPath = new ResourcePathVisitor().Visit(linkAst);
-        let linkPart = linkPath.navigation[linkPath.navigation.length - 1];
+        let linkUrl = (processor.resourcePath.id || processor.body["@odata.id"] || "").replace(getODataRoot(processor.context), "");
+        let linkAst, linkPath, linkPart;
+        if (linkUrl){
+            linkAst = ODataParser.odataUri(linkUrl, { metadata: processor.serverType.$metadata().edmx });
+            linkPath = new ResourcePathVisitor().Visit(linkAst);
+            linkPart = linkPath.navigation[linkPath.navigation.length - 1];
+        }else linkPart = prevPart;
 
-        let ctrl = processor.ctrl;
+        let ctrl = processor.prevCtrl;
         let params = {};
-        if (linkPart.key) linkPart.key.forEach((key) => params[key.name] = key.value);
-        let fnDesc = fn;
+        if (routePart.key) routePart.key.forEach((key) => params[key.name] = key.value);
 
-        processor.__applyParams(ctrl, fnDesc.call, params, processor.url.query);
+        let fnDesc = fn;
+        processor.__applyParams(ctrl, fnDesc.call, params, processor.url.query, this);
 
         fn = ctrl.prototype[fnDesc.call];
         if (fnDesc.key.length == 1 && routePart.key.length == 1 && fnDesc.key[0].to != routePart.key[0].name){
@@ -158,6 +164,17 @@ const expCalls = {
                     params[fnDesc.key[i].to] = params[fnDesc.key[i].from];
                     delete params[fnDesc.key[i].from];
                 }
+            }
+        }
+
+        let linkParams = {};
+        if (linkPart.key) linkPart.key.forEach((key) => linkParams[key.name] = key.value);
+
+        if (fnDesc.link.length == 1 && linkPart.key.length == 1 && fnDesc.link[0].to != linkPart.key[0].name){
+            params[fnDesc.link[0].to] = linkParams[linkPart.key[0].name];
+        }else{
+            for (let i = 0; i < fnDesc.link.length; i++){
+                params[fnDesc.link[i].to] = linkParams[fnDesc.link[i].from];
             }
         }
 
@@ -174,8 +191,7 @@ const expCalls = {
             currentResult = new Promise((resolve) => resolve(currentResult));
         }
 
-        console.log(this, prevPart, routePart, fn, linkPath);
-        return this;
+        return currentResult;
     }
 };
 
@@ -267,6 +283,7 @@ export class ODataProcessor extends Transform{
     private serverType:typeof ODataServer
     private options:ODataProcessorOptions
     private ctrl:typeof ODataController
+    private prevCtrl:typeof ODataController
     private instance:ODataController
     private resourcePath:ResourcePathVisitor
     private workflow:any[]
@@ -300,7 +317,10 @@ export class ODataProcessor extends Transform{
         let entitySets = this.entitySets = odata.getPublicControllers(this.serverType);
         this.odataContext = createODataContext(context, entitySets, server, resourcePath);
 
-        this.workflow = resourcePath.navigation.map((part) => {
+        if (resourcePath.navigation.length == 0) throw new ResourceNotFoundError();
+        this.workflow = resourcePath.navigation.map((part, i) => {
+            let next = resourcePath.navigation[i + 1];
+            if (next && next.type == TokenType.RefExpression) return;
             let fn = this[getResourcePartFunction(part.type) || ("__" + part.type)];
             if (fn) return fn.call(this, part);
         }).filter(it => !!it);
@@ -470,6 +490,8 @@ export class ODataProcessor extends Transform{
 
     __read(ctrl:typeof ODataController, part:any, params:any, data?:any, filter?:string | Function, elementType?:any){
         return new Promise((resolve, reject) => {
+            if (this.ctrl) this.prevCtrl = this.ctrl;
+            else this.prevCtrl = ctrl;
             this.ctrl = ctrl;
 
             let method = writeMethods.indexOf(this.method) >= 0 && this.resourcePath.navigation.indexOf(part) < this.resourcePath.navigation.length - 1
@@ -687,10 +709,10 @@ export class ODataProcessor extends Transform{
                             opResult.on("end", resolve);
                             opResult.on("error", reject);
                         }else{
-                            return ODataResult.Ok(expResult, typeof expResult == "object" ? "application/json" : "text/plain").then((result) => {
+                            return (<Promise<ODataResult>>ODataRequestResult[this.method](expResult, typeof expResult == "object" ? "application/json" : "text/plain")).then((result) => {
                                 if (typeof expResult == "object") result.elementType = elementType;
                                 resolve(result);
-                            });
+                            }, reject);
                         }
                     }
                     if (isAction){
@@ -792,13 +814,14 @@ export class ODataProcessor extends Transform{
     }
 
     __applyParams(container:any, name:string, params:any, queryString?:string, result?:any){
-        let queryParam, filterParam, contextParam, streamParam, resultParam;
+        let queryParam, filterParam, contextParam, streamParam, resultParam, idParam;
 
         queryParam = odata.getQueryParameter(container, name);
         filterParam = odata.getFilterParameter(container, name);
         contextParam = odata.getContextParameter(container, name);
         streamParam = odata.getStreamParameter(container, name);
         resultParam = odata.getResultParameter(container, name);
+        idParam = odata.getIdParameter(container, name);
 
         queryString = queryString || this.url.query;
         let queryAst = queryString ? ODataParser.query(queryString, { metadata: this.serverType.$metadata().edmx }) : null;
@@ -822,6 +845,10 @@ export class ODataProcessor extends Transform{
 
         if (resultParam){
             params[resultParam] = result instanceof ODataResult ? result.body : result;
+        }
+
+        if (idParam){
+            params[idParam] = decodeURI(this.resourcePath.id || this.body["@odata.id"]);
         }
     }
 

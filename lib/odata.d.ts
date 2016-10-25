@@ -56,9 +56,13 @@ export declare namespace odata {
     function key(name?: string): any;
     function key(target: any, targetKey: string, parameterIndex: number): any;
     function getKeys(target: any, targetKey: any): any;
+    function link(name?: string): any;
+    function link(target: any, targetKey: string, parameterIndex: number): any;
+    function getLinks(target: any, targetKey: any): any;
     function findODataMethod(target: any, method: any, keys: any): {
         call: string;
         key: any;
+        link: any;
     };
     const query: (target: any, targetKey: any, parameterIndex: number) => void;
     function getQueryParameter(target: any, targetKey: any): any;
@@ -72,4 +76,6 @@ export declare namespace odata {
     function getStreamParameter(target: any, targetKey: any): any;
     const result: (target: any, targetKey: any, parameterIndex: number) => void;
     function getResultParameter(target: any, targetKey: any): any;
+    const id: (target: any, targetKey: any, parameterIndex: number) => void;
+    function getIdParameter(target: any, targetKey: any): any;
 }

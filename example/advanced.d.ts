@@ -1,19 +1,14 @@
-import { Token } from "odata-v4-parser/lib/lexer";
-import { ODataController, ODataServer } from "../lib/index";
+import { ODataController, ODataServer, ODataQuery } from "../lib/index";
 import { Product } from "./model";
 export declare class ProductsController extends ODataController {
-    find(filter: Token): Product[];
+    find(filter: ODataQuery): Product[];
     findOne(key: string): Product;
     getCategory(result: any): Promise<any>;
-    getCategoryRef(key: string, result: any): Promise<void>;
-    createCategoryRef(key: string, result: any): Promise<void>;
-    updateCategoryRef(key: string, result: any): Promise<void>;
-    deleteCategoryRef(key: string, result: any): Promise<void>;
 }
 export declare class CategoriesController extends ODataController {
-    find(query: Token): Promise<any[]>;
-    findOne(key: string, query: Token): Promise<any>;
-    getProducts(result: any, query: Token): Promise<any[]>;
+    find(query: ODataQuery): Promise<any[]>;
+    findOne(key: string, query: ODataQuery): Promise<any>;
+    getProducts(result: any, query: ODataQuery): Promise<any[]>;
     GetFirstProduct(): any;
 }
 export declare class NorthwindODataServer extends ODataServer {

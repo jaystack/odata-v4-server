@@ -14,6 +14,7 @@ export declare class ODataProcessor extends Transform {
     private serverType;
     private options;
     private ctrl;
+    private prevCtrl;
     private instance;
     private resourcePath;
     private workflow;
