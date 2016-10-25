@@ -22,18 +22,15 @@ OData V4 server for node.js
 * support result streaming
 * support media entities
 
-## Parameter injection
+## Controller and server functions parameter injection decorators
 
+* @odata.key
 * @odata.filter
 * @odata.query
 * @odata.context
 * @odata.body
 * @odata.result
 * @odata.stream
-
-## TODO
-
-Object
 
 ## Example Northwind server
 
