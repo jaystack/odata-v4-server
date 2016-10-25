@@ -212,8 +212,13 @@ function run(iterator, handlers){
     return iterate();
 }
 
+export interface ODataProcessorOptions{
+    disableEntityConversion:boolean
+}
+
 export class ODataProcessor extends Transform{
     private serverType:typeof ODataServer
+    private options:ODataProcessorOptions
     private ctrl:typeof ODataController
     private instance:ODataController
     private resourcePath:ResourcePathVisitor
@@ -229,13 +234,14 @@ export class ODataProcessor extends Transform{
     private streamEnabled = false;
     private resultCount = 0;
 
-    constructor(context, server){
+    constructor(context, server, options?:ODataProcessorOptions){
         super(<TransformOptions>{
             objectMode: true
         });
 
         this.context = context;
         this.serverType = server;
+        this.options = options || <ODataProcessorOptions>{};
 
         let method = this.method = context.method.toLowerCase();
         if (ODataRequestMethods.indexOf(method) < 0) throw new MethodNotAllowedError();
@@ -679,7 +685,7 @@ export class ODataProcessor extends Transform{
     }
 
     __convertEntity(context, result, elementType){
-        if (elementType === Object || this.context.disableEntityConversion) return extend(context, result);
+        if (elementType === Object || this.options.disableEntityConversion) return extend(context, result);
         let props = Edm.isOpenType(elementType) ? Object.getOwnPropertyNames(result) : Edm.getProperties(elementType.prototype);
         if (props.length > 0){
             props.forEach((prop) => {

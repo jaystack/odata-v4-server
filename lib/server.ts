@@ -12,7 +12,7 @@ import { ODataController } from "./controller";
 import { odata } from "./odata";
 import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { createMetadataJSON } from "./metadata";
-import { ODataProcessor } from "./processor";
+import { ODataProcessor, ODataProcessorOptions } from "./processor";
 
 export class ODataServer extends Transform{
     private static _metadataCache:any
@@ -32,7 +32,8 @@ export class ODataServer extends Transform{
                     host: req.headers.host,
                     base: req.baseUrl,
                     request: req,
-                    response: res,
+                    response: res
+                }, {
                     disableEntityConversion: true
                 });
                 processor.on("contentType", (contentType) => {
@@ -111,8 +112,8 @@ export class ODataServer extends Transform{
         if (typeof done == "function") done();
     }
 
-    static createProcessor(context:any){
-        return new ODataProcessor(context, this);
+    static createProcessor(context:any, options?:ODataProcessorOptions){
+        return new ODataProcessor(context, this, options);
     }
 
     static $metadata():ServiceMetadata;

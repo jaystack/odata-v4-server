@@ -7,8 +7,12 @@ export declare namespace ODataGeneratorHandlers {
     function PromiseHandler(request: any, next: GeneratorAction): any;
     function StreamHandler(request: any, next: GeneratorAction): Promise<{}>;
 }
+export interface ODataProcessorOptions {
+    disableEntityConversion: boolean;
+}
 export declare class ODataProcessor extends Transform {
     private serverType;
+    private options;
     private ctrl;
     private instance;
     private resourcePath;
@@ -23,7 +27,7 @@ export declare class ODataProcessor extends Transform {
     private streamStart;
     private streamEnabled;
     private resultCount;
-    constructor(context: any, server: any);
+    constructor(context: any, server: any, options?: ODataProcessorOptions);
     _transform(chunk: any, encoding: string, done: Function): void;
     _flush(done?: Function): void;
     __EntityCollectionNavigationProperty(part: NavigationPart): Function;

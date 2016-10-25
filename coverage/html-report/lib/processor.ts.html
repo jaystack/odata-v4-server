@@ -20,14 +20,14 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">75.5% </span>
+        <span class="strong">75.55% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>379/502</span>
+        <span class='fraction'>380/503</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">69.58% </span>
+        <span class="strong">69.74% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>263/378</span>
+        <span class='fraction'>265/380</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">82.35% </span>
@@ -35,9 +35,9 @@
         <span class='fraction'>28/34</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">76.69% </span>
+        <span class="strong">76.74% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>352/459</span>
+        <span class='fraction'>353/460</span>
       </div>
     </div>
   </div>
@@ -811,7 +811,13 @@
 766
 767
 768
-769</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+769
+770
+771
+772
+773
+774
+775</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
@@ -1025,6 +1031,10 @@
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1038,15 +1048,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">37×</span>
-<span class="cline-any cline-yes">37×</span>
-<span class="cline-any cline-yes">37×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">37×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">37×</span>
 <span class="cline-any cline-yes">37×</span>
 <span class="cline-any cline-yes">37×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1793,8 +1805,13 @@ function run(iterator, handlers){
     return iterate();
 }
 &nbsp;
+export interface ODataProcessorOptions{
+    disableEntityConversion:boolean
+}
+&nbsp;
 export class ODataProcessor extends Transform{
     private serverType:typeof ODataServer
+    private options:ODataProcessorOptions
     private ctrl:typeof ODataController
     private instance:ODataController
     private resourcePath:ResourcePathVisitor
@@ -1810,13 +1827,14 @@ export class ODataProcessor extends Transform{
     private streamEnabled = false;
     private resultCount = 0;
 &nbsp;
-    constructor(context, server){
+    constructor(context, server, options?:ODataProcessorOptions){
         super(&lt;TransformOptions&gt;{
             objectMode: true
         });
 &nbsp;
         this.context = context;
         this.serverType = server;
+        this.options = options || &lt;ODataProcessorOptions&gt;{};
 &nbsp;
         let method = this.method = context.method.toLowerCase();
         if (ODataRequestMethods.indexOf(method) &lt; 0) throw new MethodNotAllowedError();
@@ -2260,7 +2278,7 @@ export class ODataProcessor extends Transform{
     }
 &nbsp;
     __convertEntity(context, result, elementType){
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (elementType === Object || this.context.disableEntityConversion) <span class="cstat-no" title="statement not covered" >return extend(context, result);</span>
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (elementType === Object || this.options.disableEntityConversion) <span class="cstat-no" title="statement not covered" >return extend(context, result);</span>
         let props = Edm.isOpenType(elementType) ? Object.getOwnPropertyNames(result) : Edm.getProperties(elementType.prototype);
         <span class="missing-if-branch" title="else path not taken" >E</span>if (props.length &gt; 0){
             props.forEach((prop) =&gt; {
@@ -2353,7 +2371,7 @@ export class ODataProcessor extends Transform{
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Oct 24 2016 17:28:50 GMT+0200 (Central Europe Daylight Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Oct 25 2016 10:12:23 GMT+0200 (Central Europe Daylight Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

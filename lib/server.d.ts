@@ -5,7 +5,7 @@ export { Promise } from "es6-promise";
 import * as express from "express";
 import { Transform, TransformOptions } from "stream";
 import { ODataController } from "./controller";
-import { ODataProcessor } from "./processor";
+import { ODataProcessor, ODataProcessorOptions } from "./processor";
 export declare class ODataServer extends Transform {
     private static _metadataCache;
     static namespace: string;
@@ -17,7 +17,7 @@ export declare class ODataServer extends Transform {
     constructor(opts?: TransformOptions);
     _transform(chunk: any, encoding?: string, done?: Function): any;
     _flush(done?: Function): void;
-    static createProcessor(context: any): ODataProcessor;
+    static createProcessor(context: any, options?: ODataProcessorOptions): ODataProcessor;
     static $metadata(): ServiceMetadata;
     static $metadata(metadata: Metadata.Edmx | any): any;
     static document(): ServiceDocument;
