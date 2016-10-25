@@ -37,7 +37,7 @@ OData V4 server for node.js
 ```typescript
 export class ProductsController extends ODataController{
     @odata.GET
-    find(@odata.filter filter:Token){
+    find(@odata.filter filter:ODataQuery){
         if (filter) return products.filter(createFilter(filter));
         return products;
     }
@@ -70,7 +70,7 @@ export class ProductsController extends ODataController{
 
 export class CategoriesController extends ODataController{
     @odata.GET
-    find(@odata.filter filter:Token){
+    find(@odata.filter filter:ODataQuery){
         if (filter) return categories.filter(createFilter(filter));
         return categories;
     }
