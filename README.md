@@ -56,7 +56,10 @@ export class ProductsController extends ODataController{
 
     @odata.PATCH
     update(@odata.key key:string, @odata.body delta:any){
-        extend(products.filter(product => product._id == key)[0], delta);
+        let product = products.filter(product => product._id == key)[0];
+        for (let prop in delta){
+            product[prop] = delta[prop];
+        }
     }
 
     @odata.DELETE
@@ -86,7 +89,10 @@ export class CategoriesController extends ODataController{
 
     @odata.PATCH
     update(@odata.key key:string, @odata.body delta:any){
-        extend(categories.filter(category => category._id == key)[0], delta);
+        let category = categories.filter(category => category._id == key)[0];
+        for (let prop in delta){
+            category[prop] = delta[prop];
+        }
     }
 
     @odata.DELETE
