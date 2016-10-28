@@ -14,6 +14,7 @@
     "chai": "registry:npm/chai#3.5.0+20160723033700",
     "es6-promise": "registry:npm/es6-promise#3.0.0+20160723033700",
     "express": "registry:npm/express#4.14.0+20160815112707",
-    "mongodb": "registry:npm/mongodb#2.1.0+20160721204323"
+    "mongodb": "registry:npm/mongodb#2.1.0+20160721204323",
+    "mssql": "registry:npm/mssql#3.3.0+20160526152843"
   }
 }
