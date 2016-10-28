@@ -15,12 +15,12 @@
       <div class="container">
         <div class="report-info-cnt">
           <h1 class="report-title">OData V4 Server</h1>
-          <h3 class="report-date">Friday, October 28 2016, 04:44pm</h3>
+          <h3 class="report-date">Friday, October 28 2016, 05:59pm</h3>
         </div>
         <div class="nav-right">
           <div class="quick-summary-cnt">
               <ul class="list-unstyled quick-summary">
-                <li class="qs-item summary-duration" title="Duration">514<span>MS</span></li>
+                <li class="qs-item summary-duration" title="Duration">633<span>MS</span></li>
                 <li class="qs-item summary-suites" title="Suites">3</li>
                 <li class="qs-item summary-tests" title="Tests">38</li>
                 <li class="qs-item summary-passes" title="Passed" data-filter="passed">38</li>
@@ -37,7 +37,7 @@
       <div class="container">
           <div class="row">
             <div class="summary-col summary-duration">
-              <h1 class="summary-count">514<span>MS</span></h1>
+              <h1 class="summary-count">633<span>MS</span></h1>
               <h4 class="summary-label">MS</h4>
             </div>
             <div class="summary-col summary-suites" title="Suites">
@@ -73,22 +73,22 @@
     <!-- Suites -->
     <div class="details container">
             <section class="suite-wrap">
-          <div id="95f70aac-6bb2-4b37-afd7-07026eae2f83" class="suite has-suites">
+          <div id="a43b771b-a6ee-4f09-be2f-307aa7886fc5" class="suite has-suites">
             <h3 class="suite-title">ODataServer</h3>
             <h5 class="suite-filename">\build\test\server.spec.js</h5>
         
               <section class="suite-wrap">
-          <div id="68e9697c-1637-47f7-b051-133b1b763754" class="suite has-tests has-passed">
+          <div id="31c16061-df1c-4b7c-b4b5-1b93d5e25d34" class="suite has-tests has-passed">
             <h3 class="suite-title">OData CRUD</h3>
             <h5 class="suite-filename">\build\test\server.spec.js</h5>
             <!-- Suite Chart -->
             <div class="suite-chart-wrap">
-              <canvas id="68e9697c-1637-47f7-b051-133b1b763754" class="suite-chart" width="50" height="50" data-total-passes="35" data-total-failures="0" data-total-pending="0" data-total-skipped="0"></canvas>
+              <canvas id="31c16061-df1c-4b7c-b4b5-1b93d5e25d34" class="suite-chart" width="50" height="50" data-total-passes="35" data-total-failures="0" data-total-pending="0" data-total-skipped="0"></canvas>
             </div>
             <div class="suite-data-wrap">
               <!-- Suite Summary -->
               <ul class="suite-summary list-unstyled">
-                <li class="suite-summary-item duration">358 ms</li>
+                <li class="suite-summary-item duration">373 ms</li>
                 <li class="suite-summary-item tests">35</li>
                 <li class="suite-summary-item passed">35</li>
                 <li class="suite-summary-item failed">0</li>
@@ -96,11 +96,11 @@
               </ul>
               <!-- Test Info -->
               <div class="suite-test-wrap">
-                <div class="suite-test-header" data-toggle="collapse" data-target="#68e9697c-1637-47f7-b051-133b1b763754-test-list">
+                <div class="suite-test-header" data-toggle="collapse" data-target="#31c16061-df1c-4b7c-b4b5-1b93d5e25d34-test-list">
                   <h4 class="suite-test-header-title">Tests</h4>
                 </div>
-                <div id="68e9697c-1637-47f7-b051-133b1b763754-test-list" class="list-group test-list collapse in">
-                    <div id="cdf9e03c-7460-4104-8fbb-a90eb19a6a6c" class="list-group-item test passed">
+                <div id="31c16061-df1c-4b7c-b4b5-1b93d5e25d34-test-list" class="list-group test-list collapse in">
+                    <div id="e48c78fd-ced4-43f9-bc37-839872d464fa" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -108,17 +108,17 @@
               should return entity set result (GET /EntitySet)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#cdf9e03c-7460-4104-8fbb-a90eb19a6a6c > .test-code.collapse">Code</button>
-              <span class="test-duration slow">89 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#e48c78fd-ced4-43f9-bc37-839872d464fa > .test-code.collapse">Code</button>
+              <span class="test-duration medium">49 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="eadb5130-a6dd-4fcf-8220-a18be5a4b546" class="list-group-item test passed">
+        </div>            <div id="b96e33d3-34c9-4ef2-9ed6-d1627dc7b3af" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -126,17 +126,17 @@
               should return entity set result using generator function (GET /GeneratorEntitySet)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#eadb5130-a6dd-4fcf-8220-a18be5a4b546 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">6 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#b96e33d3-34c9-4ef2-9ed6-d1627dc7b3af > .test-code.collapse">Code</button>
+              <span class="test-duration fast">13 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="289bcabc-fdc4-4266-90f5-9e18f24def05" class="list-group-item test passed">
+        </div>            <div id="2f6d15c8-fc5e-487f-8c6b-f627e9a6596c" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -144,17 +144,17 @@
               should return entity set result using async function (GET /AsyncEntitySet)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#289bcabc-fdc4-4266-90f5-9e18f24def05 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">5 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#2f6d15c8-fc5e-487f-8c6b-f627e9a6596c > .test-code.collapse">Code</button>
+              <span class="test-duration fast">8 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="d8c107ee-a1eb-4b96-9127-b7ee036a209f" class="list-group-item test passed">
+        </div>            <div id="1e2798aa-9f7c-4253-a15f-4b412ef23fee" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -162,17 +162,17 @@
               should return entity set result with inline count (GET /InlineCountEntitySet?$count=true)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#d8c107ee-a1eb-4b96-9127-b7ee036a209f > .test-code.collapse">Code</button>
-              <span class="test-duration fast">6 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#1e2798aa-9f7c-4253-a15f-4b412ef23fee > .test-code.collapse">Code</button>
+              <span class="test-duration fast">16 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="82a98562-3b36-4761-9884-da67a467dc4a" class="list-group-item test passed">
+        </div>            <div id="49b6c5aa-3cb8-4813-aa67-c2489e6268f0" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -180,17 +180,17 @@
               should return entity by key (GET /EntitySet(1))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#82a98562-3b36-4761-9884-da67a467dc4a > .test-code.collapse">Code</button>
-              <span class="test-duration fast">7 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#49b6c5aa-3cb8-4813-aa67-c2489e6268f0 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">10 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="c3ad0f4b-5ae5-4ef8-8a0a-2456558ceb86" class="list-group-item test passed">
+        </div>            <div id="5f4ca729-bace-4a07-a42c-ebb66775fcc6" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -198,17 +198,17 @@
               should insert new entity (POST /EntitySet)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#c3ad0f4b-5ae5-4ef8-8a0a-2456558ceb86 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">3 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#5f4ca729-bace-4a07-a42c-ebb66775fcc6 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">4 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="0d4a3692-861d-4536-bffc-1e9b815bcb72" class="list-group-item test passed">
+        </div>            <div id="d2ea165b-eb68-4930-adf7-db2c9b893afa" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -216,17 +216,17 @@
               should update entity (PUT /EntitySet(1))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#0d4a3692-861d-4536-bffc-1e9b815bcb72 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">4 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#d2ea165b-eb68-4930-adf7-db2c9b893afa > .test-code.collapse">Code</button>
+              <span class="test-duration fast">6 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="8bb05c5a-3e5e-4d6f-9281-2bb8462a12b5" class="list-group-item test passed">
+        </div>            <div id="6a6ce648-7581-43e1-a1bc-caf5aa971c77" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -234,17 +234,17 @@
               should update entity using delta (PATCH /EntitySet(1))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#8bb05c5a-3e5e-4d6f-9281-2bb8462a12b5 > .test-code.collapse">Code</button>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#6a6ce648-7581-43e1-a1bc-caf5aa971c77 > .test-code.collapse">Code</button>
               <span class="test-duration fast">4 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="31b02f33-a281-4344-bb28-ff59e49e5890" class="list-group-item test passed">
+        </div>            <div id="d5492856-e059-4b80-a7c1-1a4fc22fc90a" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -252,17 +252,17 @@
               should delete entity (DELETE /EntitySet(1))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#31b02f33-a281-4344-bb28-ff59e49e5890 > .test-code.collapse">Code</button>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#d5492856-e059-4b80-a7c1-1a4fc22fc90a > .test-code.collapse">Code</button>
               <span class="test-duration fast">1 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="98f261c3-2a1e-4d19-8406-283286c24fca" class="list-group-item test passed">
+        </div>            <div id="a1011579-2dd7-43bf-8b8d-31fcd3df5aec" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -270,17 +270,17 @@
               should return result count (GET /EntitySet/$count)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#98f261c3-2a1e-4d19-8406-283286c24fca > .test-code.collapse">Code</button>
-              <span class="test-duration fast">29 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#a1011579-2dd7-43bf-8b8d-31fcd3df5aec > .test-code.collapse">Code</button>
+              <span class="test-duration fast">12 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="cb7e29c3-b4f3-48d0-9b68-0aa978a0fa0b" class="list-group-item test passed">
+        </div>            <div id="71bbd5bf-c18c-4c61-a923-55233ea70e13" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -288,17 +288,17 @@
               should return entity property (GET /EntitySet(1)/foo)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#cb7e29c3-b4f3-48d0-9b68-0aa978a0fa0b > .test-code.collapse">Code</button>
-              <span class="test-duration fast">7 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#71bbd5bf-c18c-4c61-a923-55233ea70e13 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">10 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="fcff0948-ece0-4209-a818-d0559bf535ff" class="list-group-item test passed">
+        </div>            <div id="741cf855-ca46-4544-8cf8-9880a9e2708d" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -306,17 +306,17 @@
               should return entity property value (GET /EntitySet(1)/foo/$value)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#fcff0948-ece0-4209-a818-d0559bf535ff > .test-code.collapse">Code</button>
-              <span class="test-duration fast">4 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#741cf855-ca46-4544-8cf8-9880a9e2708d > .test-code.collapse">Code</button>
+              <span class="test-duration fast">6 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="8c53b9c1-b028-4414-a5ee-0fcbeb723237" class="list-group-item test passed">
+        </div>            <div id="2919d973-60b0-4598-9816-492e119ab743" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -324,17 +324,17 @@
               should return entity value (GET /EntitySet(1)/$value)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#8c53b9c1-b028-4414-a5ee-0fcbeb723237 > .test-code.collapse">Code</button>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#2919d973-60b0-4598-9816-492e119ab743 > .test-code.collapse">Code</button>
               <span class="test-duration fast">2 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="1f89b1f9-1255-4c62-8ede-57335f156a11" class="list-group-item test passed">
+        </div>            <div id="a90a421a-3f0b-498c-b76c-92c54c431038" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -342,17 +342,17 @@
               should call action import (POST /ActionImport)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#1f89b1f9-1255-4c62-8ede-57335f156a11 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">8 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#a90a421a-3f0b-498c-b76c-92c54c431038 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">15 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="c3fca684-bcd6-4541-98a8-b0733bffd42b" class="list-group-item test passed">
+        </div>            <div id="ac413ea9-2f49-4ea3-9b87-39622524fb98" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -360,17 +360,17 @@
               should call action import with parameters (POST /ActionImportParams)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#c3fca684-bcd6-4541-98a8-b0733bffd42b > .test-code.collapse">Code</button>
-              <span class="test-duration fast">3 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#ac413ea9-2f49-4ea3-9b87-39622524fb98 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">4 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="92eafc33-a878-45af-ad62-61867fed85c3" class="list-group-item test passed">
+        </div>            <div id="a8c80cfe-7dc2-4359-9621-1cc7dbc56294" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -378,17 +378,17 @@
               should call function import (GET /FunctionImport(value=42))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#92eafc33-a878-45af-ad62-61867fed85c3 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">6 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#a8c80cfe-7dc2-4359-9621-1cc7dbc56294 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">4 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="4302d1b5-05f9-4062-b0ac-f93253d1d811" class="list-group-item test passed">
+        </div>            <div id="a18b9cc8-2730-43c2-8845-0dc7b7bc7bff" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -396,17 +396,17 @@
               should call function import using parameter alias (GET /FunctionImport(value=@value)?@value=42)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#4302d1b5-05f9-4062-b0ac-f93253d1d811 > .test-code.collapse">Code</button>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#a18b9cc8-2730-43c2-8845-0dc7b7bc7bff > .test-code.collapse">Code</button>
               <span class="test-duration fast">11 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="7b5d7d76-2a7d-4d07-a9c7-158ea61e9fbf" class="list-group-item test passed">
+        </div>            <div id="9ee8435f-f816-4115-855f-ef998935a383" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -414,17 +414,17 @@
               should call function import with multiple parameters (GET /FunctionImportMore(value=42,message=&#x27;hello world&#x27;))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#7b5d7d76-2a7d-4d07-a9c7-158ea61e9fbf > .test-code.collapse">Code</button>
-              <span class="test-duration fast">6 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#9ee8435f-f816-4115-855f-ef998935a383 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">9 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="46505dbb-bacd-4408-8723-7244e734ae38" class="list-group-item test passed">
+        </div>            <div id="c42d39dd-a9fc-431c-bbda-04bd2af82508" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -432,17 +432,17 @@
               should call function import with multiple parameters using parameter alias (GET /FunctionImportMore(value=@value,message=@message)?@value=42&amp;@message=&#x27;hello world&#x27;)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#46505dbb-bacd-4408-8723-7244e734ae38 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">3 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#c42d39dd-a9fc-431c-bbda-04bd2af82508 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">9 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="af6596fb-ee39-4e63-8473-ea7507b8933f" class="list-group-item test passed">
+        </div>            <div id="241f11d8-d92f-48ee-a283-50b593e92e28" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -450,17 +450,17 @@
               should call function import with multiple parameters (different ordering) (GET /FunctionImportMore(message=&#x27;hello world&#x27;,value=42))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#af6596fb-ee39-4e63-8473-ea7507b8933f > .test-code.collapse">Code</button>
-              <span class="test-duration fast">3 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#241f11d8-d92f-48ee-a283-50b593e92e28 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">2 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="d79bb6c2-2ddf-4afe-9db0-1c1a79ae0bbc" class="list-group-item test passed">
+        </div>            <div id="315b5f69-571e-4847-a1b6-60ef56e44cc8" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -468,17 +468,17 @@
               should call bound collection action (POST /BoundOperationEntitySet/Default.Action)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#d79bb6c2-2ddf-4afe-9db0-1c1a79ae0bbc > .test-code.collapse">Code</button>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#315b5f69-571e-4847-a1b6-60ef56e44cc8 > .test-code.collapse">Code</button>
               <span class="test-duration fast">10 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="817859e2-3f7d-4f76-a6b8-d2cfb3126930" class="list-group-item test passed">
+        </div>            <div id="adf110db-48e8-4ab5-82f5-0ca632a434f1" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -486,17 +486,17 @@
               should call bound entity action (POST /BoundOperationEntitySet(1)/Default.Foo)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#817859e2-3f7d-4f76-a6b8-d2cfb3126930 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">2 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#adf110db-48e8-4ab5-82f5-0ca632a434f1 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">4 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="ad0e4fa3-b696-493e-9556-c2fa5a8bf779" class="list-group-item test passed">
+        </div>            <div id="ba48df02-6054-4e5e-a6d3-6c889e8d4b7e" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -504,17 +504,17 @@
               should call bound collection function (GET /BoundOperationEntitySet/Default.Function(value=42))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#ad0e4fa3-b696-493e-9556-c2fa5a8bf779 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">5 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#ba48df02-6054-4e5e-a6d3-6c889e8d4b7e > .test-code.collapse">Code</button>
+              <span class="test-duration fast">7 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="9f21cd2d-a7ba-45ee-a89f-8b0466598bd1" class="list-group-item test passed">
+        </div>            <div id="61f40163-3783-4fac-9da5-e95517670d1f" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -522,17 +522,17 @@
               should call bound entity function (GET /BoundOperationEntitySet(1)/Default.Bar())
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#9f21cd2d-a7ba-45ee-a89f-8b0466598bd1 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">6 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#61f40163-3783-4fac-9da5-e95517670d1f > .test-code.collapse">Code</button>
+              <span class="test-duration fast">2 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="09386e1c-b3c3-4d34-b409-a1eb851a5c82" class="list-group-item test passed">
+        </div>            <div id="93764b09-24c1-4da7-8658-3bd29b55f74b" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -540,17 +540,17 @@
               should call bound entity function with parameter (GET /BoundOperationEntitySet(1)/Echo.echo(message=&#x27;my message&#x27;))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#09386e1c-b3c3-4d34-b409-a1eb851a5c82 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">2 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#93764b09-24c1-4da7-8658-3bd29b55f74b > .test-code.collapse">Code</button>
+              <span class="test-duration fast">3 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="63f954a5-bbb2-4211-be2b-e51564ef0c57" class="list-group-item test passed">
+        </div>            <div id="8752eb42-192b-484a-9ec9-72bef530e324" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -558,17 +558,17 @@
               should call bound collection function using parameter alias (GET /BoundOperationEntitySet/Default.Function(value=@value)?@value=42)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#63f954a5-bbb2-4211-be2b-e51564ef0c57 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">7 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#8752eb42-192b-484a-9ec9-72bef530e324 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">9 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="0144f071-6543-44c9-880f-b8873ce6c324" class="list-group-item test passed">
+        </div>            <div id="9142c402-126b-48db-ae26-29e846df8ff3" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -576,17 +576,17 @@
               should call function import with multiple parameters (GET /BoundOperationEntitySet/Default.FunctionMore(value=42,message=&#x27;hello world&#x27;))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#0144f071-6543-44c9-880f-b8873ce6c324 > .test-code.collapse">Code</button>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#9142c402-126b-48db-ae26-29e846df8ff3 > .test-code.collapse">Code</button>
               <span class="test-duration fast">4 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="4eb8cad9-99e7-43ca-8a21-fb8667179ca9" class="list-group-item test passed">
+        </div>            <div id="e213a0e0-60f4-4e47-a272-d344b5792d25" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -594,17 +594,17 @@
               should call function import with multiple parameters using parameter alias (GET /BoundOperationEntitySet/Default.FunctionMore(value=@value,message=@message)?@value=42&amp;@message=&#x27;hello world&#x27;)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#4eb8cad9-99e7-43ca-8a21-fb8667179ca9 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">11 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#e213a0e0-60f4-4e47-a272-d344b5792d25 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">13 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="36cb1a40-11cf-457c-9b27-f3d9b3c7a67c" class="list-group-item test passed">
+        </div>            <div id="722f13f6-64e4-4f6a-9cbd-8c055f97b875" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -612,17 +612,17 @@
               should call function import with multiple parameters (different ordering) (GET /BoundOperationEntitySet/Default.FunctionMore(message=&#x27;hello world&#x27;,value=42))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#36cb1a40-11cf-457c-9b27-f3d9b3c7a67c > .test-code.collapse">Code</button>
-              <span class="test-duration fast">9 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#722f13f6-64e4-4f6a-9cbd-8c055f97b875 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">6 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="b3acc8ec-255c-4af0-8acc-ca9b66d8e5d0" class="list-group-item test passed">
+        </div>            <div id="4f617d31-3add-43d2-b6ca-6fec925f6080" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -630,17 +630,17 @@
               should return entity collection navigation property result (GET /Categories(&#x27;578f2baa12eaebabec4af289&#x27;)/Products)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#b3acc8ec-255c-4af0-8acc-ca9b66d8e5d0 > .test-code.collapse">Code</button>
-              <span class="test-duration medium">43 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#4f617d31-3add-43d2-b6ca-6fec925f6080 > .test-code.collapse">Code</button>
+              <span class="test-duration medium">52 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="0b64485d-d066-4654-bd5b-a1559525eacd" class="list-group-item test passed">
+        </div>            <div id="23b4c91c-2658-4e9f-b429-82d721269495" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -648,17 +648,17 @@
               should return entity collection navigation property result with filter (GET /Categories(&#x27;578f2baa12eaebabec4af289&#x27;)/Products?$filter=Name eq &#x27;Chai&#x27;)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#0b64485d-d066-4654-bd5b-a1559525eacd > .test-code.collapse">Code</button>
-              <span class="test-duration fast">20 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#23b4c91c-2658-4e9f-b429-82d721269495 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">32 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="21ff9266-f74c-4f8c-a4b4-ad3eea345a13" class="list-group-item test passed">
+        </div>            <div id="7cc40649-f6ed-426b-8194-4f33fdeaabc3" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -666,17 +666,17 @@
               should return entity collection navigation property result (GET /Categories(&#x27;578f2baa12eaebabec4af289&#x27;)/Products(&#x27;578f2b8c12eaebabec4af23c&#x27;))
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#21ff9266-f74c-4f8c-a4b4-ad3eea345a13 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">13 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#7cc40649-f6ed-426b-8194-4f33fdeaabc3 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">9 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="bae34b74-61a0-4d1e-88a1-9ba6097138b9" class="list-group-item test passed">
+        </div>            <div id="6351be43-3b3a-4afe-862d-f094955d5182" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -684,17 +684,17 @@
               should return entity navigation property result (GET /Products(&#x27;578f2b8c12eaebabec4af23c&#x27;)/Category)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#bae34b74-61a0-4d1e-88a1-9ba6097138b9 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">7 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#6351be43-3b3a-4afe-862d-f094955d5182 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">10 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="be69eae7-b66c-4c6e-8466-511749f009ed" class="list-group-item test passed">
+        </div>            <div id="d2a61235-86da-41af-97ba-b7b0e75b32ce" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -702,17 +702,17 @@
               should return result including complex type (GET /Users)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#be69eae7-b66c-4c6e-8466-511749f009ed > .test-code.collapse">Code</button>
-              <span class="test-duration fast">8 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#d2a61235-86da-41af-97ba-b7b0e75b32ce > .test-code.collapse">Code</button>
+              <span class="test-duration fast">11 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="45a4d0b7-4f1f-46b9-9253-0f9835596848" class="list-group-item test passed">
+        </div>            <div id="dd7f8878-9350-4097-b7a3-84a4e9437280" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -720,14 +720,14 @@
               should return complex type property (GET /Users(1)/Location)
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#45a4d0b7-4f1f-46b9-9253-0f9835596848 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">4 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#dd7f8878-9350-4097-b7a3-84a4e9437280 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">6 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    assert.deepEqual(result, compare);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">let</span> test = command.split(<span class="hljs-string">" "</span>);<br><span class="hljs-keyword">return</span> server.execute(test.slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">" "</span>), test[<span class="hljs-number">0</span>], body).then((result) =&gt; {<br>    expect(result).to.deep.equal(compare);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
         </div>        </div>
@@ -738,17 +738,17 @@
           </div>
         </section>
               <section class="suite-wrap">
-          <div id="7a71b934-43e0-4938-a959-e6631ab8e65d" class="suite has-tests has-passed">
+          <div id="d306d84f-5765-4a97-9e90-125556f7f075" class="suite has-tests has-passed">
             <h3 class="suite-title">Code coverage</h3>
             <h5 class="suite-filename">\build\test\server.spec.js</h5>
             <!-- Suite Chart -->
             <div class="suite-chart-wrap">
-              <canvas id="7a71b934-43e0-4938-a959-e6631ab8e65d" class="suite-chart" width="50" height="50" data-total-passes="3" data-total-failures="0" data-total-pending="0" data-total-skipped="0"></canvas>
+              <canvas id="d306d84f-5765-4a97-9e90-125556f7f075" class="suite-chart" width="50" height="50" data-total-passes="3" data-total-failures="0" data-total-pending="0" data-total-skipped="0"></canvas>
             </div>
             <div class="suite-data-wrap">
               <!-- Suite Summary -->
               <ul class="suite-summary list-unstyled">
-                <li class="suite-summary-item duration">2 ms</li>
+                <li class="suite-summary-item duration">4 ms</li>
                 <li class="suite-summary-item tests">3</li>
                 <li class="suite-summary-item passed">3</li>
                 <li class="suite-summary-item failed">0</li>
@@ -756,11 +756,11 @@
               </ul>
               <!-- Test Info -->
               <div class="suite-test-wrap">
-                <div class="suite-test-header" data-toggle="collapse" data-target="#7a71b934-43e0-4938-a959-e6631ab8e65d-test-list">
+                <div class="suite-test-header" data-toggle="collapse" data-target="#d306d84f-5765-4a97-9e90-125556f7f075-test-list">
                   <h4 class="suite-test-header-title">Tests</h4>
                 </div>
-                <div id="7a71b934-43e0-4938-a959-e6631ab8e65d-test-list" class="list-group test-list collapse in">
-                    <div id="51e8e0d1-caa4-4ee8-ad2c-464b98c65138" class="list-group-item test passed">
+                <div id="d306d84f-5765-4a97-9e90-125556f7f075-test-list" class="list-group test-list collapse in">
+                    <div id="79960057-a2db-4014-8c25-812c1c22b035" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -768,17 +768,17 @@
               should return empty object when no public controllers on server
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#51e8e0d1-caa4-4ee8-ad2c-464b98c65138 > .test-code.collapse">Code</button>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#79960057-a2db-4014-8c25-812c1c22b035 > .test-code.collapse">Code</button>
               <span class="test-duration fast">0 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small">assert.deepEqual(index_1.odata.getPublicControllers(NoServer), {});</code></pre>
+            <pre><code class="hljs javascript small">expect(index_1.odata.getPublicControllers(NoServer)).to.deep.equal({});</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="136329f4-b624-4a61-8ed2-bb54c1b521eb" class="list-group-item test passed">
+        </div>            <div id="6d157224-93bf-4d13-baef-ce4ae2b4b3e5" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -786,17 +786,17 @@
               should not allow non-OData methods
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#136329f4-b624-4a61-8ed2-bb54c1b521eb > .test-code.collapse">Code</button>
-              <span class="test-duration fast">0 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#6d157224-93bf-4d13-baef-ce4ae2b4b3e5 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">1 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">try</span> {<br>    NoServer.execute(<span class="hljs-string">"/dev/null"</span>, <span class="hljs-string">"MERGE"</span>);<br>    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"MERGE should not be allowed"</span>);<br>}<br><span class="hljs-keyword">catch</span> (err) {<br>    assert.equal(err.message, <span class="hljs-string">"Method not allowed."</span>);<br>}</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">try</span> {<br>    NoServer.execute(<span class="hljs-string">"/dev/null"</span>, <span class="hljs-string">"MERGE"</span>);<br>    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"MERGE should not be allowed"</span>);<br>}<br><span class="hljs-keyword">catch</span> (err) {<br>    expect(err.message).to.equal(<span class="hljs-string">"Method not allowed."</span>);<br>}</code></pre>
           </div>
           <!-- Test Error Stack -->
-        </div>            <div id="109726cc-cdd6-4ee6-bb0d-5881527fd689" class="list-group-item test passed">
+        </div>            <div id="9514af09-adba-4641-9556-ec9fa45e5237" class="list-group-item test passed">
           <!-- Test Heading -->
           <div class="test-heading">
             <h4 class="test-title">
@@ -804,14 +804,14 @@
               should throw resource not found error
             </h4>
             <div class="pull-right">
-              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#109726cc-cdd6-4ee6-bb0d-5881527fd689 > .test-code.collapse">Code</button>
-              <span class="test-duration fast">2 ms</span>
+              <button class="btn btn-link btn-sm toggle-btn toggle-code collapsed" data-toggle="collapse" data-target="#9514af09-adba-4641-9556-ec9fa45e5237 > .test-code.collapse">Code</button>
+              <span class="test-duration fast">3 ms</span>
             </div>
           </div>
           <!-- Test Errors -->
           <!-- Test Code -->
           <div class="test-code collapse">
-            <pre><code class="hljs javascript small"><span class="hljs-keyword">return</span> AuthenticationServer.execute(<span class="hljs-string">"/Users"</span>, <span class="hljs-string">"DELETE"</span>).then(() =&gt; {<br>    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"should throw error"</span>);<br>}, (err) =&gt; {<br>    assert.equal(err.message, <span class="hljs-string">"Resource not found."</span>);<br>});</code></pre>
+            <pre><code class="hljs javascript small"><span class="hljs-keyword">return</span> AuthenticationServer.execute(<span class="hljs-string">"/Users"</span>, <span class="hljs-string">"DELETE"</span>).then(() =&gt; {<br>    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"should throw error"</span>);<br>}, (err) =&gt; {<br>    expect(err.message).to.equal(<span class="hljs-string">"Resource not found."</span>);<br>});</code></pre>
           </div>
           <!-- Test Error Stack -->
         </div>        </div>
@@ -839,15 +839,15 @@
         <button class="nav-menu-btn close-menu"><i class="icon-failed"></i></button>
         <ul class="list-unstyled main-menu">
                 <li class="nav-menu-item">
-                <a href="#95f70aac-6bb2-4b37-afd7-07026eae2f83" class="nav-menu-item-link">ODataServer</a>
+                <a href="#a43b771b-a6ee-4f09-be2f-307aa7886fc5" class="nav-menu-item-link">ODataServer</a>
                   <ul class="list-unstyled sub-menu">
                     <li class="nav-menu-item">
-                <a href="#68e9697c-1637-47f7-b051-133b1b763754" class="nav-menu-item-link has-passes">OData CRUD</a>
+                <a href="#31c16061-df1c-4b7c-b4b5-1b93d5e25d34" class="nav-menu-item-link has-passes">OData CRUD</a>
             </li>
                   </ul>
                   <ul class="list-unstyled sub-menu">
                     <li class="nav-menu-item">
-                <a href="#7a71b934-43e0-4938-a959-e6631ab8e65d" class="nav-menu-item-link has-passes">Code coverage</a>
+                <a href="#d306d84f-5765-4a97-9e90-125556f7f075" class="nav-menu-item-link has-passes">Code coverage</a>
             </li>
                   </ul>
             </li>

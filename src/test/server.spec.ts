@@ -1,4 +1,5 @@
 /// <reference types="mocha" />
+let expect = require("chai").expect;
 import * as assert from "assert";
 import * as extend from "extend";
 import { Token } from "odata-v4-parser/lib/lexer";
@@ -258,6 +259,7 @@ class TestServer extends ODataServer{
         return `The number is ${value} and your message was ${message}.`;
     }
 }
+TestServer.$metadata();
 
 @odata.namespace("Authentication")
 @odata.controller(UsersController, true)
@@ -275,7 +277,7 @@ function createTest(testcase:string, server:typeof ODataServer, command:string, 
     it(`${testcase} (${command})`, () => {
         let test = command.split(" ");
         return server.execute(test.slice(1).join(" "), test[0], body).then((result) => {
-            assert.deepEqual(result, compare);
+            expect(result).to.deep.equal(compare);
         });
     });
 }
@@ -583,6 +585,7 @@ describe("ODataServer", () => {
             contentType: "application/json"
         });
 
+        console.log(new Object());
         createTest("should return complex type property", AuthenticationServer, "GET /Users(1)/Location", {
             statusCode: 200,
             body: {
@@ -596,7 +599,7 @@ describe("ODataServer", () => {
 
     describe("Code coverage", () => {
         it("should return empty object when no public controllers on server", () => {
-            assert.deepEqual(odata.getPublicControllers(NoServer), {});
+            expect(odata.getPublicControllers(NoServer)).to.deep.equal({});
         });
 
         it("should not allow non-OData methods", () => {
@@ -604,7 +607,7 @@ describe("ODataServer", () => {
                 NoServer.execute("/dev/null", "MERGE");
                 throw new Error("MERGE should not be allowed");
             }catch(err){
-                assert.equal(err.message, "Method not allowed.");
+                expect(err.message).to.equal("Method not allowed.");
             }
         });
 
@@ -612,7 +615,7 @@ describe("ODataServer", () => {
             return AuthenticationServer.execute("/Users", "DELETE").then(() => {
                 throw new Error("should throw error");
             }, (err) => {
-                assert.equal(err.message, "Resource not found.");
+                expect(err.message).to.equal("Resource not found.");
             });
         });
     })

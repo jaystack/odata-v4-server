@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-server",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "OData V4 Server",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
@@ -58,6 +58,7 @@
     "@types/node-uuid": "^0.0.28",
     "JSONStream": "^1.2.1",
     "benchmark": "^2.1.1",
+    "chai": "^3.5.0",
     "event-stream": "^3.3.4",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.2",

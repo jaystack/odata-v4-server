@@ -4,6 +4,7 @@ const ODataParser = require("odata-v4-parser");
 const extend = require("extend");
 const url = require("url");
 const qs = require("qs");
+const util = require("util");
 const stream_1 = require("stream");
 const utils_1 = require("./utils");
 const result_1 = require("./result");
@@ -459,7 +460,7 @@ class ODataProcessor extends stream_1.Transform {
                         value: value
                     };
                     if (typeof value == "object")
-                        result.elementType = Object.getPrototypeOf(value).constructor;
+                        result.elementType = edm_1.Edm.getType(result.elementType, part.name) || Object;
                     resolve(result);
                 }
             });
@@ -756,8 +757,7 @@ class ODataProcessor extends stream_1.Transform {
                 let itemType;
                 if (typeof type == "function") {
                     itemType = function () { };
-                    itemType.prototype = Object.create(type);
-                    itemType.prototype.constructor = type;
+                    util.inherits(itemType, type);
                 }
                 let converter = edm_1.Edm.getConverter(elementType, prop);
                 let isCollection = edm_1.Edm.isCollection(elementType, prop);

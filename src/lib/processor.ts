@@ -3,6 +3,7 @@ import * as ODataParser from "odata-v4-parser";
 import * as extend from "extend";
 import * as url from "url";
 import * as qs from "qs";
+import * as util from "util";
 import { Transform, Readable, Duplex, TransformOptions } from "stream";
 import { getFunctionParameters } from "./utils";
 import { ODataResult, IODataResult } from "./result";
@@ -472,7 +473,7 @@ export class ODataProcessor extends Transform{
                         "@odata.context": result.body["@odata.context"],
                         value: value
                     };
-                    if (typeof value == "object") result.elementType = Object.getPrototypeOf(value).constructor;
+                    if (typeof value == "object") result.elementType = Edm.getType(result.elementType, part.name) || Object;
                     resolve(result);
                 }
             });
@@ -781,8 +782,7 @@ export class ODataProcessor extends Transform{
                 let itemType;
                 if (typeof type == "function"){
                     itemType = function(){};
-                    itemType.prototype = Object.create(type);
-                    itemType.prototype.constructor = type;
+                    util.inherits(itemType, type);
                 }
                 let converter:Function = Edm.getConverter(elementType, prop);
                 let isCollection = Edm.isCollection(elementType, prop);

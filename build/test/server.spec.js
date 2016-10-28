@@ -9,7 +9,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 /// <reference types="mocha" />
-const assert = require("assert");
+let expect = require("chai").expect;
 const extend = require("extend");
 const odata_v4_inmemory_1 = require("odata-v4-inmemory");
 const index_1 = require("../lib/index");
@@ -338,6 +338,7 @@ TestServer = __decorate([
     index_1.odata.controller(HiddenController),
     index_1.odata.container("TestContainer")
 ], TestServer);
+TestServer.$metadata();
 let AuthenticationServer = class AuthenticationServer extends index_1.ODataServer {
     echo(message) {
         return message;
@@ -358,7 +359,7 @@ function createTest(testcase, server, command, compare, body) {
     it(`${testcase} (${command})`, () => {
         let test = command.split(" ");
         return server.execute(test.slice(1).join(" "), test[0], body).then((result) => {
-            assert.deepEqual(result, compare);
+            expect(result).to.deep.equal(compare);
         });
     });
 }
@@ -631,6 +632,7 @@ describe("ODataServer", () => {
             elementType: User,
             contentType: "application/json"
         });
+        console.log(new Object());
         createTest("should return complex type property", AuthenticationServer, "GET /Users(1)/Location", {
             statusCode: 200,
             body: {
@@ -643,7 +645,7 @@ describe("ODataServer", () => {
     });
     describe("Code coverage", () => {
         it("should return empty object when no public controllers on server", () => {
-            assert.deepEqual(index_1.odata.getPublicControllers(NoServer), {});
+            expect(index_1.odata.getPublicControllers(NoServer)).to.deep.equal({});
         });
         it("should not allow non-OData methods", () => {
             try {
@@ -651,14 +653,14 @@ describe("ODataServer", () => {
                 throw new Error("MERGE should not be allowed");
             }
             catch (err) {
-                assert.equal(err.message, "Method not allowed.");
+                expect(err.message).to.equal("Method not allowed.");
             }
         });
         it("should throw resource not found error", () => {
             return AuthenticationServer.execute("/Users", "DELETE").then(() => {
                 throw new Error("should throw error");
             }, (err) => {
-                assert.equal(err.message, "Resource not found.");
+                expect(err.message).to.equal("Resource not found.");
             });
         });
     });
