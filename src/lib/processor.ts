@@ -590,7 +590,7 @@ export class ODataProcessor extends Transform{
 
                 this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
                 resolve(result);
-            });
+            }, reject);
         });
     }
 

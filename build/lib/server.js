@@ -37,8 +37,11 @@ class ODataServer extends stream_1.Transform {
                 processor.on("contentType", (contentType) => {
                     res.contentType(contentType);
                 });
+                let hasError = false;
                 processor.on("data", (chunk, encoding, done) => {
-                    res.write(chunk, encoding, done);
+                    if (!hasError) {
+                        res.write(chunk, encoding, done);
+                    }
                 });
                 processor.execute(req.body || req).then((result) => {
                     try {
@@ -56,9 +59,13 @@ class ODataServer extends stream_1.Transform {
                         res.end();
                     }
                     catch (err) {
+                        hasError = true;
                         next(err);
                     }
-                }, next);
+                }, (err) => {
+                    hasError = true;
+                    next(err);
+                });
             }
             catch (err) {
                 next(err);

@@ -571,7 +571,7 @@ class ODataProcessor extends stream_1.Transform {
                 }
                 this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
                 resolve(result);
-            });
+            }, reject);
         });
     }
     __EntitySetName(part) {

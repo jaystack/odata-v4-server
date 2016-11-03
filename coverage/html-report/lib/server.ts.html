@@ -20,14 +20,14 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">31.78% </span>
+        <span class="strong">30.36% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>34/107</span>
+        <span class='fraction'>34/112</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">23.88% </span>
+        <span class="strong">23.19% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>16/67</span>
+        <span class='fraction'>16/69</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">30.77% </span>
@@ -35,9 +35,9 @@
         <span class='fraction'>4/13</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">32.99% </span>
+        <span class="strong">31.37% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>32/97</span>
+        <span class='fraction'>32/102</span>
       </div>
     </div>
   </div>
@@ -242,7 +242,14 @@
 197
 198
 199
-200</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+200
+201
+202
+203
+204
+205
+206
+207</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
@@ -284,21 +291,28 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -481,8 +495,11 @@ export class ODataServer extends Transform{
 <span class="cstat-no" title="statement not covered" >                processor.on("contentType", (contentType) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >                    res.contentType(contentType);</span>
                 });
+<span class="cstat-no" title="statement not covered" >                let hasError = false;</span>
 <span class="cstat-no" title="statement not covered" >                processor.on("data", (chunk, encoding, done) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >                    res.write(chunk, encoding, done);</span>
+<span class="cstat-no" title="statement not covered" >                    if (!hasError){</span>
+<span class="cstat-no" title="statement not covered" >                        res.write(chunk, encoding, done);</span>
+                    }
                 });
 <span class="cstat-no" title="statement not covered" >                processor.execute(req.body || req).then((result:ODataResult) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >                    try{</span>
@@ -496,9 +513,13 @@ export class ODataServer extends Transform{
                         }
 <span class="cstat-no" title="statement not covered" >                        res.end();</span>
                     }catch(err){
+<span class="cstat-no" title="statement not covered" >                        hasError = true;</span>
 <span class="cstat-no" title="statement not covered" >                        next(err);</span>
                     }
-                }, next);
+                }, (err) =&gt; {
+<span class="cstat-no" title="statement not covered" >                    hasError = true;</span>
+<span class="cstat-no" title="statement not covered" >                    next(err);</span>
+                });
             }catch(err){
 <span class="cstat-no" title="statement not covered" >                next(err);</span>
             }
@@ -646,7 +667,7 @@ export function createODataServer(server:typeof ODataServer, port:number, hostna
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Nov 03 2016 10:47:02 GMT+0100 (Central Europe Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Nov 03 2016 11:26:04 GMT+0100 (Central Europe Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>
