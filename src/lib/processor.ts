@@ -707,7 +707,7 @@ export class ODataProcessor extends Transform{
 
                     if (boundOp == expOp){
                         let expResult = boundOpName == "$count" ? opResult || this.resultCount : opResult;
-                        if (Edm.isMediaEntity(elementType)){
+                        if (elementType && boundOpName == "$value" && Edm.isMediaEntity(elementType)){
                             this.emit("contentType", Edm.getContentType(elementType));
                             opResult.pipe(this);
                             opResult.on("end", resolve);

@@ -677,7 +677,7 @@ class ODataProcessor extends stream_1.Transform {
                     }
                     if (boundOp == expOp) {
                         let expResult = boundOpName == "$count" ? opResult || this.resultCount : opResult;
-                        if (edm_1.Edm.isMediaEntity(elementType)) {
+                        if (elementType && boundOpName == "$value" && edm_1.Edm.isMediaEntity(elementType)) {
                             this.emit("contentType", edm_1.Edm.getContentType(elementType));
                             opResult.pipe(this);
                             opResult.on("end", resolve);
