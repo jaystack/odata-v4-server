@@ -350,22 +350,21 @@ class ODataProcessor extends stream_1.Transform {
             let resultType = result.elementType;
             let elementType = edm_1.Edm.getType(resultType, part.name);
             let partIndex = this.resourcePath.navigation.indexOf(part);
-            let prevPart = this.resourcePath.navigation[partIndex - 1];
             let method = writeMethods.indexOf(this.method) >= 0 && partIndex < this.resourcePath.navigation.length - 1
                 ? "get"
                 : this.method;
-            let fn = odata_1.odata.findODataMethod(this.ctrl, method + "/" + part.name, prevPart.key);
+            let fn = odata_1.odata.findODataMethod(this.ctrl, method + "/" + part.name, part.key);
             if (fn) {
                 let ctrl = this.ctrl;
                 let fnDesc = fn;
                 let params = {};
-                if (prevPart.key)
-                    prevPart.key.forEach((key) => params[key.name] = key.value);
+                if (part.key)
+                    part.key.forEach((key) => params[key.name] = key.value);
                 this.__applyParams(ctrl, fnDesc.call, params, this.url.query, result);
                 fn = ctrl.prototype[fnDesc.call];
-                if (fnDesc.key.length == 1 && prevPart.key.length == 1 && fnDesc.key[0].to != prevPart.key[0].name) {
-                    params[fnDesc.key[0].to] = params[prevPart.key[0].name];
-                    delete params[prevPart.key[0].name];
+                if (fnDesc.key.length == 1 && part.key.length == 1 && fnDesc.key[0].to != part.key[0].name) {
+                    params[fnDesc.key[0].to] = params[part.key[0].name];
+                    delete params[part.key[0].name];
                 }
                 else {
                     for (let i = 0; i < fnDesc.key.length; i++) {
@@ -375,7 +374,12 @@ class ODataProcessor extends stream_1.Transform {
                         }
                     }
                 }
-                return this.__read(ctrl, part, params, result, fn, elementType);
+                if (part.key)
+                    part.key.forEach((key) => params[key.name] = key.value);
+                return this.__read(ctrl, part, params, result, fn, elementType).then((result) => {
+                    this.ctrl = this.serverType.getController(elementType);
+                    return result;
+                });
             }
             else {
                 let ctrl = this.serverType.getController(elementType);
@@ -398,22 +402,21 @@ class ODataProcessor extends stream_1.Transform {
             let resultType = result.elementType;
             let elementType = edm_1.Edm.getType(resultType, part.name);
             let partIndex = this.resourcePath.navigation.indexOf(part);
-            let prevPart = this.resourcePath.navigation[partIndex - 1];
             let method = writeMethods.indexOf(this.method) >= 0 && partIndex < this.resourcePath.navigation.length - 1
                 ? "get"
                 : this.method;
-            let fn = odata_1.odata.findODataMethod(this.ctrl, method + "/" + part.name, prevPart.key);
+            let fn = odata_1.odata.findODataMethod(this.ctrl, method + "/" + part.name, part.key);
             if (fn) {
                 let ctrl = this.ctrl;
                 let fnDesc = fn;
                 let params = {};
-                if (prevPart.key)
-                    prevPart.key.forEach((key) => params[key.name] = key.value);
+                if (part.key)
+                    part.key.forEach((key) => params[key.name] = key.value);
                 this.__applyParams(ctrl, fnDesc.call, params, this.url.query, result);
                 fn = ctrl.prototype[fnDesc.call];
-                if (fnDesc.key.length == 1 && prevPart.key.length == 1 && fnDesc.key[0].to != prevPart.key[0].name) {
-                    params[fnDesc.key[0].to] = params[prevPart.key[0].name];
-                    delete params[prevPart.key[0].name];
+                if (fnDesc.key.length == 1 && part.key.length == 1 && fnDesc.key[0].to != part.key[0].name) {
+                    params[fnDesc.key[0].to] = params[part.key[0].name];
+                    delete params[part.key[0].name];
                 }
                 else {
                     for (let i = 0; i < fnDesc.key.length; i++) {
@@ -423,13 +426,15 @@ class ODataProcessor extends stream_1.Transform {
                         }
                     }
                 }
-                return this.__read(ctrl, part, params, result, fn, elementType);
+                return this.__read(ctrl, part, params, result, fn, elementType).then((result) => {
+                    this.ctrl = this.serverType.getController(elementType);
+                    return result;
+                });
             }
             else {
                 let ctrl = this.serverType.getController(elementType);
                 let foreignKeys = edm_1.Edm.getForeignKeys(resultType, part.name);
                 let typeKeys = edm_1.Edm.getKeyProperties(elementType);
-                let params = {};
                 result.foreignKeys = {};
                 part.key = foreignKeys.map((key) => {
                     result.foreignKeys[key] = result.body[key];
@@ -438,6 +443,7 @@ class ODataProcessor extends stream_1.Transform {
                         value: result.body[key]
                     };
                 });
+                let params = {};
                 if (part.key)
                     part.key.forEach((key) => params[key.name] = key.value);
                 return this.__read(ctrl, part, params, result);
@@ -502,7 +508,6 @@ class ODataProcessor extends stream_1.Transform {
                 }
                 if (typeof fn != "function") {
                     let fnDesc = fn;
-                    this.__applyParams(ctrl, fnDesc.call, params, queryString);
                     fn = ctrl.prototype[fnDesc.call];
                     if (fnDesc.key.length == 1 && part.key.length == 1 && fnDesc.key[0].to != part.key[0].name) {
                         params[fnDesc.key[0].to] = params[part.key[0].name];
@@ -516,6 +521,7 @@ class ODataProcessor extends stream_1.Transform {
                             }
                         }
                     }
+                    this.__applyParams(ctrl, fnDesc.call, params, queryString);
                 }
                 else
                     this.__applyParams(ctrl, method, params, queryString);
@@ -565,6 +571,10 @@ class ODataProcessor extends stream_1.Transform {
                 }
                 if (!(result instanceof result_1.ODataResult)) {
                     return ODataRequestResult[method](result).then((result) => {
+                        if (this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
+                            writeMethods.indexOf(this.method) < 0 &&
+                            part.key && part.key.length > 0 && !result.body)
+                            return reject(new error_1.ResourceNotFoundError());
                         this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
                         resolve(result);
                     }, reject);
@@ -684,7 +694,7 @@ class ODataProcessor extends stream_1.Transform {
                             opResult.on("error", reject);
                         }
                         else {
-                            return ODataRequestResult[this.method](expResult, typeof expResult == "object" ? "application/json" : "text/plain").then((result) => {
+                            return (boundOpName == "$ref" && this.method != "get" ? result_1.ODataResult.NoContent : ODataRequestResult[this.method])(expResult, typeof expResult == "object" ? "application/json" : "text/plain").then((result) => {
                                 if (typeof expResult == "object")
                                     result.elementType = elementType;
                                 resolve(result);

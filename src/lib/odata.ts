@@ -76,7 +76,9 @@ export namespace odata{
     function odataMethodFactory(type:string, navigationProperty?:string){
         type = type.toLowerCase();
         let decorator:any = function(target, targetKey){
-            Reflect.defineMetadata(ODataMethod, type, target, targetKey);
+            let existingMethods: any[] = Reflect.getMetadata(ODataMethod, target, targetKey) || [];
+            existingMethods.push(type);
+            Reflect.defineMetadata(ODataMethod, existingMethods, target, targetKey);
             return decorator;
         }
         let fn:any = function(target:any, targetKey?:string):any{
@@ -87,7 +89,9 @@ export namespace odata{
             type += "/" + navigationProperty;
             fn.$ref = decorator.$ref = function(target, targetKey){
                 type += "/$ref";
-                Reflect.defineMetadata(ODataMethod, type, target, targetKey);
+                let existingMethods: any[] = Reflect.getMetadata(ODataMethod, target, targetKey) || [];
+                existingMethods.push(type);
+                Reflect.defineMetadata(ODataMethod, existingMethods, target, targetKey);
             };
         }
 
@@ -215,7 +219,7 @@ export namespace odata{
         keys = keys || [];
         let propNames = getAllPropertyNames(target.prototype);
         for (let prop of propNames){
-            if (odata.getMethod(target, prop) == method){
+            if (odata.getMethod(target, prop) && odata.getMethod(target, prop).indexOf(method) >= 0){
                 let fnKeys = odata.getKeys(target, prop);
                 if (keys.length == fnKeys.length){
                     return {
@@ -241,7 +245,7 @@ export namespace odata{
         }
 
         for (let prop of propNames){
-            if (odata.getMethod(target, prop) == method){
+            if (odata.getMethod(target, prop) && odata.getMethod(target, prop).indexOf(method) >= 0){
                 return {
                     call: prop,
                     key: [],

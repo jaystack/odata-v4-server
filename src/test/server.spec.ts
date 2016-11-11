@@ -175,7 +175,7 @@ class CategoriesController extends ODataController{
     }
 
     @odata.GET
-    findOne(@odata.key key:string):Category{
+    findOne(@odata.key key:string, @odata.result result:any):Category{
         return categories.filter(category => category._id.toString() == key)[0] || null;
     }
 }

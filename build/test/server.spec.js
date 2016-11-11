@@ -229,7 +229,7 @@ let CategoriesController = class CategoriesController extends index_1.ODataContr
             return categories.map((category) => extend(extend({}, category), { _id: category._id.toString() })).filter(odata_v4_inmemory_1.createFilter(filter));
         return categories;
     }
-    findOne(key) {
+    findOne(key, result) {
         return categories.filter(category => category._id.toString() == key)[0] || null;
     }
 };
@@ -239,7 +239,8 @@ __decorate([
 ], CategoriesController.prototype, "find", null);
 __decorate([
     index_1.odata.GET,
-    __param(0, index_1.odata.key)
+    __param(0, index_1.odata.key),
+    __param(1, index_1.odata.result)
 ], CategoriesController.prototype, "findOne", null);
 CategoriesController = __decorate([
     index_1.odata.type(model_1.Category),

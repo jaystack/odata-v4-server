@@ -1796,7 +1796,11 @@ odata-v4-mongodb@^0.1.5:
     odata-v4-literal "^0.1.0"
     odata-v4-parser "^0.1.9"
 
-odata-v4-parser@^0.1.12, odata-v4-parser@^0.1.9:
+odata-v4-parser:
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/odata-v4-parser/-/odata-v4-parser-0.1.13.tgz#4b5cfef0381cc39c1ca0d53c0bbc825cc655b492"
+
+odata-v4-parser@^0.1.9:
   version "0.1.12"
   resolved "https://registry.yarnpkg.com/odata-v4-parser/-/odata-v4-parser-0.1.12.tgz#b8a96692d6c273fff7b1bdc65b99dc6100e77434"
 
