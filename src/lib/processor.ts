@@ -10,7 +10,7 @@ import { ODataResult, IODataResult } from "./result";
 import { ODataController } from "./controller";
 import { ResourcePathVisitor, NavigationPart } from "./visitor";
 import { Edm } from "./edm";
-import { odata } from "./odata";
+import { odata, ODataMethodType } from "./odata";
 import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { ODataServer } from "./server";
 
@@ -52,8 +52,8 @@ const createODataContext = function(context, entitySets, server:typeof ODataServ
                         }
                     }
                     returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? "" : "/$entity") : returnTypeName;
-                }
-                return odataContext += returnTypeName;
+                }else returnType = returnTypeName;
+                return odataContext += returnType;
             }else{
                 let call = baseResource.name;
                 let returnType = Edm.getReturnType(server, call);
@@ -68,8 +68,8 @@ const createODataContext = function(context, entitySets, server:typeof ODataServ
                         }
                     }
                     returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? "" : "/$entity") : returnTypeName;
-                }
-                return odataContext += returnTypeName;
+                }else returnType = returnTypeName;
+                return odataContext += returnType;
             }
         }
         if (baseResource.type == TokenType.EntityCollectionNavigationProperty){
@@ -591,13 +591,21 @@ export class ODataProcessor extends Transform{
                         if (this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
                             writeMethods.indexOf(this.method) < 0 &&
                             part.key && part.key.length > 0 && !result.body) return reject(new ResourceNotFoundError());
-                        this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
-                        resolve(result);
+                        try{
+                            this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
+                            resolve(result);
+                        }catch(err){
+                            reject(err);
+                        }
                     }, reject);
                 }
 
-                this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
-                resolve(result);
+                try{
+                    this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
+                    resolve(result);
+                }catch(err){
+                    reject(err);
+                }
             }, reject);
         });
     }
@@ -645,8 +653,12 @@ export class ODataProcessor extends Transform{
                                 (<any>result.body).on("end", resolve);
                                 (<any>result.body).on("error", reject);
                             }else{
-                                this.__appendODataContext(result, returnType);
-                                resolve(result);
+                                try{
+                                    this.__appendODataContext(result, returnType);
+                                    resolve(result);
+                                }catch(err){
+                                    reject(err);
+                                }
                             }
                         }, reject);
                     }
@@ -735,8 +747,12 @@ export class ODataProcessor extends Transform{
                             (<any>result.body).on("end", resolve);
                             (<any>result.body).on("error", reject);
                         }else{
-                            this.__appendODataContext(result, returnType);
-                            resolve(result);
+                            try{
+                                this.__appendODataContext(result, returnType);
+                                resolve(result);
+                            }catch(err){
+                                reject(err);
+                            }
                         }
                     }, reject);
                 }catch(err){
@@ -744,6 +760,34 @@ export class ODataProcessor extends Transform{
                 }
             });
         };
+    }
+
+    __appendLinks(ctrl, elementType, context, body){
+        let entitySet = this.entitySets[this.resourcePath.navigation[0].name] == ctrl ? this.resourcePath.navigation[0].name : null;
+        if (!entitySet){
+            for (let prop in this.entitySets){
+                if (this.entitySets[prop] == ctrl){
+                    entitySet = prop;
+                    break;
+                }
+            }
+        }
+        if (entitySet){
+            let keys = Edm.getKeyProperties(elementType);
+            if (keys.length > 0){
+                let id;
+                if (keys.length == 1){
+                    id = Edm.escape(body[keys[0]], Edm.getTypeName(elementType, keys[0]));
+                }else{
+                    id = keys.map(it => `${it}=${Edm.escape(body[it], Edm.getTypeName(elementType, it))}`).join(",");
+                }
+                context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                if (odata.findODataMethod(ctrl, "put", keys) ||
+                    odata.findODataMethod(ctrl, "patch", keys)){
+                        context["@odata.editLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                    }
+            }
+        }
     }
 
     __appendODataContext(result:any, elementType:Function){
@@ -761,16 +805,19 @@ export class ODataProcessor extends Transform{
             }
 
             if (!result.body["@odata.context"]){
+                let ctrl = this.ctrl || this.serverType.getController(elementType);
                 if (Array.isArray(result.body.value)){
                     context.value = result.body.value;
                     result.body.value.forEach((entity, i) => {
                         if (typeof entity == "object"){
                             let item = {};
+                            if (ctrl) this.__appendLinks(ctrl, elementType, item, entity);
                             this.__convertEntity(item, entity, elementType);
                             context.value[i] = item;
                         }
                     });
                 }else{
+                    if (ctrl) this.__appendLinks(ctrl, elementType, context, result.body);
                     this.__convertEntity(context, result.body, elementType);
                 }
             }

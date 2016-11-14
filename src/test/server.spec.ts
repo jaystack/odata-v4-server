@@ -41,7 +41,7 @@ class Foobar{
 class SyncTestController extends ODataController{
     @odata.GET
     entitySet(@odata.query query:Token, @odata.context context:any, @odata.result result:any, @odata.stream stream:ODataProcessor){
-        return [{ a: 1 }];
+        return [{ id: 1,  a: 1 }];
     }
 
     @odata.GET()
@@ -75,7 +75,7 @@ class SyncTestController extends ODataController{
 class GeneratorTestController extends ODataController{
     @odata.GET
     *entitySet(){
-        return [{ a: 1 }];
+        return [{ id: 1, a: 1 }];
     }
 }
 
@@ -85,7 +85,7 @@ class AsyncTestController extends ODataController{
     entitySet(){
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                resolve([{ a: 1 }]);
+                resolve([{ id: 1, a: 1 }]);
             });
         });
     }
@@ -114,7 +114,7 @@ class AsyncTestController extends ODataController{
 class InlineCountController extends ODataController{
     @odata.GET
     entitySet(){
-        let result = [{ a: 1 }];
+        let result = [{ id: 1, a: 1 }];
         (<any>result).inlinecount = 1;
         return result;
     }
@@ -141,12 +141,12 @@ class BoundOperationController extends ODataController{
 
     @odata.GET
     entitySet(){
-        return [{ a: 1 }];
+        return [{ id: 1, a: 1 }];
     }
 
     @odata.GET
     entity(@odata.key key:number){
-        return { a: 1 };
+        return { id: key, a: 1 };
     }
 }
 
@@ -288,7 +288,12 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#EntitySet",
-                value: [{ a: 1 }]
+                value: [{
+                    "@odata.id": "http://localhost/EntitySet(1)",
+                    "@odata.editLink": "http://localhost/EntitySet(1)",
+                    id: 1,
+                    a: 1
+                }]
             },
             elementType: Foobar,
             contentType: "application/json"
@@ -298,7 +303,11 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#GeneratorEntitySet",
-                value: [{ a: 1 }]
+                value: [{
+                    "@odata.id": "http://localhost/GeneratorEntitySet(1)",
+                    id: 1,
+                    a: 1
+                }]
             },
             elementType: Foobar,
             contentType: "application/json"
@@ -308,7 +317,11 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#AsyncEntitySet",
-                value: [{ a: 1 }]
+                value: [{
+                    "@odata.id": "http://localhost/AsyncEntitySet(1)",
+                    id: 1,
+                    a: 1
+                }]
             },
             elementType: Foobar,
             contentType: "application/json"
@@ -319,7 +332,11 @@ describe("ODataServer", () => {
             body: {
                 "@odata.context": "http://localhost/$metadata#InlineCountEntitySet",
                 "@odata.count": 1,
-                value: [{ a: 1 }]
+                value: [{
+                    "@odata.id": "http://localhost/InlineCountEntitySet(1)",
+                    id: 1,
+                    a: 1
+                }]
             },
             elementType: Foobar,
             contentType: "application/json"
@@ -329,6 +346,8 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
+                "@odata.id": "http://localhost/EntitySet(1)",
+                "@odata.editLink": "http://localhost/EntitySet(1)",
                 id: 1,
                 foo: "bar"
             },
@@ -340,6 +359,8 @@ describe("ODataServer", () => {
             statusCode: 201,
             body: {
                 "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
+                "@odata.id": "http://localhost/EntitySet(1)",
+                "@odata.editLink": "http://localhost/EntitySet(1)",
                 id: 1,
                 foo: "bar"
             },
@@ -541,7 +562,9 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af289')/Products",
-                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289")
+                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289").map(product => extend({
+                    "@odata.id": `http://localhost/Products('${product._id}')`
+                }, product))
             },
             elementType: Product,
             contentType: "application/json"
@@ -551,7 +574,9 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af289')/Products",
-                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289" && product.Name == "Chai")
+                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289" && product.Name == "Chai").map(product => extend({
+                    "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')"
+                }, product))
             },
             elementType: Product,
             contentType: "application/json"
@@ -561,6 +586,7 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: extend({
                 "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af289')/Products/$entity",
+                "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')"
             }, products.filter(product => product._id.toString() == "578f2b8c12eaebabec4af23c")[0]),
             elementType: Product,
             contentType: "application/json"
@@ -570,6 +596,7 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: extend({
                 "@odata.context": "http://localhost/$metadata#Products('578f2b8c12eaebabec4af23c')/Category",
+                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af289')",
             }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af289")[0]),
             elementType: Category,
             contentType: "application/json"
@@ -579,7 +606,9 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Users",
-                value: [new User(1, new Location("Budapest", "Virág utca"))]
+                value: [extend(new User(1, new Location("Budapest", "Virág utca")), {
+                    "@odata.id": "http://localhost/Users(1)"
+                })]
             },
             elementType: User,
             contentType: "application/json"

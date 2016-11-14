@@ -54,7 +54,9 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
                     }
                     returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? "" : "/$entity") : returnTypeName;
                 }
-                return odataContext += returnTypeName;
+                else
+                    returnType = returnTypeName;
+                return odataContext += returnType;
             }
             else {
                 let call = baseResource.name;
@@ -71,7 +73,9 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
                     }
                     returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? "" : "/$entity") : returnTypeName;
                 }
-                return odataContext += returnTypeName;
+                else
+                    returnType = returnTypeName;
+                return odataContext += returnType;
             }
         }
         if (baseResource.type == lexer_1.TokenType.EntityCollectionNavigationProperty) {
@@ -575,12 +579,22 @@ class ODataProcessor extends stream_1.Transform {
                             writeMethods.indexOf(this.method) < 0 &&
                             part.key && part.key.length > 0 && !result.body)
                             return reject(new error_1.ResourceNotFoundError());
-                        this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
-                        resolve(result);
+                        try {
+                            this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
+                            resolve(result);
+                        }
+                        catch (err) {
+                            reject(err);
+                        }
                     }, reject);
                 }
-                this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
-                resolve(result);
+                try {
+                    this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
+                    resolve(result);
+                }
+                catch (err) {
+                    reject(err);
+                }
             }, reject);
         });
     }
@@ -625,8 +639,13 @@ class ODataProcessor extends stream_1.Transform {
                                 result.body.on("error", reject);
                             }
                             else {
-                                this.__appendODataContext(result, returnType);
-                                resolve(result);
+                                try {
+                                    this.__appendODataContext(result, returnType);
+                                    resolve(result);
+                                }
+                                catch (err) {
+                                    reject(err);
+                                }
                             }
                         }, reject);
                     }
@@ -710,8 +729,13 @@ class ODataProcessor extends stream_1.Transform {
                             result.body.on("error", reject);
                         }
                         else {
-                            this.__appendODataContext(result, returnType);
-                            resolve(result);
+                            try {
+                                this.__appendODataContext(result, returnType);
+                                resolve(result);
+                            }
+                            catch (err) {
+                                reject(err);
+                            }
                         }
                     }, reject);
                 }
@@ -720,6 +744,34 @@ class ODataProcessor extends stream_1.Transform {
                 }
             });
         };
+    }
+    __appendLinks(ctrl, elementType, context, body) {
+        let entitySet = this.entitySets[this.resourcePath.navigation[0].name] == ctrl ? this.resourcePath.navigation[0].name : null;
+        if (!entitySet) {
+            for (let prop in this.entitySets) {
+                if (this.entitySets[prop] == ctrl) {
+                    entitySet = prop;
+                    break;
+                }
+            }
+        }
+        if (entitySet) {
+            let keys = edm_1.Edm.getKeyProperties(elementType);
+            if (keys.length > 0) {
+                let id;
+                if (keys.length == 1) {
+                    id = edm_1.Edm.escape(body[keys[0]], edm_1.Edm.getTypeName(elementType, keys[0]));
+                }
+                else {
+                    id = keys.map(it => `${it}=${edm_1.Edm.escape(body[it], edm_1.Edm.getTypeName(elementType, it))}`).join(",");
+                }
+                context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                if (odata_1.odata.findODataMethod(ctrl, "put", keys) ||
+                    odata_1.odata.findODataMethod(ctrl, "patch", keys)) {
+                    context["@odata.editLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                }
+            }
+        }
     }
     __appendODataContext(result, elementType) {
         if (typeof result.body == "undefined")
@@ -736,17 +788,22 @@ class ODataProcessor extends stream_1.Transform {
                 result.stream = result.body;
             }
             if (!result.body["@odata.context"]) {
+                let ctrl = this.ctrl || this.serverType.getController(elementType);
                 if (Array.isArray(result.body.value)) {
                     context.value = result.body.value;
                     result.body.value.forEach((entity, i) => {
                         if (typeof entity == "object") {
                             let item = {};
+                            if (ctrl)
+                                this.__appendLinks(ctrl, elementType, item, entity);
                             this.__convertEntity(item, entity, elementType);
                             context.value[i] = item;
                         }
                     });
                 }
                 else {
+                    if (ctrl)
+                        this.__appendLinks(ctrl, elementType, context, result.body);
                     this.__convertEntity(context, result.body, elementType);
                 }
             }

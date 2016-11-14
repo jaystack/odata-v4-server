@@ -42,6 +42,7 @@ export declare class ODataProcessor extends Transform {
     __EntitySetName(part: NavigationPart): Function;
     __actionOrFunctionImport(part: NavigationPart): Function;
     __actionOrFunction(part: NavigationPart): Function;
+    __appendLinks(ctrl: any, elementType: any, context: any, body: any): void;
     __appendODataContext(result: any, elementType: Function): void;
     __convertEntity(context: any, result: any, elementType: any): any;
     __enableStreaming(part: NavigationPart): void;
