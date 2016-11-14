@@ -585,7 +585,7 @@ describe("ODataServer", () => {
         createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products('578f2b8c12eaebabec4af23c')", {
             statusCode: 200,
             body: extend({
-                "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af289')/Products/$entity",
+                "@odata.context": "http://localhost/$metadata#Products/$entity",
                 "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')"
             }, products.filter(product => product._id.toString() == "578f2b8c12eaebabec4af23c")[0]),
             elementType: Product,
@@ -595,7 +595,7 @@ describe("ODataServer", () => {
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
             statusCode: 200,
             body: extend({
-                "@odata.context": "http://localhost/$metadata#Products('578f2b8c12eaebabec4af23c')/Category",
+                "@odata.context": "http://localhost/$metadata#Categories/$entity",
                 "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af289')",
             }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af289")[0]),
             elementType: Category,

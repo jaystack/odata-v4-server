@@ -1,7 +1,8 @@
 export interface IODataResult {
-    "@odata.context": string;
-    "@odata.count": number;
-    value: any;
+    "@odata.context"?: string;
+    "@odata.count"?: number;
+    value?: any;
+    [x: string]: any;
 }
 export declare class ODataResult {
     statusCode: number;

@@ -44,6 +44,7 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
                 let returnType = edm_1.Edm.getReturnType(target, propertyKey);
                 let returnTypeName = edm_1.Edm.getReturnTypeName(target, propertyKey);
                 if (typeof returnType == "function") {
+                    prevType = returnType;
                     let ctrl = server.getController(returnType);
                     let entitySet = null;
                     for (let prop in entitySets) {
@@ -63,6 +64,7 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
                 let returnType = edm_1.Edm.getReturnType(server, call);
                 let returnTypeName = edm_1.Edm.getReturnTypeName(server, call);
                 if (typeof returnType == "function") {
+                    prevType = returnType;
                     let ctrl = server.getController(returnType);
                     let entitySet = null;
                     for (let prop in entitySets) {
@@ -82,6 +84,16 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
             prevResource = baseResource;
             odataContext += "/" + baseResource.name;
             prevType = baseResource.key ? edm_1.Edm.getType(prevType, baseResource.name) : server.getController(edm_1.Edm.getType(prevType, baseResource.name));
+            let ctrl = server.getController(prevType);
+            let entitySet = null;
+            for (let prop in entitySets) {
+                if (entitySets[prop] == ctrl) {
+                    entitySet = prop;
+                    break;
+                }
+            }
+            if (entitySet)
+                odataContext = entitySet;
             if (baseResource.key && resourcePath.navigation.indexOf(baseResource) == resourcePath.navigation.length - 1)
                 return odataContext += "/$entity";
             if (baseResource.key) {
@@ -92,7 +104,15 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
         if (baseResource.type == lexer_1.TokenType.EntityNavigationProperty) {
             prevResource = baseResource;
             prevType = edm_1.Edm.getType(prevType, baseResource.name);
-            return odataContext += "/" + baseResource.name;
+            let ctrl = server.getController(prevType);
+            let entitySet = null;
+            for (let prop in entitySets) {
+                if (entitySets[prop] == ctrl) {
+                    entitySet = prop;
+                    break;
+                }
+            }
+            return entitySet ? odataContext = entitySet + "/$entity" : odataContext += "/" + baseResource.name;
         }
         if (baseResource.type == lexer_1.TokenType.PrimitiveProperty ||
             baseResource.type == lexer_1.TokenType.PrimitiveCollectionProperty ||
@@ -788,7 +808,7 @@ class ODataProcessor extends stream_1.Transform {
                 result.stream = result.body;
             }
             if (!result.body["@odata.context"]) {
-                let ctrl = this.ctrl || this.serverType.getController(elementType);
+                let ctrl = this.ctrl && this.ctrl.prototype.elementType == elementType ? this.ctrl : this.serverType.getController(elementType);
                 if (Array.isArray(result.body.value)) {
                     context.value = result.body.value;
                     result.body.value.forEach((entity, i) => {
