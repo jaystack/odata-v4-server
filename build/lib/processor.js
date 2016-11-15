@@ -163,7 +163,7 @@ const expCalls = {
         let fn = odata_1.odata.findODataMethod(processor.prevCtrl, processor.method + "/" + prevPart.name + "/$ref", routePart.key || []);
         if (!fn)
             throw new error_1.ResourceNotFoundError();
-        let linkUrl = (processor.resourcePath.id || processor.body["@odata.id"] || "").replace(getODataRoot(processor.context), "");
+        let linkUrl = (processor.resourcePath.id || (processor.body || {})["@odata.id"] || "").replace(getODataRoot(processor.context), "");
         let linkAst, linkPath, linkPart;
         if (linkUrl) {
             linkAst = ODataParser.odataUri(linkUrl, { metadata: processor.serverType.$metadata().edmx });
