@@ -734,7 +734,7 @@ class ODataProcessor extends stream_1.Transform {
                         }
                         else {
                             return (boundOpName == "$ref" && this.method != "get" ? result_1.ODataResult.NoContent : ODataRequestResult[this.method])(expResult, typeof expResult == "object" ? "application/json" : "text/plain").then((result) => {
-                                if (typeof expResult == "object")
+                                if (typeof expResult == "object" && boundOpName != "$ref")
                                     result.elementType = elementType;
                                 resolve(result);
                             }, reject);

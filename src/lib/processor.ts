@@ -753,7 +753,7 @@ export class ODataProcessor extends Transform{
                             opResult.on("error", reject);
                         }else{
                             return (<Promise<ODataResult>>(boundOpName == "$ref" && this.method != "get" ? ODataResult.NoContent : ODataRequestResult[this.method])(expResult, typeof expResult == "object" ? "application/json" : "text/plain")).then((result) => {
-                                if (typeof expResult == "object") result.elementType = elementType;
+                                if (typeof expResult == "object" && boundOpName != "$ref") result.elementType = elementType;
                                 resolve(result);
                             }, reject);
                         }
