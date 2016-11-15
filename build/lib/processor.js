@@ -596,8 +596,7 @@ class ODataProcessor extends stream_1.Transform {
                 if (!(result instanceof result_1.ODataResult)) {
                     return ODataRequestResult[method](result).then((result) => {
                         if (this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
-                            writeMethods.indexOf(this.method) < 0 &&
-                            part.key && part.key.length > 0 && !result.body)
+                            writeMethods.indexOf(this.method) < 0 && !result.body)
                             return reject(new error_1.ResourceNotFoundError());
                         try {
                             this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);

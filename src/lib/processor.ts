@@ -608,8 +608,7 @@ export class ODataProcessor extends Transform{
                 if (!(result instanceof ODataResult)){
                     return (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
                         if (this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
-                            writeMethods.indexOf(this.method) < 0 &&
-                            part.key && part.key.length > 0 && !result.body) return reject(new ResourceNotFoundError());
+                            writeMethods.indexOf(this.method) < 0 && !result.body) return reject(new ResourceNotFoundError());
                         try{
                             this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
                             resolve(result);
