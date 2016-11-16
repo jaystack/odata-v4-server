@@ -334,6 +334,7 @@ class ODataProcessor extends stream_1.Transform {
                     this.push(',');
                 try {
                     let entity = {};
+                    this.__appendLinks(this.ctrl, this.ctrl.prototype.elementType, entity, chunk);
                     this.__convertEntity(entity, chunk, this.ctrl.prototype.elementType);
                     chunk = JSON.stringify(entity);
                 }
@@ -588,12 +589,10 @@ class ODataProcessor extends stream_1.Transform {
             }
             return currentResult.then((result) => {
                 if (isStream(result) && !edm_1.Edm.isMediaEntity(elementType || this.ctrl.prototype.elementType)) {
-                    return new Promise((resolve, reject) => {
-                        result.on("end", resolve);
-                        result.on("error", reject);
-                    });
+                    result.on("end", () => resolve(ODataRequestResult[method]()));
+                    result.on("error", reject);
                 }
-                if (!(result instanceof result_1.ODataResult)) {
+                else if (!(result instanceof result_1.ODataResult)) {
                     return ODataRequestResult[method](result).then((result) => {
                         if (this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
                             writeMethods.indexOf(this.method) < 0 && !result.body)
@@ -607,12 +606,14 @@ class ODataProcessor extends stream_1.Transform {
                         }
                     }, reject);
                 }
-                try {
-                    this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
-                    resolve(result);
-                }
-                catch (err) {
-                    reject(err);
+                else {
+                    try {
+                        this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
+                        resolve(result);
+                    }
+                    catch (err) {
+                        reject(err);
+                    }
                 }
             }, reject);
         });

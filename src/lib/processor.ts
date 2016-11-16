@@ -357,6 +357,7 @@ export class ODataProcessor extends Transform{
                 }else this.push(',');
                 try{
                     let entity = {};
+                    this.__appendLinks(this.ctrl, this.ctrl.prototype.elementType, entity, chunk);
                     this.__convertEntity(entity, chunk, this.ctrl.prototype.elementType);
                     chunk = JSON.stringify(entity);
                 }catch(err){
@@ -600,12 +601,9 @@ export class ODataProcessor extends Transform{
 
             return currentResult.then((result:any):any => {
                 if (isStream(result) && !Edm.isMediaEntity(elementType || this.ctrl.prototype.elementType)){
-                    return new Promise((resolve, reject) => {
-                        result.on("end", resolve);
-                        result.on("error", reject);
-                    });
-                }
-                if (!(result instanceof ODataResult)){
+                    result.on("end", () => resolve(ODataRequestResult[method]()));
+                    result.on("error", reject);
+                }else if (!(result instanceof ODataResult)){
                     return (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
                         if (this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
                             writeMethods.indexOf(this.method) < 0 && !result.body) return reject(new ResourceNotFoundError());
@@ -616,13 +614,13 @@ export class ODataProcessor extends Transform{
                             reject(err);
                         }
                     }, reject);
-                }
-
-                try{
-                    this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
-                    resolve(result);
-                }catch(err){
-                    reject(err);
+                }else{
+                    try{
+                        this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType);
+                        resolve(result);
+                    }catch(err){
+                        reject(err);
+                    }
                 }
             }, reject);
         });
