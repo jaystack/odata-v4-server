@@ -779,17 +779,20 @@ class ODataProcessor extends stream_1.Transform {
             let keys = edm_1.Edm.getKeyProperties(elementType);
             if (keys.length > 0) {
                 let id;
-                if (keys.length == 1) {
-                    id = edm_1.Edm.escape(body[keys[0]], edm_1.Edm.getTypeName(elementType, keys[0]));
+                try {
+                    if (keys.length == 1) {
+                        id = edm_1.Edm.escape(body[keys[0]], edm_1.Edm.getTypeName(elementType, keys[0]));
+                    }
+                    else {
+                        id = keys.map(it => `${it}=${edm_1.Edm.escape(body[it], edm_1.Edm.getTypeName(elementType, it))}`).join(",");
+                    }
+                    context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                    if (odata_1.odata.findODataMethod(ctrl, "put", keys) ||
+                        odata_1.odata.findODataMethod(ctrl, "patch", keys)) {
+                        context["@odata.editLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                    }
                 }
-                else {
-                    id = keys.map(it => `${it}=${edm_1.Edm.escape(body[it], edm_1.Edm.getTypeName(elementType, it))}`).join(",");
-                }
-                context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
-                if (odata_1.odata.findODataMethod(ctrl, "put", keys) ||
-                    odata_1.odata.findODataMethod(ctrl, "patch", keys)) {
-                    context["@odata.editLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
-                }
+                catch (err) { }
             }
         }
     }

@@ -792,16 +792,18 @@ export class ODataProcessor extends Transform{
             let keys = Edm.getKeyProperties(elementType);
             if (keys.length > 0){
                 let id;
-                if (keys.length == 1){
-                    id = Edm.escape(body[keys[0]], Edm.getTypeName(elementType, keys[0]));
-                }else{
-                    id = keys.map(it => `${it}=${Edm.escape(body[it], Edm.getTypeName(elementType, it))}`).join(",");
-                }
-                context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
-                if (odata.findODataMethod(ctrl, "put", keys) ||
-                    odata.findODataMethod(ctrl, "patch", keys)){
-                        context["@odata.editLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                try{
+                    if (keys.length == 1){
+                        id = Edm.escape(body[keys[0]], Edm.getTypeName(elementType, keys[0]));
+                    }else{
+                        id = keys.map(it => `${it}=${Edm.escape(body[it], Edm.getTypeName(elementType, it))}`).join(",");
                     }
+                    context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                    if (odata.findODataMethod(ctrl, "put", keys) ||
+                        odata.findODataMethod(ctrl, "patch", keys)){
+                            context["@odata.editLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                        }
+                }catch(err){}
             }
         }
     }
