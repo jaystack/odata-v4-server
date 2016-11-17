@@ -7,7 +7,7 @@ class ODataResult {
             this.body = typeof result == "object" && result ? extend({}, result) : result;
             if (result && result.constructor)
                 this.elementType = result.constructor;
-            this.contentType = contentType || (typeof this.body == "object" ? "application/json" : "text/plain");
+            this.contentType = contentType || "application/json";
         }
     }
 }

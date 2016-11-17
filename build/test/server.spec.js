@@ -22,6 +22,9 @@ class Foobar {
         return "foobar";
     }
     echo(message) {
+        return message;
+    }
+    echoMany(message) {
         return [message];
     }
 }
@@ -44,9 +47,14 @@ __decorate([
 ], Foobar.prototype, "Bar", null);
 __decorate([
     index_1.odata.namespace("Echo"),
-    index_1.Edm.Function(index_1.Edm.Collection(index_1.Edm.String)),
+    index_1.Edm.Function(index_1.Edm.String),
     __param(0, index_1.Edm.String)
 ], Foobar.prototype, "echo", null);
+__decorate([
+    index_1.odata.namespace("Echo"),
+    index_1.Edm.Function(index_1.Edm.Collection(index_1.Edm.String)),
+    __param(0, index_1.Edm.String)
+], Foobar.prototype, "echoMany", null);
 let SyncTestController = class SyncTestController extends index_1.ODataController {
     entitySet(query, context, result, stream) {
         return [{ id: 1, a: 1 }];
@@ -504,7 +512,7 @@ describe("ODataServer", () => {
                 value: "The number is 42."
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call function import using parameter alias", TestServer, "GET /FunctionImport(value=@value)?@value=42", {
             statusCode: 200,
@@ -513,7 +521,7 @@ describe("ODataServer", () => {
                 value: "The number is 42."
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call function import with multiple parameters", TestServer, "GET /FunctionImportMore(value=42,message='hello world')", {
             statusCode: 200,
@@ -522,7 +530,7 @@ describe("ODataServer", () => {
                 value: "The number is 42 and your message was hello world."
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call function import with multiple parameters using parameter alias", TestServer, "GET /FunctionImportMore(value=@value,message=@message)?@value=42&@message='hello world'", {
             statusCode: 200,
@@ -531,7 +539,7 @@ describe("ODataServer", () => {
                 value: "The number is 42 and your message was hello world."
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call function import with multiple parameters (different ordering)", TestServer, "GET /FunctionImportMore(message='hello world',value=42)", {
             statusCode: 200,
@@ -540,7 +548,7 @@ describe("ODataServer", () => {
                 value: "The number is 42 and your message was hello world."
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call bound collection action", TestServer, "POST /BoundOperationEntitySet/Default.Action", {
             statusCode: 204
@@ -555,7 +563,7 @@ describe("ODataServer", () => {
                 value: "foobar"
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call bound entity function", TestServer, "GET /BoundOperationEntitySet(1)/Default.Bar()", {
             statusCode: 200,
@@ -564,9 +572,18 @@ describe("ODataServer", () => {
                 value: "foobar"
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call bound entity function with parameter", TestServer, "GET /BoundOperationEntitySet(1)/Echo.echo(message='my message')", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Edm.String",
+                value: "my message"
+            },
+            elementType: "Edm.String",
+            contentType: "application/json"
+        });
+        createTest("should call bound entity function with parameter", TestServer, "GET /BoundOperationEntitySet(1)/Echo.echoMany(message='my message')", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Collection(Edm.String)",
@@ -582,7 +599,7 @@ describe("ODataServer", () => {
                 value: "foobar"
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call function import with multiple parameters", TestServer, "GET /BoundOperationEntitySet/Default.FunctionMore(value=42,message='hello world')", {
             statusCode: 200,
@@ -591,7 +608,7 @@ describe("ODataServer", () => {
                 value: "The number is 42 and your message was hello world."
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call function import with multiple parameters using parameter alias", TestServer, "GET /BoundOperationEntitySet/Default.FunctionMore(value=@value,message=@message)?@value=42&@message='hello world'", {
             statusCode: 200,
@@ -600,7 +617,7 @@ describe("ODataServer", () => {
                 value: "The number is 42 and your message was hello world."
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should call function import with multiple parameters (different ordering)", TestServer, "GET /BoundOperationEntitySet/Default.FunctionMore(message='hello world',value=42)", {
             statusCode: 200,
@@ -609,7 +626,7 @@ describe("ODataServer", () => {
                 value: "The number is 42 and your message was hello world."
             },
             elementType: "Edm.String",
-            contentType: "text/plain"
+            contentType: "application/json"
         });
         createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products", {
             statusCode: 200,
