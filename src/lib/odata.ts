@@ -341,4 +341,21 @@ export namespace odata{
     export function getIdParameter(target, targetKey){
         return Reflect.getMetadata(ODataIdParameter, target.prototype, targetKey);
     }
+
+    export function parameter(name:string, type:Function){
+        return function(target?:any, targetKey?:string){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let parameterIndex = parameterNames.indexOf(name);
+            if (parameterIndex >= 0){
+                type(target, targetKey, parameterIndex);
+            }
+        };
+    }
+    export function parameters(parameters:any){
+        return function(target?:any, targetKey?:string){
+            for (let prop in parameters){
+                parameter(prop, parameters[prop])(target, targetKey);
+            }
+        }
+    }
 }

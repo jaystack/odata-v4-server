@@ -166,7 +166,8 @@ class ProductsController extends ODataController{
     }
 
     @odata.GET
-    findOne(@odata.key key:string):Product{
+    @odata.parameter("key", odata.key)
+    findOne(key:string):Product{
         return products.filter(product => product._id.toString() == key)[0] || null;
     }
 }
@@ -181,7 +182,11 @@ class CategoriesController extends ODataController{
     }
 
     @odata.GET
-    findOne(@odata.key key:string, @odata.result result:any):Category{
+    @odata.parameters({
+        key: odata.key,
+        result: odata.result
+    })
+    findOne(key:string, result:any):Category{
         return categories.filter(category => category._id.toString() == key)[0] || null;
     }
 }

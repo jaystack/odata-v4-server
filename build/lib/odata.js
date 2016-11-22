@@ -318,5 +318,23 @@ var odata;
         return Reflect.getMetadata(ODataIdParameter, target.prototype, targetKey);
     }
     odata.getIdParameter = getIdParameter;
+    function parameter(name, type) {
+        return function (target, targetKey) {
+            let parameterNames = utils_1.getFunctionParameters(target, targetKey);
+            let parameterIndex = parameterNames.indexOf(name);
+            if (parameterIndex >= 0) {
+                type(target, targetKey, parameterIndex);
+            }
+        };
+    }
+    odata.parameter = parameter;
+    function parameters(parameters) {
+        return function (target, targetKey) {
+            for (let prop in parameters) {
+                parameter(prop, parameters[prop])(target, targetKey);
+            }
+        };
+    }
+    odata.parameters = parameters;
 })(odata = exports.odata || (exports.odata = {}));
 //# sourceMappingURL=odata.js.map

@@ -78,4 +78,6 @@ export declare namespace odata {
     function getResultParameter(target: any, targetKey: any): any;
     const id: (target: any, targetKey: any, parameterIndex: number) => void;
     function getIdParameter(target: any, targetKey: any): any;
+    function parameter(name: string, type: Function): (target?: any, targetKey?: string) => void;
+    function parameters(parameters: any): (target?: any, targetKey?: string) => void;
 }

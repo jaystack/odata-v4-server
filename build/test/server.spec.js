@@ -225,7 +225,7 @@ __decorate([
 ], ProductsController.prototype, "find", null);
 __decorate([
     index_1.odata.GET,
-    __param(0, index_1.odata.key)
+    index_1.odata.parameter("key", index_1.odata.key)
 ], ProductsController.prototype, "findOne", null);
 ProductsController = __decorate([
     index_1.odata.type(model_1.Product),
@@ -247,8 +247,10 @@ __decorate([
 ], CategoriesController.prototype, "find", null);
 __decorate([
     index_1.odata.GET,
-    __param(0, index_1.odata.key),
-    __param(1, index_1.odata.result)
+    index_1.odata.parameters({
+        key: index_1.odata.key,
+        result: index_1.odata.result
+    })
 ], CategoriesController.prototype, "findOne", null);
 CategoriesController = __decorate([
     index_1.odata.type(model_1.Category),
