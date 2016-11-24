@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-server",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "OData V4 Server",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
@@ -43,7 +43,7 @@
     "express": "^4.14.0",
     "extend": "^3.0.0",
     "odata-v4-metadata": "^0.1.3",
-    "odata-v4-parser": "^0.1.13",
+    "odata-v4-parser": "^0.1.14",
     "odata-v4-service-document": "0.0.3",
     "odata-v4-service-metadata": "^0.1.5",
     "qs": "^6.3.0",

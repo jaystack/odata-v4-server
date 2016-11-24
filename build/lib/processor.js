@@ -15,19 +15,25 @@ const error_1 = require("./error");
 const getODataRoot = function (context) {
     return (context.protocol || "http") + "://" + (context.host || "localhost") + (context.base || "");
 };
-const createODataContext = function (context, entitySets, server, resourcePath) {
+const createODataContext = function (context, entitySets, server, resourcePath, processor) {
     let odataContextBase = getODataRoot(context) + "/$metadata#";
     let odataContext = "";
     let prevResource = null;
     let prevType = server;
+    let selectContext = "";
+    if (processor.query && processor.query.$select) {
+        selectContext = `(${processor.query.$select})`;
+    }
     resourcePath.navigation.forEach((baseResource, i) => {
         let next = resourcePath.navigation[i + 1];
+        let selectContextPart = (i == resourcePath.navigation.length - 1) ? selectContext : "";
         if (next && next.type == lexer_1.TokenType.RefExpression)
             return;
         if (baseResource.type == lexer_1.TokenType.EntitySetName) {
             prevResource = baseResource;
             prevType = baseResource.key ? entitySets[baseResource.name].prototype.elementType : entitySets[baseResource.name];
             odataContext += baseResource.name;
+            odataContext += selectContextPart;
             if (baseResource.key && resourcePath.navigation.indexOf(baseResource) == resourcePath.navigation.length - 1)
                 return odataContext += "/$entity";
             if (baseResource.key) {
@@ -53,7 +59,7 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
                             break;
                         }
                     }
-                    returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? "" : "/$entity") : returnTypeName;
+                    returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? selectContextPart : selectContextPart + "/$entity") : returnTypeName;
                 }
                 else
                     returnType = returnTypeName;
@@ -73,7 +79,7 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
                             break;
                         }
                     }
-                    returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? "" : "/$entity") : returnTypeName;
+                    returnType = entitySet ? entitySet + (returnTypeName.indexOf("Collection") == 0 ? selectContextPart : selectContextPart + "/$entity") : returnTypeName;
                 }
                 else
                     returnType = returnTypeName;
@@ -94,6 +100,7 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
             }
             if (entitySet)
                 odataContext = entitySet;
+            odataContext += selectContextPart;
             if (baseResource.key && resourcePath.navigation.indexOf(baseResource) == resourcePath.navigation.length - 1)
                 return odataContext += "/$entity";
             if (baseResource.key) {
@@ -112,7 +119,7 @@ const createODataContext = function (context, entitySets, server, resourcePath) 
                     break;
                 }
             }
-            return entitySet ? odataContext = entitySet + "/$entity" : odataContext += "/" + baseResource.name;
+            return entitySet ? odataContext = entitySet + selectContextPart + "/$entity" : odataContext += "/" + baseResource.name;
         }
         if (baseResource.type == lexer_1.TokenType.PrimitiveProperty ||
             baseResource.type == lexer_1.TokenType.PrimitiveCollectionProperty ||
@@ -312,7 +319,7 @@ class ODataProcessor extends stream_1.Transform {
         let ast = ODataParser.odataUri(context.url, { metadata: this.serverType.$metadata().edmx });
         let resourcePath = this.resourcePath = new visitor_1.ResourcePathVisitor().Visit(ast);
         let entitySets = this.entitySets = odata_1.odata.getPublicControllers(this.serverType);
-        this.odataContext = createODataContext(context, entitySets, server, resourcePath);
+        this.odataContext = createODataContext(context, entitySets, server, resourcePath, this);
         if (resourcePath.navigation.length == 0)
             throw new error_1.ResourceNotFoundError();
         this.workflow = resourcePath.navigation.map((part, i) => {
@@ -786,10 +793,12 @@ class ODataProcessor extends stream_1.Transform {
                     else {
                         id = keys.map(it => `${it}=${edm_1.Edm.escape(body[it], edm_1.Edm.getTypeName(elementType, it))}`).join(",");
                     }
-                    context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
-                    if (odata_1.odata.findODataMethod(ctrl, "put", keys) ||
-                        odata_1.odata.findODataMethod(ctrl, "patch", keys)) {
-                        context["@odata.editLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                    if (typeof id != "undefined") {
+                        context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                        if (odata_1.odata.findODataMethod(ctrl, "put", keys) ||
+                            odata_1.odata.findODataMethod(ctrl, "patch", keys)) {
+                            context["@odata.editLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                        }
                     }
                 }
                 catch (err) { }

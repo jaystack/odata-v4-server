@@ -241,6 +241,7 @@ export namespace Edm{
     }
 
     export function escape(value:any, type:any){
+        if (typeof value == "undefined" || value == null) return value;
         switch (type){
             case "Edm.Binary":
                 return value.toString("hex");

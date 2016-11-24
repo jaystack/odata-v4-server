@@ -259,6 +259,8 @@ var Edm;
     }
     Edm.getKeyProperties = getKeyProperties;
     function escape(value, type) {
+        if (typeof value == "undefined" || value == null)
+            return value;
         switch (type) {
             case "Edm.Binary":
                 return value.toString("hex");
