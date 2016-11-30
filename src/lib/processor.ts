@@ -607,7 +607,7 @@ export class ODataProcessor extends Transform{
             }
 
             return currentResult.then((result:any):any => {
-                if (isStream(result) && !Edm.isMediaEntity(elementType || this.ctrl.prototype.elementType)){
+                if (isStream(result) && (!part.key || !Edm.isMediaEntity(elementType || this.ctrl.prototype.elementType))){
                     result.on("end", () => resolve(ODataRequestResult[method]()));
                     result.on("error", reject);
                 }else if (!(result instanceof ODataResult)){
@@ -785,7 +785,7 @@ export class ODataProcessor extends Transform{
         };
     }
 
-    __appendLinks(ctrl, elementType, context, body){
+    __appendLinks(ctrl, elementType, context, body, result?){
         let entitySet = this.entitySets[this.resourcePath.navigation[0].name] == ctrl ? this.resourcePath.navigation[0].name : null;
         if (!entitySet){
             for (let prop in this.entitySets){
@@ -807,6 +807,11 @@ export class ODataProcessor extends Transform{
                     }
                     if (typeof id != "undefined"){
                         context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
+                        if (typeof elementType == "function" && Edm.isMediaEntity(elementType)) {
+                            context["@odata.mediaReadLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})/$value`;
+                            context["@odata.mediaContentType"] = Edm.getContentType(elementType);
+                            if (typeof result == "object") result.stream = body;
+                        }
                         if (odata.findODataMethod(ctrl, "put", keys) ||
                             odata.findODataMethod(ctrl, "patch", keys)){
                                 context["@odata.editLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
@@ -824,13 +829,6 @@ export class ODataProcessor extends Transform{
         };
         if (typeof result.body == "object" && result.body){
             if (typeof result.body["@odata.count"] == "number") context["@odata.count"] = result.body["@odata.count"];
-
-            if (typeof elementType == "function" && Edm.isMediaEntity(elementType)){
-                context["@odata.mediaReadLink"] = (this.context.protocol || "http") + "://" + (this.context.host || "localhost") + (this.context.base || "") + this.context.url + "/$value";
-                context["@odata.mediaContentType"] = Edm.getContentType(elementType);
-                result.stream = result.body;
-            }
-
             if (!result.body["@odata.context"]){
                 let ctrl = this.ctrl && this.ctrl.prototype.elementType == elementType ? this.ctrl : this.serverType.getController(elementType);
                 if (Array.isArray(result.body.value)){
@@ -844,7 +842,7 @@ export class ODataProcessor extends Transform{
                         }
                     });
                 }else{
-                    if (ctrl) this.__appendLinks(ctrl, elementType, context, result.body);
+                    if (ctrl) this.__appendLinks(ctrl, elementType, context, result.body, result);
                     this.__convertEntity(context, result.body, elementType);
                 }
             }
