@@ -29,6 +29,12 @@ export namespace Edm{
     const EdmOpenType:string = "emd:opentype";
     const EdmContainer:Function[] = [];
 
+    /**
+     * Defines OData Edm decorators
+     *
+     * @param type Edm decorator type
+     * @return     Edm decorator
+     */
     function typeDecoratorFactory(type:string):any{
         let decorator = function(target?:any, targetKey?:string, parameterIndex?:number){
             if (typeof parameterIndex == "number"){
@@ -63,57 +69,91 @@ export namespace Edm{
             else return decorator.apply(this, args);
         };
     }
+    /** Edm.Binary primitive type property decorator */
     export const Binary = typeDecoratorFactory("Edm.Binary");
+    /** Edm.Boolean primitive type property decorator */
     export const Boolean = typeDecoratorFactory("Edm.Boolean");
+    /** Edm.Byte primitive type property decorator */
     export const Byte = typeDecoratorFactory("Edm.Byte");
+    /** Edm.Date primitive type property decorator */
     export const Date = typeDecoratorFactory("Edm.Date");
+    /** Edm.DateTimeOffset primitive type property decorator */
     export const DateTimeOffset = typeDecoratorFactory("Edm.DateTimeOffset");
+    /** Edm.Decimal primitive type property decorator */
     export const Decimal = typeDecoratorFactory("Edm.Decimal");
+    /** Edm.Double primitive type property decorator */
     export const Double = typeDecoratorFactory("Edm.Double");
+    /** Edm.Duration primitive type property decorator */
     export const Duration = typeDecoratorFactory("Edm.Duration");
+    /** Edm.Guid primitive type property decorator */
     export const Guid = typeDecoratorFactory("Edm.Guid");
+    /** Edm.Int16 primitive type property decorator */
     export const Int16 = typeDecoratorFactory("Edm.Int16");
+    /** Edm.Int32 primitive type property decorator */
     export const Int32 = typeDecoratorFactory("Edm.Int32");
+    /** Edm.Int64 primitive type property decorator */
     export const Int64 = typeDecoratorFactory("Edm.Int64");
+    /** Edm.SByte primitive type property decorator */
     export const SByte = typeDecoratorFactory("Edm.SByte");
+    /** Edm.Single primitive type property decorator */
     export const Single = typeDecoratorFactory("Edm.Single");
+    /** Edm.Stream primitive type property decorator */
     export const Stream = typeDecoratorFactory("Edm.Stream");
+    /** Edm.String primitive type property decorator */
     export const String = typeDecoratorFactory("Edm.String");
+    /** Edm.TimeOfDay primitive type property decorator */
     export const TimeOfDay = typeDecoratorFactory("Edm.TimeOfDay");
+    /** Edm.Geography primitive type property decorator */
     export const Geography = typeDecoratorFactory("Edm.Geography");
+    /** Edm.GeographyPoint primitive type property decorator */
     export const GeographyPoint = typeDecoratorFactory("Edm.GeographyPoint");
+    /** Edm.GeographyLineString primitive type property decorator */
     export const GeographyLineString = typeDecoratorFactory("Edm.GeographyLineString");
+    /** Edm.GeographyPolygon primitive type property decorator */
     export const GeographyPolygon = typeDecoratorFactory("Edm.GeographyPolygon");
+    /** Edm.GeographyMultiPoint primitive type property decorator */
     export const GeographyMultiPoint = typeDecoratorFactory("Edm.GeographyMultiPoint");
+    /** Edm.GeographyMultiLineString primitive type property decorator */
     export const GeographyMultiLineString = typeDecoratorFactory("Edm.GeographyMultiLineString");
+    /** Edm.GeographyMultiPolygon primitive type property decorator */
     export const GeographyMultiPolygon = typeDecoratorFactory("Edm.GeographyMultiPolygon");
+    /** Edm.GeographyCollection primitive type property decorator */
     export const GeographyCollection = (function GeographyCollection(){
         return typeDecoratorFactory("Edm.GeographyCollection");
     })();
+    /** Edm.Geometry primitive type property decorator */
     export const Geometry = (function Geometry(){
         return typeDecoratorFactory("Edm.Geometry");
     })();
+    /** Edm.GeometryPoint primitive type property decorator */
     export const GeometryPoint = (function GeometryPoint(){
         return typeDecoratorFactory("Edm.GeometryPoint");
     })();
+    /** Edm.GeometryLineString primitive type property decorator */
     export const GeometryLineString = (function GeometryLineString(){
         return typeDecoratorFactory("Edm.GeometryLineString");
     })();
+    /** Edm.GeometryPolygon primitive type property decorator */
     export const GeometryPolygon = (function GeometryPolygon(){
         return typeDecoratorFactory("Edm.GeometryPolygon");
     })();
+    /** Edm.GeometryMultiPoint primitive type property decorator */
     export const GeometryMultiPoint = (function GeometryMultiPoint(){
         return typeDecoratorFactory("Edm.GeometryMultiPoint");
     })();
+    /** Edm.GeometryMultiLineString primitive type property decorator */
     export const GeometryMultiLineString = (function GeometryMultiLineString(){
         return typeDecoratorFactory("Edm.GeometryMultiLineString");
     })();
+    /** Edm.GeometryMultiPolygon primitive type property decorator */
     export const GeometryMultiPolygon = (function GeometryMultiPolygon(){
         return typeDecoratorFactory("Edm.GeometryMultiPolygon");
     })();
+    /** Edm.GeometryCollection primitive type property decorator */
     export const GeometryCollection = (function GeometryCollection(){
         return typeDecoratorFactory("Edm.GeometryCollection");
     })();
+    /** Edm.Collection decorator for describing data (array of objects) as EntityType (Edm.EntityType) */
     export function Collection(elementType:Function):Decorator{
         return function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex == "number"){
@@ -240,6 +280,15 @@ export namespace Edm{
         return Reflect.getMetadata(EdmKeyProperties, target) || Reflect.getMetadata(EdmKeyProperties, target.prototype) || [];
     }
 
+    /**
+     * Returns escaped strings according to the OData format
+     * Strings are quoted in single quotes therefore single quotes in strings are converted to two singlequotes.
+     * Binary values are converted to hexadecimal strings.
+     *
+     * @param value Input value of any type
+     * @param type  OData type of the provided value
+     * @return      Escaped string
+     */
     export function escape(value:any, type:any){
         if (typeof value == "undefined" || value == null) return value;
         switch (type){
@@ -260,6 +309,7 @@ export namespace Edm{
         }
     }
 
+    /** Specify computed properties that users cannot change */
     export const Computed = (function Computed(){
         return function(target, targetKey){
             if (typeof target == "function"){
@@ -272,6 +322,7 @@ export namespace Edm{
         return Reflect.getMetadata(EdmComputedProperty, target.prototype, propertyKey) || false;
     }
 
+    /** Specify properties that can have no values (can be missing) */
     export const Nullable = (function Nullable(){
         return function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex == "number"){
@@ -296,10 +347,12 @@ export namespace Edm{
             }
         }
     })();
+    /*** Returns true if property is nullable (decorated by Edm.Nullable) */
     export function isNullable(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmNullableProperty, target.prototype, propertyKey);
     }
 
+    /*** Specify properties that must have value (cannot be missing) */
     export const Required = (function Required(){
         return function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex == "number"){
@@ -324,6 +377,7 @@ export namespace Edm{
             }
         }
     })();
+    /** Returns true if property is required (decorated by Edm.Required) */
     export function isRequired(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmNullableProperty, target.prototype, propertyKey) == false ? true : false;
     }
