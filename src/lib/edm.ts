@@ -1,3 +1,4 @@
+/** ?????????? */ // TODO: check & replace this pattern
 import "reflect-metadata";
 import { ODataController } from "./controller";
 import { getFunctionParameters } from "./utils";
@@ -153,7 +154,8 @@ export namespace Edm{
     export const GeometryCollection = (function GeometryCollection(){
         return typeDecoratorFactory("Edm.GeometryCollection");
     })();
-    /** Edm.Collection decorator for describing data (array of objects) as EntityType (Edm.EntityType) */
+    /** ?????????? */
+    /** Edm.Collection decorator for describing properties as collections */
     export function Collection(elementType:Function):Decorator{
         return function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex == "number"){
@@ -202,6 +204,7 @@ export namespace Edm{
             }
         };
     }
+    /** ?????????? */
     export function getTypeName(target:Function, propertyKey:string):string{
         let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey) || Reflect.getMetadata(EdmType, target.prototype);
         let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey) || Reflect.getMetadata(EdmElementType, target.prototype);
@@ -233,6 +236,7 @@ export namespace Edm{
         }
         return elementType ? type + "(" + elementType + ")" : type;
     }
+    /** ?????????? */
     export function getType(target:Function, propertyKey:string):Function | string{
         let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey);
         let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);
@@ -252,16 +256,20 @@ export namespace Edm{
         }
         return elementType;
     }
+    /** Returns true if property is a collection (decorated by Edm.Collection) */
     export function isCollection(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmType, target.prototype, propertyKey) == "Collection";
     }
+    /** ?????????? */
     export function getProperties(target:Function):string[]{
         return Reflect.getMetadata(EdmProperties, target) || [];
     }
+    /** ?????????? */
     export function getParameters(target:Function, targetKey:string):any[]{
         return Reflect.getMetadata(EdmParameters, target.prototype, targetKey) || [];
     }
 
+    /** Edm.Key decorator for describing properties as keys */
     export const Key = (function Key(){
         return function(target, targetKey){
             if (typeof target == "function"){
@@ -273,9 +281,11 @@ export namespace Edm{
             Reflect.defineMetadata(EdmKeyProperty, true, target, targetKey);
         };
     })();
+    /** Returns true if property is a key (decorated by Edm.Key) */
     export function isKey(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmKeyProperty, target.prototype, propertyKey) || false;
     }
+    /** Returns property names that build up the key (names of properties decorated by Edm.Key) */
     export function getKeyProperties(target:Function):string[]{
         return Reflect.getMetadata(EdmKeyProperties, target) || Reflect.getMetadata(EdmKeyProperties, target.prototype) || [];
     }
@@ -309,7 +319,7 @@ export namespace Edm{
         }
     }
 
-    /** Specify computed properties that users cannot change */
+    /** Edm.Computed decorator for describing computed properties */
     export const Computed = (function Computed(){
         return function(target, targetKey){
             if (typeof target == "function"){
@@ -318,11 +328,12 @@ export namespace Edm{
             Reflect.defineMetadata(EdmComputedProperty, true, target, targetKey);
         };
     })();
+    /** Returns true if property is computed (decorated by Edm.Computed) */
     export function isComputed(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmComputedProperty, target.prototype, propertyKey) || false;
     }
 
-    /** Specify properties that can have no values (can be missing) */
+    /** Edm.Nullable decorator for describing nullable properties (which can be missing) */
     export const Nullable = (function Nullable(){
         return function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex == "number"){
@@ -347,12 +358,12 @@ export namespace Edm{
             }
         }
     })();
-    /*** Returns true if property is nullable (decorated by Edm.Nullable) */
+    /** Returns true if property is nullable (decorated by Edm.Nullable) */
     export function isNullable(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmNullableProperty, target.prototype, propertyKey);
     }
 
-    /*** Specify properties that must have value (cannot be missing) */
+    /** Edm.Required decorator for describing non-nullable properties that must have value (cannot be missing) */
     export const Required = (function Required(){
         return function(target, targetKey, parameterIndex?:number){
             if (typeof parameterIndex == "number"){
@@ -402,48 +413,66 @@ export namespace Edm{
             Reflect.defineMetadata(EdmReturnType, element, target, targetKey);
         };
     }
+    /** Edm.ActionImport decorator for describing actions */
     export const ActionImport = operationDecoratorFactory(EdmAction);
+    /** Edm.Action decorator for describing actions */
     export const Action = operationDecoratorFactory(EdmAction);
+    /** ?????????? */
     export function FunctionImport();
+    /** ?????????? */
     export function FunctionImport(returnType?:any);
+    /** ?????????? */
     export function FunctionImport(target?:any, targetKey?:string);
+    /** ?????????? */
     export function FunctionImport(target?:any, targetKey?:string){
         if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
         else return operationDecoratorFactory(EdmFunction, target);
     }
+    /** ?????????? */
     export function Function();
+    /** ?????????? */
     export function Function(returnType?:any);
+    /** ?????????? */
     export function Function(target?:any, targetKey?:string);
+    /** ?????????? */
     export function Function(target?:any, targetKey?:string){
         if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
         else return operationDecoratorFactory(EdmFunction, target);
     }
+    /** ?????????? */
     export function getOperations(target:Function):string[]{
         return Reflect.getOwnMetadata(EdmOperations, target.prototype) || [];
     }
 
+    /** ?????????? */
     export function getReturnTypeName(target:Function, propertyKey:string):string{
         let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
         return Edm.getTypeName(returnType, EdmReturnType) || Edm.getTypeName(target, propertyKey);
     }
+    /** ?????????? */
     export function getReturnType(target:Function, propertyKey:string):Function | string{
         let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
         return Edm.getType(returnType, EdmReturnType) || Edm.getType(target, propertyKey);
     }
 
+    /** Returns true if property is a statically callable action (decorated by Edm.ActionImport) */
     export function isActionImport(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmAction, target.prototype, propertyKey) || false;
     }
+    /** Returns true if property is a statically callable function (decorated by Edm.FunctionImport) */
     export function isFunctionImport(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmFunction, target.prototype, propertyKey) || false;
     }
+    /** Returns true if property is an action (decorated by Edm.Action) */
     export function isAction(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmAction, target.prototype, propertyKey) || false;
     }
+    /** Returns true if property is an function (decorated by Edm.Function) */
     export function isFunction(target:Function, propertyKey:string):boolean{
         return Reflect.getMetadata(EdmFunction, target.prototype, propertyKey) || false;
     }
 
+    /** Edm.ComplexType decorator for describing properties of complex types */
     export function ComplexType(type:Function){
         return function(target, targetKey){
             if (typeof target == "function"){
@@ -458,27 +487,35 @@ export namespace Edm{
             Reflect.defineMetadata(EdmType, type, target, targetKey);
         };
     }
+    /** Returns true if property is a complex type (decorated by Edm.ComplexType) */
     export function isComplexType(target:Function, propertyKey:string):boolean{
         return Reflect.hasMetadata(EdmComplexType, target.prototype, propertyKey);
     }
 
+    /** Edm.MediaEntity decorator for describing media entity properties */
     export function MediaEntity(contentType:string){
         return Reflect.metadata(EdmMediaEntity, contentType);
     }
+    /** Returns true if property is a media entity (decorated by Edm.MediaEntity) */
     export function isMediaEntity(target:Function){
         return Reflect.hasMetadata(EdmMediaEntity, target);
     }
+    /** ?????????? */
     export function getContentType(target:Function){
         return Reflect.getMetadata(EdmMediaEntity, target);
     }
 
+    /** Edm.OpenType decorator for describing open type properties */
     export const OpenType = (function OpenType(){
         return Reflect.metadata(EdmOpenType, true);
     })();
+    /** Returns true if property is a open type (decorated by Edm.OpenType) */
     export function isOpenType(target:Function){
         return Reflect.hasMetadata(EdmOpenType, target) || false;
     }
 
+    /** ?????????? */
+    /** Edm.EntityType decorator for describing entity types */
     export function EntityType(type?:Function | string){
         return function(target:any, targetKey?:string){
             if (typeof target == "function"){
@@ -493,13 +530,16 @@ export namespace Edm{
             Reflect.defineMetadata(EdmType, type, target, targetKey);
         };
     }
+    /** Returns true if property is an EntityType (decorated by Edm.EntityType) */
     export function isEntityType(target:Function, propertyKey:string):boolean{
         return Reflect.hasMetadata(EdmEntityType, target.prototype, propertyKey);
     }
+    /** ?????????? */
     export function register(type:Function){
         if (EdmContainer.indexOf(type) < 0) EdmContainer.push(type);
     }
 
+    /** ?????????? */
     export function Convert(converter:Function){
         return function(target, targetKey){
             if (typeof target == "function"){
@@ -508,10 +548,12 @@ export namespace Edm{
             Reflect.defineMetadata(EdmConverter, converter, target, targetKey);
         };
     }
+    /** ?????????? */
     export function getConverter(target:Function, propertyKey:string):Function{
         return Reflect.getMetadata(EdmConverter, target.prototype, propertyKey);
     }
 
+    /** ?????????? */
     export function Annotate(...annotation:any[]){
         return function(target:any, targetKey?:string){
             if (typeof target == "function"){
@@ -522,10 +564,13 @@ export namespace Edm{
             Reflect.defineMetadata(EdmAnnotations, existingAnnotations, target, targetKey);
         };
     }
+    /** ?????????? */
     export function getAnnotations(target:Function, targetKey?:string):any[]{
         return Reflect.getOwnMetadata(EdmAnnotations, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
     }
 
+    /** ?????????? */
+    /** Edm.ForeignKey decorator for describing properties as foreign keys */
     export function ForeignKey(...keys:string[]){
         return function(target:any, targetKey?:string){
             if (typeof target == "function"){
@@ -536,17 +581,24 @@ export namespace Edm{
             Reflect.defineMetadata(EdmForeignKeys, existingForeignKeys, target, targetKey);
         };
     }
+    /** ?????????? */
+    /** Edm.ForeignKey decorator for describing properties as foreign keys */
     export function getForeignKeys(target:Function, targetKey?:string):string[]{
         return Reflect.getOwnMetadata(EdmForeignKeys, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmForeignKeys, target, targetKey) || [];
     }
 
+    /** ?????????? */
+    /** Returns property names that are foreign keys (names of properties decorated by Edm.ForeignKey) */
     export function Partner(property:string){
         return Reflect.metadata(EdmPartnerProperty, property);
     }
+    /** ?????????? */
     export function getPartner(target:any, targetKey:string){
         return Reflect.getMetadata(EdmPartnerProperty, target, targetKey) || Reflect.getMetadata(EdmPartnerProperty, target.prototype, targetKey);
     }
 
+    /** ?????????? */
+    /** Edm.EntitySet decorator for describing entity sets */
     export function EntitySet(name:string){
         return function(controller:typeof ODataController){
             controller.prototype.entitySetName = name;
