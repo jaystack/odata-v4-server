@@ -13,6 +13,7 @@ import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions } from "./processor";
 
+/** ODataServer base class to be extended by concrete OData Server data source */
 export class ODataServer extends Transform{
     private static _metadataCache:any
     static namespace:string
@@ -198,10 +199,35 @@ export function ODataErrorHandler(err, req, res, next){
     }else next();
 }
 
+/** Create Express server for OData Server
+ * @param server OData Server instance
+ * @return       Express Router object
+ */
 export function createODataServer(server:typeof ODataServer):express.Router;
+/** Create Express server for OData Server
+ * @param server OData Server instance
+ * @param port   port number for Express to listen to
+ */
 export function createODataServer(server:typeof ODataServer, port:number):void;
+/** Create Express server for OData Server
+ * @param server OData Server instance
+ * @param path   routing path for Express
+ * @param port   port number for Express to listen to
+ */
 export function createODataServer(server:typeof ODataServer, path:string, port:number):void;
+/** Create Express server for OData Server
+ * @param server   OData Server instance
+ * @param port     port number for Express to listen to
+ * @param hostname hostname for Express
+ */
 export function createODataServer(server:typeof ODataServer, port:number, hostname:string):void;
+/** Create Express server for OData Server
+ * @param server   OData Server instance
+ * @param path     routing path for Express
+ * @param port     port number for Express to listen to
+ * @param hostname hostname for Express
+ * @return         Express Router object
+ */
 export function createODataServer(server:typeof ODataServer, path?:string | RegExp | number, port?:number | string, hostname?:string):void | express.Router{
     return server.create(path, port, hostname);
 }
