@@ -6,28 +6,28 @@ let schemaJson = require("./schema");
 let categories = require("./categories");
 let products = require("./products");
 
-const mongodb = async function():Promise<Db>{
+const mongodb = async function (): Promise<Db> {
     return await MongoClient.connect("mongodb://localhost:27017/odataserver");
 };
 
-class ProductsController extends ODataController{
+class ProductsController extends ODataController {
     @odata.GET
-    *find(@odata.query query:Token){
-        let db:Db = yield mongodb();
+    *find( @odata.query query: Token) {
+        let db: Db = yield mongodb();
         let mongodbQuery = createQuery(query);
         if (typeof mongodbQuery.query._id == "string") mongodbQuery.query._id = new ObjectID(mongodbQuery.query._id);
         if (typeof mongodbQuery.query.CategoryId == "string") mongodbQuery.query.CategoryId = new ObjectID(mongodbQuery.query.CategoryId);
         return db.collection("Products").find(
-                mongodbQuery.query,
-                mongodbQuery.projection,
-                mongodbQuery.skip,
-                mongodbQuery.limit
-            ).toArray();
+            mongodbQuery.query,
+            mongodbQuery.projection,
+            mongodbQuery.skip,
+            mongodbQuery.limit
+        ).toArray();
     }
 
     @odata.GET
-    *findOne(@odata.key key:string, @odata.query query:Token){
-        let db:Db = yield mongodb();
+    *findOne( @odata.key key: string, @odata.query query: Token) {
+        let db: Db = yield mongodb();
         let mongodbQuery = createQuery(query);
         return db.collection("Products").findOne({ _id: new ObjectID(key) }, {
             fields: mongodbQuery.projection
@@ -35,7 +35,7 @@ class ProductsController extends ODataController{
     }
 
     @odata.POST
-    async insert(@odata.body data:any){
+    async insert( @odata.body data: any) {
         let db = await mongodb();
         if (data.CategoryId) data.CategoryId = new ObjectID(data.CategoryId);
         return await db.collection("Products").insert(data).then((result) => {
@@ -45,23 +45,23 @@ class ProductsController extends ODataController{
     }
 }
 
-class CategoriesController extends ODataController{
+class CategoriesController extends ODataController {
     @odata.GET
-    *find(@odata.query query:Token):any{
-        let db:Db = yield mongodb();
+    *find( @odata.query query: Token): any {
+        let db: Db = yield mongodb();
         let mongodbQuery = createQuery(query);
         if (typeof mongodbQuery.query._id == "string") mongodbQuery.query._id = new ObjectID(mongodbQuery.query._id);
         return db.collection("Categories").find(
-                mongodbQuery.query,
-                mongodbQuery.projection,
-                mongodbQuery.skip,
-                mongodbQuery.limit
-            ).toArray();
+            mongodbQuery.query,
+            mongodbQuery.projection,
+            mongodbQuery.skip,
+            mongodbQuery.limit
+        ).toArray();
     }
 
     @odata.GET
-    *findOne(@odata.key key:string, @odata.query query:Token){
-        let db:Db = yield mongodb();
+    *findOne( @odata.key key: string, @odata.query query: Token) {
+        let db: Db = yield mongodb();
         let mongodbQuery = createQuery(query);
         return db.collection("Categories").findOne({ _id: new ObjectID(key) }, {
             fields: mongodbQuery.projection
@@ -71,8 +71,8 @@ class CategoriesController extends ODataController{
 
 @odata.controller(ProductsController, true)
 @odata.controller(CategoriesController, true)
-class NorthwindServer extends ODataServer{
-    async initDb(){
+class NorthwindServer extends ODataServer {
+    async initDb() {
         let db = await mongodb();
         await db.dropDatabase();
         let categoryCollection = db.collection("Categories");
