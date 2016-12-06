@@ -220,12 +220,21 @@ export namespace odata {
         odataMethodFactory("DELETE", target)(target, targetKey);
     }
 
+    /** Create reference for OData POST operation
+     * @param navigationProperty Navigation property name to handle
+     */
     export function createRef(navigationProperty: string) {
         return POST(navigationProperty).$ref;
     }
+    /** Create reference for OData PUT operation
+     * @param navigationProperty Navigation property name to handle
+     */
     export function updateRef(navigationProperty: string) {
         return PUT(navigationProperty).$ref;
     }
+    /** Create reference for OData DELETE operation
+     * @param navigationProperty Navigation property name to handle
+     */
     export function deleteRef(navigationProperty: string) {
         return DELETE(navigationProperty).$ref;
     }
