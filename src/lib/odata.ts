@@ -24,12 +24,18 @@ export namespace odata {
     const ODataResultParameter: string = "odata:resultparameter";
     const ODataIdParameter: string = "odata:idparameter";
 
+    /** Set element type
+     * @param elementType The type of element
+     */
     export function type(elementType: Function) {
         return function (constructor: Function) {
             constructor.prototype.elementType = elementType;
         };
     }
 
+    /** Set namespace
+     * @param namespace Namespace to be set
+     */
     export function namespace(namespace: string) {
         return function (target: any, targetKey?: string) {
             if (targetKey) target[targetKey].namespace = namespace;
@@ -37,6 +43,9 @@ export namespace odata {
         };
     }
 
+    /** Set container
+     * @param name  Name of the container
+     */
     export function container(name: string) {
         return function (server: typeof ODataServer) {
             server.containerName = name;
@@ -226,13 +235,13 @@ export namespace odata {
     export function createRef(navigationProperty: string) {
         return POST(navigationProperty).$ref;
     }
-    /** Create reference for OData PUT operation
+    /** Update reference for OData PUT operation
      * @param navigationProperty Navigation property name to handle
      */
     export function updateRef(navigationProperty: string) {
         return PUT(navigationProperty).$ref;
     }
-    /** Create reference for OData DELETE operation
+    /** Delete reference for OData DELETE operation
      * @param navigationProperty Navigation property name to handle
      */
     export function deleteRef(navigationProperty: string) {
