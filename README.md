@@ -1,4 +1,4 @@
-# OData V4 Server
+# JayStack OData V4 Server
 
 OData V4 server for node.js
 
