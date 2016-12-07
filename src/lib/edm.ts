@@ -413,28 +413,32 @@ export namespace Edm{
             Reflect.defineMetadata(EdmReturnType, element, target, targetKey);
         };
     }
-    /** Edm.ActionImport decorator for describing actions */
+    /** Edm.ActionImport decorator for describing unbound actions callable from the service root */
     export const ActionImport = operationDecoratorFactory(EdmAction);
     /** Edm.Action decorator for describing actions */
     export const Action = operationDecoratorFactory(EdmAction);
     /** ?????????? */
+    /** Edm.FunctionImport decorator for describing unbound actions callable from the service root */
     export function FunctionImport();
     /** ?????????? */
+    /** Edm.FunctionImport decorator for describing unbound actions callable from the service root */
     export function FunctionImport(returnType?:any);
     /** ?????????? */
+    /** Edm.FunctionImport decorator for describing unbound actions callable from the service root */
     export function FunctionImport(target?:any, targetKey?:string);
-    /** ?????????? */
     export function FunctionImport(target?:any, targetKey?:string){
         if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
         else return operationDecoratorFactory(EdmFunction, target);
     }
     /** ?????????? */
+    /** Edm.Function decorator for describing actions */
     export function Function();
     /** ?????????? */
+    /** Edm.Function decorator for describing actions */
     export function Function(returnType?:any);
     /** ?????????? */
+    /** Edm.Function decorator for describing actions */
     export function Function(target?:any, targetKey?:string);
-    /** ?????????? */
     export function Function(target?:any, targetKey?:string){
         if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
         else return operationDecoratorFactory(EdmFunction, target);

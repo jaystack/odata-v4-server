@@ -13,7 +13,7 @@ import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions } from "./processor";
 
-/** ODataServer base class to be extended by concrete OData Server data source */
+/** ODataServer base class to be extended by concrete OData Server data sources */
 export class ODataServer extends Transform{
     private static _metadataCache:any
     static namespace:string
@@ -188,6 +188,8 @@ export class ODataServer extends Transform{
     }
 }
 
+/** ?????????? */
+/** Create Express middleware for OData error handling */
 export function ODataErrorHandler(err, req, res, next){
     if (err){
         console.log(err);
