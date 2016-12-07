@@ -52,27 +52,27 @@ export namespace odata {
         };
     }
 
-    /** Class decorator for ODataServer. 
-     * @param controller
-     * @param isPublic
+    /** Class decorator for server that binds the given controller to the server. 
+     * @param controller    Controller to be bind to the server.
+     * @param isPublic      Is the binding public or not.
      */
     export function controller(controller: typeof ODataController, isPublic?: boolean);
-    /** Class decorator for ODataServer
-     * @param controller instance of ODataController
-     * @param isPublic 
-     * @param elementType type of element
+    /** Class decorator for server that binds the given controller to the server.
+     * @param controller    Controller to be bind to the server.
+     * @param isPublic      Is the binding public or not.
+     * @param elementType   Type of the element.
      */
     export function controller(controller: typeof ODataController, isPublic?: boolean, elementType?: Function);
-    /** Class decorator for ODataServer
-     * @param controller instance of ODataController
-     * @param entitySetName
-     * @param elementType type of element
+    /** Class decorator for server that binds the given controller to the server.
+     * @param controller    Controller to be bind to the server.
+     * @param entitySetName The name of the entity set.
+     * @param elementType   Type of the element.
      */
     export function controller(controller: typeof ODataController, entitySetName?: string, elementType?: Function);
-    /** Class decorator for ODataServer
-     * @param controller instance of ODataController
-     * @param entitySetName
-     * @param elementType type of element
+    /** Class decorator for server that binds the given controller to the server.
+     * @param controller    Controller to be bind to the server.
+     * @param entitySetName The name of the entity set.
+     * @param elementType   Type of the element.
      */
     export function controller(controller: typeof ODataController, entitySetName?: string | boolean, elementType?: Function) {
         return function (server: typeof ODataServer) {
@@ -91,15 +91,15 @@ export namespace odata {
             }
         };
     }
-    /** Get metadata value of ODataEntitySets of the given ODataServer
+    /** Gives the public controllers of the given server
      * @param server
      */
     export function getPublicControllers(server: typeof ODataServer) {
         return Reflect.getOwnMetadata(ODataEntitySets, server) || {};
     }
 
-    /** Turns on the CORS on ODataServer
-     * @param server ODataServer where we turn the CORS on
+    /** Enables CORS on your server
+     * @param server The server where you turn the CORS on
      * */
     export const cors = (function cors() {
         return function (server: typeof ODataServer) {
@@ -136,17 +136,16 @@ export namespace odata {
      * @param navigationProperty Navigation property name to handle
      */
     export function GET(navigationProperty: string);
-    /** Annotate function for OData GET operation
-     */
+    /** Annotate function for OData GET operation */
     export function GET();
     /** Annotate function for OData GET operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function GET(target?: any, targetKey?: string);
     /** Annotate function for OData GET operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function GET(target?: any, targetKey?: string) {
         if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("GET", target);
@@ -159,13 +158,13 @@ export namespace odata {
     /** Annotate function for OData POST operation */
     export function POST();
     /** Annotate function for OData POST operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function POST(target?: any, targetKey?: string);
     /** Annotate function for OData POST operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function POST(target?: any, targetKey?: string) {
         if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("POST", target);
@@ -178,13 +177,13 @@ export namespace odata {
     /** Annotate function for OData PUT operation */
     export function PUT();
     /** Annotate function for OData PUT operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function PUT(target?: any, targetKey?: string);
     /** Annotate function for OData PUT operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function PUT(target?: any, targetKey?: string) {
         if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("PUT", target);
@@ -197,13 +196,13 @@ export namespace odata {
     /** Annotate function for OData PATCH operation */
     export function PATCH();
     /** Annotate function for OData PATCH operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function PATCH(target?: any, targetKey?: string);
     /** Annotate function for OData PATCH operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function PATCH(target?: any, targetKey?: string) {
         if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("PATCH", target);
@@ -216,13 +215,13 @@ export namespace odata {
     /** Annotate function for OData DELETE operation */
     export function DELETE();
     /** Annotate function for OData DELETE operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function DELETE(target?: any, targetKey?: string);
     /** Annotate function for OData DELETE operation
-     * @param target    Target object
-     * @param targetKey Target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function DELETE(target?: any, targetKey?: string) {
         if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("DELETE", target);
@@ -253,15 +252,28 @@ export namespace odata {
         return odataMethodFactory(method.toUpperCase(), navigationProperty);
     }
     /** get metadata value of ODataMethod on the prototype chain of target or targetKey
-     * @param target    target object
-     * @param targetKey target property
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getMethod(target, targetKey) {
         return Reflect.getMetadata(ODataMethod, target.prototype, targetKey);
     }
 
+    /** Gives the entity key
+     * @param name
+     */
     export function key(name?: string);
+    /** Gives the entity key
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
+     */
     export function key(target: any, targetKey: string, parameterIndex: number);
+    /** Gives the entity key
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
+     */
     export function key(target: any, targetKey?: string, parameterIndex?: number): any {
         let name;
         let decorator = function (target, targetKey, parameterIndex: number) {
@@ -280,16 +292,29 @@ export namespace odata {
             return decorator;
         } else return decorator(target, targetKey, parameterIndex);
     }
-    /** get metadata value of ODataKeyParameters on the prototype chain of target or targetKey
-     * @param target    target object
-     * @param targetKey target property
+    /** Gives the decorated key parameter.
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getKeys(target, targetKey) {
         return Reflect.getMetadata(ODataKeyParameters, target.prototype, targetKey) || [];
     }
 
+    /** Gives the identifier of the referenced entity.
+     * @param name
+     */
     export function link(name?: string);
+    /** Gives the identifier of the referenced entity.
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
+     */
     export function link(target: any, targetKey: string, parameterIndex: number);
+    /** Gives the identifier of the referenced entity.
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
+     */
     export function link(target: any, targetKey?: string, parameterIndex?: number): any {
         let name;
         let decorator = function (target, targetKey, parameterIndex: number) {
@@ -308,9 +333,9 @@ export namespace odata {
             return decorator;
         } else return decorator(target, targetKey, parameterIndex);
     }
-    /** get metadata value of ODataLinkParameters on the prototype chain of target or targetKey
-     * @param target    target object
-     * @param targetKey target property
+    /** Gives the decorated link parameter.
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getLinks(target, targetKey) {
         return Reflect.getMetadata(ODataLinkParameters, target.prototype, targetKey) || [];
@@ -371,10 +396,10 @@ export namespace odata {
         }
     }
 
-    /** Query parameter injection decorator. Defines query parameter metadata on target or targetKey.
-     * @param target            target object
-     * @param targetKey         target property
-     * @param parameterIndex    index of query parameter
+    /** Provides access to all OData query options.
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
      */
     export const query = (function query() {
         return function (target, targetKey, parameterIndex: number) {
@@ -384,18 +409,18 @@ export namespace odata {
         };
     })();
 
-    /** Get metadata value of query parameter on the prototype chain of target or targetKey.
-     * @param target    target object
-     * @param targetKey target property
+    /** Gives the decorated query parameter.
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getQueryParameter(target, targetKey) {
         return Reflect.getMetadata(ODataQueryParameter, target.prototype, targetKey);
     }
 
-    /** Filter parameter injection decorator. Defines filter parameter metadata on target or targetKey.
-     * @param target            target object
-     * @param targetKey         target property
-     * @param parameterIndex    index of filter parameter
+    /** Gives filter information and provides the AST tree of the OData $filter.
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
      */
     export const filter = (function filter() {
         return function (target, targetKey, parameterIndex: number) {
@@ -405,18 +430,18 @@ export namespace odata {
         };
     })();
 
-    /** Get metadata value of filter parameter on the prototype chain of target or targetKey.
-     * @param target    target object
-     * @param targetKey target property
+    /** Gives the decorated filter parameter.
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getFilterParameter(target, targetKey) {
         return Reflect.getMetadata(ODataFilterParameter, target.prototype, targetKey);
     }
 
-    /** Body parameter injection decorator. Defines body parameter metadata on target or targetKey.
-     * @param target            target object
-     * @param targetKey         target property
-     * @param parameterIndex    index of body parameter
+    /** Gives the body of the OData request.
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
      */
     export const body = (function body() {
         return function (target, targetKey, parameterIndex: number) {
@@ -426,18 +451,18 @@ export namespace odata {
         };
     })();
 
-    /** Get metadata value of body parameter on the prototype chain of target or targetKey.
-     * @param target    target object
-     * @param targetKey target property
+    /** Gives the decorated body parameter.
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getBodyParameter(target, targetKey) {
         return Reflect.getMetadata(ODataBodyParameter, target.prototype, targetKey);
     }
 
-    /** Context parameter injection decorator. Defines context parameter metadata on target or targetKey.
-     * @param target            target object
-     * @param targetKey         target property
-     * @param parameterIndex    index of context parameter
+    /** Gives the current execution context.
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
      */
     export const context = (function context() {
         return function (target, targetKey, parameterIndex: number) {
@@ -447,18 +472,18 @@ export namespace odata {
         };
     })();
 
-    /** Get metadata value of context parameter on the prototype chain of target or targetKey.
-     * @param target    target object
-     * @param targetKey target property
+    /** Gives the decorated context parameter.
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getContextParameter(target, targetKey) {
         return Reflect.getMetadata(ODataContextParameter, target.prototype, targetKey);
     }
 
-    /** Stream parameter injection decorator. Defines stream parameter metadata on target or targetKey.
-     * @param target            target object
-     * @param targetKey         target property
-     * @param parameterIndex    index of stream parameter
+    /** Gives a writable stream that will perform OData result transformation on the result and then sends it forward to your response stream.
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
      */
     export const stream = (function stream() {
         return function (target, targetKey, parameterIndex: number) {
@@ -468,18 +493,18 @@ export namespace odata {
         };
     })();
 
-    /** Get metadata value of stream parameter on the prototype chain of target or targetKey.
-     * @param target    target object
-     * @param targetKey target property
+    /** Gives the decorated stream parameter.
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getStreamParameter(target, targetKey) {
         return Reflect.getMetadata(ODataStreamParameter, target.prototype, targetKey);
     }
 
-    /** Result parameter injection decorator. Defines result parameter metadata on target or targetKey.
-     * @param target            target object
-     * @param targetKey         target property
-     * @param parameterIndex    index of result parameter
+    /** Gives the result from the last part from the resource path of the OData URL. This ensures the access to an entity in context of your action or function.
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
      */
     export const result = (function result() {
         return function (target, targetKey, parameterIndex: number) {
@@ -489,18 +514,18 @@ export namespace odata {
         };
     })();
 
-    /** Get metadata value of result parameter on the prototype chain of the given target or targetKey.
-     * @param target    target object
-     * @param targetKey target property
+    /** Gives the decorated result parameter.
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getResultParameter(target, targetKey) {
         return Reflect.getMetadata(ODataResultParameter, target.prototype, targetKey);
     }
 
-    /** Id parameter injection decorator. Defines id parameter metadata on target or targetKey.
-     * @param target            target object
-     * @param targetKey         target property
-     * @param parameterIndex    index of id parameter
+    /** Gives the url that was provided either in request body as @odata.id or in query parameters as $id.
+     * @param target            The prototype of the class for an instance member
+     * @param targetKey         The name of the class method
+     * @param parameterIndex    The ordinal index of the parameter in the function’s parameter list
      */
     export const id = (function id() {
         return function (target, targetKey, parameterIndex: number) {
@@ -510,14 +535,18 @@ export namespace odata {
         };
     })();
 
-    /** Get metadata value of id parameter on the prototype chain of target or targetKey.
-     * @param target    target object
-     * @param targetKey target property
+    /** Gives the decorated id parameter.
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
      */
     export function getIdParameter(target, targetKey) {
         return Reflect.getMetadata(ODataIdParameter, target.prototype, targetKey);
     }
 
+    /** Sets a parameter decorator for the given parameter.
+     * @param name The name of the parameter.
+     * @param type OData decorator type.
+     */
     export function parameter(name: string, type: Function) {
         return function (target?: any, targetKey?: string) {
             let parameterNames = getFunctionParameters(target, targetKey);
@@ -528,6 +557,9 @@ export namespace odata {
         };
     }
 
+    /** Sets parameter decorators for the given parameters.
+     * @param parameters Object that contains the name of the parameter as key and the type of the parameter as value.
+     */
     export function parameters(parameters: any) {
         return function (target?: any, targetKey?: string) {
             for (let prop in parameters) {
