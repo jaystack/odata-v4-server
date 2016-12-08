@@ -19,6 +19,12 @@ export class ODataController{
             });
         }
     }
+
+
+    /** Enables the filtering
+     * @param fn
+     * @param param
+     */
     static enableFilter(fn:Function | string, param?:string){
         let fnName = <string>((<any>fn).name || fn);
         fn = this.prototype[fnName];
