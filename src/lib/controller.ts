@@ -1,7 +1,7 @@
 import * as extend from "extend";
 import { ODataServer } from "./server";
 import { ODataResult } from "./result";
-import { odata } from "./odata";
+import * as odata from "./odata";
 import { getFunctionParameters } from "./utils";
 
 export class ODataController{

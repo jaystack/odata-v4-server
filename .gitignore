@@ -1,7 +1,7 @@
 node_modules
 .vscode
-npm-debug.log
-yarn-error.log
+*.log*
 coverage
 report
 build
+docs

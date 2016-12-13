@@ -2,8 +2,8 @@ import * as extend from "extend";
 import { Edm as Metadata } from "odata-v4-metadata";
 import { ODataController } from "./controller";
 import { ODataServer } from "./server";
-import { Edm } from "./edm";
-import { odata } from "./odata";
+import * as Edm from "./edm";
+import * as odata from "./odata";
 import { getAllPropertyNames } from "./utils";
 
 export function createMetadataJSON(server:typeof ODataServer){

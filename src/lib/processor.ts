@@ -9,8 +9,9 @@ import { getFunctionParameters } from "./utils";
 import { ODataResult, IODataResult } from "./result";
 import { ODataController } from "./controller";
 import { ResourcePathVisitor, NavigationPart } from "./visitor";
-import { Edm } from "./edm";
-import { odata, ODataMethodType } from "./odata";
+import * as Edm from "./edm";
+import * as odata from "./odata";
+import { ODataMethodType } from "./odata";
 import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { ODataServer } from "./server";
 

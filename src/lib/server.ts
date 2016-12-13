@@ -8,7 +8,7 @@ import * as cors from "cors";
 import { Transform, Readable, Duplex, TransformOptions } from "stream";
 import { ODataResult, IODataResult } from "./result";
 import { ODataController } from "./controller";
-import { odata } from "./odata";
+import * as odata from "./odata";
 import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions } from "./processor";

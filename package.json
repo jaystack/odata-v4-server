@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-server",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "OData V4 Server",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
@@ -11,7 +11,8 @@
     "pretest": "tsc",
     "test": "mocha build/test/**/*.spec.js --reporter mochawesome --reporter-options reportDir=report,reportName=odata-v4-server,reportTitle=\"OData V4 Server\"",
     "coverage": "rm -rf coverage && tsc && node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha build/test/**/*.spec.js --config=.istanbul.yaml -x config/**/*.js && node node_modules/remap-istanbul/bin/remap-istanbul -i coverage/coverage.json -o coverage/html-report -t html",
-    "prepublish": "npm run test"
+    "prepublish": "npm run test",
+    "typedoc": "typedoc --name \"JayStack OData v4 Server\" --exclude \"**/?(utils|index).ts\" --excludeExternals --excludeNotExported --hideGenerator --excludeExternals --excludePrivate --out docs src/lib"
   },
   "watch": {
     "coverage": "{lib,test}/*.js",
@@ -72,6 +73,9 @@
     "odata-v4-mongodb": "^0.1.5",
     "remap-istanbul": "^0.6.4",
     "tslint": "^3.15.1",
-    "typescript": "^2.0.6"
+    "typedoc": "^0.5.1",
+    "typedoc-default-themes": "^0.4.0",
+    "typedoc-plugin-external-module-name": "^1.0.5",
+    "typescript": "^2.1.4"
   }
 }
