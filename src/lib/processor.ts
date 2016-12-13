@@ -357,7 +357,7 @@ export class ODataProcessor extends Transform{
         }).filter(it => !!it);
     }
 
-    _transform(chunk:any, encoding:string, done:Function){
+    protected _transform(chunk:any, encoding:string, done:Function){
         if (this.streamEnabled){
             if (!(chunk instanceof Buffer)){
                 if (!this.streamStart){
@@ -385,7 +385,7 @@ export class ODataProcessor extends Transform{
         if (typeof done == "function") done();
     }
 
-    _flush(done?:Function){
+    protected _flush(done?:Function){
         if (this.streamEnabled){
             if (this.streamStart) this.push("]}");
             else this.push('{"@odata.context":"' + this.odataContext + '","value":[]}');
@@ -393,7 +393,7 @@ export class ODataProcessor extends Transform{
         if (typeof done == "function") done();
     }
 
-    __EntityCollectionNavigationProperty(part:NavigationPart):Function{
+    private __EntityCollectionNavigationProperty(part:NavigationPart):Function{
         return (result) => {
             let resultType = result.elementType;
             let elementType = <Function>Edm.getType(resultType, part.name);
@@ -441,7 +441,7 @@ export class ODataProcessor extends Transform{
         };
     }
 
-    __EntityNavigationProperty(part:NavigationPart):Function{
+    private __EntityNavigationProperty(part:NavigationPart):Function{
         return (result) => {
             let resultType = result.elementType;
             let elementType = <Function>Edm.getType(resultType, part.name);
@@ -491,7 +491,7 @@ export class ODataProcessor extends Transform{
         };
     }
 
-    __PrimitiveProperty(part:NavigationPart):Function{
+    private __PrimitiveProperty(part:NavigationPart):Function{
         return (result) => {
             return new Promise((resolve, reject) => {
                 this.__enableStreaming(part);
@@ -513,19 +513,19 @@ export class ODataProcessor extends Transform{
         };
     }
 
-    __PrimitiveCollectionProperty(part:NavigationPart):Function{
+    private __PrimitiveCollectionProperty(part:NavigationPart):Function{
         return this.__PrimitiveProperty(part);
     }
 
-    __ComplexProperty(part:NavigationPart):Function{
+    private __ComplexProperty(part:NavigationPart):Function{
         return this.__PrimitiveProperty(part);
     }
 
-    __ComplexCollectionProperty(part:NavigationPart):Function{
+    private __ComplexCollectionProperty(part:NavigationPart):Function{
         return this.__PrimitiveProperty(part);
     }
 
-    __read(ctrl:typeof ODataController, part:any, params:any, data?:any, filter?:string | Function, elementType?:any){
+    private __read(ctrl:typeof ODataController, part:any, params:any, data?:any, filter?:string | Function, elementType?:any){
         return new Promise((resolve, reject) => {
             if (this.ctrl) this.prevCtrl = this.ctrl;
             else this.prevCtrl = ctrl;
@@ -634,7 +634,7 @@ export class ODataProcessor extends Transform{
         });
     }
 
-    __EntitySetName(part:NavigationPart):Function{
+    private __EntitySetName(part:NavigationPart):Function{
         let ctrl = this.entitySets[part.name];
         let params = {};
         if (part.key) part.key.forEach((key) => params[key.name] = key.value);
@@ -643,7 +643,7 @@ export class ODataProcessor extends Transform{
         };
     }
 
-    __actionOrFunctionImport(part:NavigationPart):Function{
+    private __actionOrFunctionImport(part:NavigationPart):Function{
         let fn = this.serverType.prototype[part.name];
         return (data) => {
             return new Promise((resolve, reject) => {
@@ -693,7 +693,7 @@ export class ODataProcessor extends Transform{
         };
     }
 
-    __actionOrFunction(part:NavigationPart):Function{
+    private __actionOrFunction(part:NavigationPart):Function{
         return (result:ODataResult) => {
             return new Promise((resolve, reject) => {
                 this.__enableStreaming(part);
@@ -786,7 +786,7 @@ export class ODataProcessor extends Transform{
         };
     }
 
-    __appendLinks(ctrl, elementType, context, body, result?){
+    private __appendLinks(ctrl, elementType, context, body, result?){
         let entitySet = this.entitySets[this.resourcePath.navigation[0].name] == ctrl ? this.resourcePath.navigation[0].name : null;
         if (!entitySet){
             for (let prop in this.entitySets){
@@ -823,7 +823,7 @@ export class ODataProcessor extends Transform{
         }
     }
 
-    __appendODataContext(result:any, elementType:Function){
+    private __appendODataContext(result:any, elementType:Function){
         if (typeof result.body == "undefined") return;
         let context:any = {
             "@odata.context": this.odataContext
@@ -854,7 +854,7 @@ export class ODataProcessor extends Transform{
         result.elementType = elementType;
     }
 
-    __convertEntity(context, result, elementType){
+    private __convertEntity(context, result, elementType){
         if (elementType === Object || this.options.disableEntityConversion) return extend(context, result);
         let props = Edm.isOpenType(elementType) ? Object.getOwnPropertyNames(result) : Edm.getProperties(elementType.prototype);
         if (props.length > 0){
@@ -890,14 +890,14 @@ export class ODataProcessor extends Transform{
         }
     }
 
-    __enableStreaming(part:NavigationPart){
+    private __enableStreaming(part:NavigationPart){
         this.streamEnabled = part == this.resourcePath.navigation[this.resourcePath.navigation.length - 1] ||
             (this.resourcePath.navigation[this.resourcePath.navigation.indexOf(part) + 1] &&
                 this.resourcePath.navigation[this.resourcePath.navigation.indexOf(part) + 1].name == "$value");
         if (!this.streamEnabled) this.resultCount = 0;
     }
 
-    __applyParams(container:any, name:string, params:any, queryString?:string, result?:any){
+    private __applyParams(container:any, name:string, params:any, queryString?:string, result?:any){
         let queryParam, filterParam, contextParam, streamParam, resultParam, idParam;
 
         queryParam = odata.getQueryParameter(container, name);
