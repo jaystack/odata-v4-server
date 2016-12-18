@@ -33,8 +33,6 @@ export class ODataServer extends Transform{
                     base: req.baseUrl,
                     request: req,
                     response: res
-                }, {
-                    disableEntityConversion: true
                 });
                 processor.on("contentType", (contentType) => {
                     res.contentType(contentType);

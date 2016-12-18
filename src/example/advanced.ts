@@ -1,6 +1,5 @@
 import { MongoClient, ObjectID, Collection, Db } from "mongodb";
-import { createFilter } from "odata-v4-inmemory";
-import { createQuery } from "odata-v4-mongodb";
+import { createFilter, createQuery } from "odata-v4-mongodb";
 import * as extend from "extend";
 import { Edm, odata, ODataController, ODataServer, ODataQuery, ODataErrorHandler, ResourceNotFoundError, createODataServer } from "../lib/index";
 import { Category, Product } from "./model";
@@ -15,17 +14,10 @@ const mongodb = async function():Promise<Db>{
 @Edm.EntitySet("Products")
 export class ProductsController extends ODataController{
     @odata.GET
-    find(@odata.filter filter:ODataQuery):Product[]{
-        if (filter){
-            let filterFn = createFilter(filter);
-            return products.map((product) => {
-                let result = extend({}, product);
-                result._id = result._id.toString();
-                result.CategoryId = result.CategoryId.toString();
-                return result;
-            }).filter((product) => filterFn(product));
-        }
-        return products;
+    async find(@odata.query query:ODataQuery):Promise<Product[]>{
+        let mongodbQuery = createQuery(query);
+        if (mongodbQuery.query.CategoryId) mongodbQuery.query.CategoryId = new ObjectID(mongodbQuery.query.CategoryId);
+        return await (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
     }
 
     @odata.GET

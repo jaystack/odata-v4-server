@@ -1,5 +1,6 @@
 import { Token, TokenType } from "odata-v4-parser/lib/lexer";
 import { Literal } from "odata-v4-literal";
+import * as qs from "qs";
 
 export interface KeyValuePair{
     name:string
@@ -22,6 +23,11 @@ export class ResourcePathVisitor{
     inlinecount:boolean
     id:string
     ast:Token
+    navigationProperty:string
+    query:any
+    includes:{
+        [navigationProperty: string]: ResourcePathVisitor
+    } = {};
 
     constructor(){
         this.navigation = [];
@@ -77,6 +83,33 @@ export class ResourcePathVisitor{
 
     protected VisitQueryOptions(node:Token, context:any){
         node.value.options.forEach((option) => this.Visit(option, context));
+    }
+
+    protected VisitExpand(node: Token, context: any) {
+        node.value.items.forEach((item) => {
+            let expandPath = item.value.path.raw;
+            let visitor = this.includes[expandPath];
+            if (!visitor){
+                visitor = new ResourcePathVisitor();
+                this.includes[expandPath] = visitor;
+            }
+            visitor.Visit(item);
+        });
+    }
+
+    protected VisitExpandItem(node: Token, context: any) {
+        this.Visit(node.value.path, context);
+        if (node.value.options){
+            this.ast = new Token(node);
+            this.ast.type = TokenType.QueryOptions;
+            this.ast.raw = node.value.options.map(n => n.raw).join("&");
+            this.query = qs.parse(this.ast.raw);
+            node.value.options.forEach((item) => this.Visit(item, context));
+        }
+    }
+
+    protected VisitExpandPath(node: Token, context: any) {
+        this.navigationProperty = node.raw;
     }
 
     protected VisitId(node:Token, context:any){

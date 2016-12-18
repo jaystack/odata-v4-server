@@ -38,7 +38,7 @@ export class ODataResult{
         let inlinecount;
         if (result && typeof result.then == 'function'){
             return result.then((result) => {
-                if (Array.isArray(result)){
+                if (result && Array.isArray(result)){
                     if (result && (<any>result).inlinecount && typeof (<any>result).inlinecount == "number"){
                         inlinecount = (<any>result).inlinecount;
                         delete (<any>result).inlinecount;
@@ -54,7 +54,7 @@ export class ODataResult{
             });
         }else{
             return new Promise((resolve, reject) => {
-                if (Array.isArray(result)){
+                if (result && Array.isArray(result)){
                     if (result && (<any>result).inlinecount && typeof (<any>result).inlinecount == "number"){
                         inlinecount = (<any>result).inlinecount;
                         delete (<any>result).inlinecount;
