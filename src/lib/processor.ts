@@ -896,25 +896,25 @@ export class ODataProcessor extends Transform{
                 let entity = result;
                 if (isCollection && entity[prop]){
                     let value = Array.isArray(entity[prop]) ? entity[prop] : (typeof entity[prop] != "undefined" ? [entity[prop]] : []);
-                    if (typeof type == "function"){
-                        context[prop] = await (async it => {
+                    if (includes && includes[prop]){
+                        await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
+                    }else if (typeof type == "function"){
+                        context[prop] = value.map(async it => await (async it => {
                             if (!it) return it;
                             let item = new itemType();
                             await this.__convertEntity(item, it, type, includes);
                             return item;
-                        })(it);
+                        })(it));
                     }else if (typeof converter == "function") context[prop] = value.map(it => converter(it));
-                    else if (includes && includes[prop]){
-                        await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
-                    }else context[prop] = value;
+                    else context[prop] = value;
                 }else{
-                    if (typeof type == "function" && entity[prop]){
+                    if (includes && includes[prop]){
+                        await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
+                    }else if (typeof type == "function" && entity[prop]){
                         context[prop] = new itemType();
                         await this.__convertEntity(context[prop], entity[prop], type, includes);
                     }else if (typeof converter == "function") context[prop] = converter(entity[prop]);
-                    else if (includes && includes[prop]){
-                        await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
-                    }else if (typeof entity[prop] != "undefined") context[prop] = entity[prop];
+                    else if (typeof entity[prop] != "undefined") context[prop] = entity[prop];
                 }
             })(prop)));
         }
@@ -924,42 +924,48 @@ export class ODataProcessor extends Transform{
         try{
             const isCollection = Edm.isCollection(elementType, include.navigationProperty);
             const navigationType = <Function>Edm.getType(elementType, include.navigationProperty);
-            const fn = odata.findODataMethod(ctrl, `get/${include.navigationProperty}`, []);
-            let params = {};
             let navigationResult;
-            if (fn){
-                this.__applyParams(ctrl, fn.call, params, include.ast, result);
-                navigationResult = await ODataResult.Ok(await fnCaller.call(ctrl, ctrl.prototype[fn.call], params));
+            if (result[prop]){
+                navigationResult = await ODataResult.Ok(result[prop]);
                 await this.__appendODataContext(navigationResult, navigationType, include.includes);
                 ctrl = this.serverType.getController(navigationType);
             }else{
-                ctrl = this.serverType.getController(navigationType);
-                if (isCollection){
-                    let foreignKeys = Edm.getForeignKeys(elementType, include.navigationProperty);
-                    let typeKeys = Edm.getKeyProperties(navigationType);
-                    result.foreignKeys = {};
-                    let part:any = {};
-                    let foreignFilter = foreignKeys.map((key) => {
-                        result.foreignKeys[key] = result[typeKeys[0]];
-                        return `${key} eq ${Edm.escape(result[typeKeys[0]], Edm.getTypeName(navigationType, key))}`;
-                    }).join(" and ");
-                    if (part.key) part.key.forEach((key) => params[key.name] = key.value);
-                    navigationResult = await this.__read(ctrl, part, params, result, foreignFilter, navigationType, include);
-                }else{
-                    const foreignKeys = Edm.getForeignKeys(elementType, include.navigationProperty);
-                    const typeKeys = Edm.getKeyProperties(navigationType);
-                    result.foreignKeys = {};
-                    let part:any = {};
-                    part.key = foreignKeys.map(key => {
-                        result.foreignKeys[key] = result[key];
-                        return {
-                            name: key,
-                            value: result[key]
-                        };
-                    });
-                    if (part.key) part.key.forEach((key) => params[key.name] = key.value);
+                const fn = odata.findODataMethod(ctrl, `get/${include.navigationProperty}`, []);
+                let params = {};
+                if (fn){
+                    this.__applyParams(ctrl, fn.call, params, include.ast, result);
+                    navigationResult = await ODataResult.Ok(await fnCaller.call(ctrl, ctrl.prototype[fn.call], params));
+                    await this.__appendODataContext(navigationResult, navigationType, include.includes);
                     ctrl = this.serverType.getController(navigationType);
-                    navigationResult = await this.__read(ctrl, part, params, result, undefined, navigationType, include);
+                }else{
+                    ctrl = this.serverType.getController(navigationType);
+                    if (isCollection){
+                        let foreignKeys = Edm.getForeignKeys(elementType, include.navigationProperty);
+                        let typeKeys = Edm.getKeyProperties(navigationType);
+                        result.foreignKeys = {};
+                        let part:any = {};
+                        let foreignFilter = foreignKeys.map((key) => {
+                            result.foreignKeys[key] = result[typeKeys[0]];
+                            return `${key} eq ${Edm.escape(result[typeKeys[0]], Edm.getTypeName(navigationType, key))}`;
+                        }).join(" and ");
+                        if (part.key) part.key.forEach((key) => params[key.name] = key.value);
+                        navigationResult = await this.__read(ctrl, part, params, result, foreignFilter, navigationType, include);
+                    }else{
+                        const foreignKeys = Edm.getForeignKeys(elementType, include.navigationProperty);
+                        const typeKeys = Edm.getKeyProperties(navigationType);
+                        result.foreignKeys = {};
+                        let part:any = {};
+                        part.key = foreignKeys.map(key => {
+                            result.foreignKeys[key] = result[key];
+                            return {
+                                name: key,
+                                value: result[key]
+                            };
+                        });
+                        if (part.key) part.key.forEach((key) => params[key.name] = key.value);
+                        ctrl = this.serverType.getController(navigationType);
+                        navigationResult = await this.__read(ctrl, part, params, result, undefined, navigationType, include);
+                    }
                 }
             }
             let entitySet = this.entitySets[this.resourcePath.navigation[0].name] == ctrl ? this.resourcePath.navigation[0].name : null;

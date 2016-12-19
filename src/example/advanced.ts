@@ -17,17 +17,20 @@ export class ProductsController extends ODataController{
     async find(@odata.query query:ODataQuery):Promise<Product[]>{
         let mongodbQuery = createQuery(query);
         if (mongodbQuery.query.CategoryId) mongodbQuery.query.CategoryId = new ObjectID(mongodbQuery.query.CategoryId);
-        return await (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
+        return (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
     }
 
     @odata.GET
-    findOne(@odata.key key:string):Product{
-        return products.filter(product => product._id.toString() == key)[0] || null;
+    async findOne(@odata.key key:string, @odata.query query:ODataQuery):Promise<Product>{
+        let mongodbQuery = createQuery(query);
+        return (await mongodb()).collection("Products").findOne({ _id: new ObjectID(key) }, {
+            fields: mongodbQuery.projection
+        });
     }
 
     @odata.GET("Category")
     async getCategory(@odata.result result:any){
-        return await (await mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
+        return (await mongodb()).collection("Categories").findOne({ _id: result.CategoryId });
     }
 }
 
@@ -37,13 +40,13 @@ export class CategoriesController extends ODataController{
     @odata.GET
     async find(@odata.query query:ODataQuery){
         let mongodbQuery = createQuery(query);
-        return await (await mongodb()).collection("Categories").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
+        return (await mongodb()).collection("Categories").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
     }
 
     @odata.GET
     async findOne(@odata.key() key:string, @odata.query query:ODataQuery){
         let mongodbQuery = createQuery(query);
-        return await (await mongodb()).collection("Categories").findOne({ _id: new ObjectID(key) }, {
+        return (await mongodb()).collection("Categories").findOne({ _id: new ObjectID(key) }, {
             fields: mongodbQuery.projection
         });
     }
@@ -52,7 +55,7 @@ export class CategoriesController extends ODataController{
     async getProducts(@odata.result result:any, @odata.query query:ODataQuery){
         let mongodbQuery = createQuery(query);
         mongodbQuery.query = { $and: [mongodbQuery.query, { CategoryId: result._id }] };
-        return await (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
+        return (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).toArray();
     }
 
     @Edm.EntityType(Object)
