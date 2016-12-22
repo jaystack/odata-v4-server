@@ -368,27 +368,37 @@ export class ODataProcessor extends Transform{
                 try{
                     let entity = {};
                     this.__appendLinks(this.ctrl, this.ctrl.prototype.elementType, entity, chunk);
-                    return this.__convertEntity(entity, chunk, this.ctrl.prototype.elementType, this.resourcePath.includes).then(() => {
+                    this.__convertEntity(entity, chunk, this.ctrl.prototype.elementType, this.resourcePath.includes).then(() => {
                         chunk = JSON.stringify(entity);
                         this.streamStart = true;
                         this.push(chunk);
                         if (typeof done == "function") done();
+                    }, (err) => {
+                        try{
+                            chunk = chunk.toString();
+                            this.streamStart = true;
+                            this.push(chunk);
+                        }catch(err){
+                            super.end();
+                        }
                     });
                 }catch(err){
                     try{
                         chunk = chunk.toString();
+                        this.streamStart = true;
+                        this.push(chunk);
                     }catch(err){
                         super.end();
                     }
-                }finally{
-                    this.streamStart = true;
-                    this.push(chunk);
                 }
-            }else this.push(chunk);
+            }else{
+                this.push(chunk);
+                if (typeof done == "function") done();
+            }
         }else{
             this.resultCount++;
+            if (typeof done == "function") done();
         }
-        if (typeof done == "function") done();
     }
 
     protected _flush(done?:Function){
