@@ -13,6 +13,17 @@ import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions } from "./processor";
 
+/** HTTP context interface when using the server HTTP request handler */
+export interface ODataHttpContext{
+    url:string
+    method:string
+    protocol:"http"|"https"
+    host:string
+    base:string
+    request:express.Request
+    response:express.Response
+}
+
 /** ODataServer base class to be extended by concrete OData Server data sources */
 export class ODataServer extends Transform{
     private static _metadataCache:any

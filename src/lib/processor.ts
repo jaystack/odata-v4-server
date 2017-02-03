@@ -5,7 +5,7 @@ import * as url from "url";
 import * as qs from "qs";
 import * as util from "util";
 import { Transform, Readable, Duplex, TransformOptions } from "stream";
-import { getFunctionParameters } from "./utils";
+import { getFunctionParameters, isIterator, isPromise, isStream } from "./utils";
 import { ODataResult, IODataResult } from "./result";
 import { ODataController } from "./controller";
 import { ResourcePathVisitor, NavigationPart } from "./visitor";
@@ -249,27 +249,20 @@ const getResourcePartFunction = (type) => {
     }
 };
 
+const jsPrimitiveTypes = [
+    Object,
+    String,
+    Boolean,
+    Number,
+    Date
+];
+
 const writeMethods = [
     "delete",
     "post",
     "put",
     "patch"
 ];
-
-let GeneratorFunction;
-try{ GeneratorFunction = eval("(function*() {}).constructor"); }catch(err){}
-
-function isIterator(value){
-    return value instanceof GeneratorFunction;
-}
-
-function isPromise(value){
-    return value && typeof value.then == "function";
-}
-
-function isStream(stream){
-    return stream !== null && typeof stream == "object" && typeof stream.pipe == "function";
-}
 
 export type GeneratorAction = (value?) => {};
 
@@ -296,7 +289,7 @@ function run(iterator, handlers){
         let next = iterator.next(value);
         let request = next.value;
         let nextAction = next.done ? id : iterate;
-        
+
         for (let handler of handlers){
             let action = handler(request, nextAction);
             if (typeof action != "undefined") return action;
@@ -306,7 +299,7 @@ function run(iterator, handlers){
     return iterate();
 }
 
-class ODataStream extends Transform{
+class ODataStreamWrapper extends Transform{
     buffer:any[];
 
     constructor(){
@@ -335,6 +328,17 @@ class ODataStream extends Transform{
     }
 }
 
+class StreamWrapper{
+    stream:any
+    constructor(value){
+        this.stream = value;
+    }
+
+    toJSON(){
+        return undefined;
+    }
+}
+
 export interface ODataProcessorOptions{
     disableEntityConversion:boolean
 }
@@ -358,6 +362,7 @@ export class ODataProcessor extends Transform{
     private body:any
     private streamStart = false;
     private streamEnabled = false;
+    private streamEnd = false;
     private resultCount = 0;
 
     constructor(context, server, options?:ODataProcessorOptions){
@@ -403,6 +408,7 @@ export class ODataProcessor extends Transform{
                         this.push(chunk);
                         if (typeof done == "function") done();
                     }, (err) => {
+                        console.log(err);
                         try{
                             chunk = chunk.toString();
                             this.push(chunk);
@@ -411,6 +417,7 @@ export class ODataProcessor extends Transform{
                         }
                     });
                 }catch(err){
+                    console.log(err);
                     try{
                         chunk = chunk.toString();
                         this.push(chunk);
@@ -433,6 +440,7 @@ export class ODataProcessor extends Transform{
             if (this.streamStart) this.push("]}");
             else this.push('{"@odata.context":"' + this.odataContext + '","value":[]}');
         }
+        this.streamEnd = true;
         if (typeof done == "function") done();
     }
 
@@ -540,18 +548,23 @@ export class ODataProcessor extends Transform{
                 this.__enableStreaming(part);
 
                 let value = result.body[part.name];
-                if (isStream(value)){
+                if (value instanceof StreamWrapper){
+                    value = value.stream;
+                }
+                result.body = {
+                    "@odata.context": result.body["@odata.context"],
+                    value: value
+                };
+                let elementType = result.elementType;
+                if (typeof value == "object") result.elementType = Edm.getType(result.elementType, part.name) || Object;
+
+                if (isStream(value) || isStream(value.stream)){
+                    this.emit("contentType", Edm.getContentType(elementType.prototype, part.name) || value.contentType || "application/octet-stream");
+                    if (value.stream) value = value.stream;
                     value.pipe(this);
                     value.on("end", resolve);
                     value.on("error", reject);
-                }else{
-                    result.body = {
-                        "@odata.context": result.body["@odata.context"],
-                        value: value
-                    };
-                    if (typeof value == "object") result.elementType = Edm.getType(result.elementType, part.name) || Object;
-                    resolve(result);
-                }
+                }else resolve(result);
             });
         };
     }
@@ -674,11 +687,14 @@ export class ODataProcessor extends Transform{
                     result.on("error", reject);
                 }else if (!(result instanceof ODataResult)){
                     return (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
-                        if (this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
+                        if (!this.streamEnabled &&
+                            !this.streamStart &&
+                            this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
                             writeMethods.indexOf(this.method) < 0 && !result.body) return reject(new ResourceNotFoundError());
                         try{
                             this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType, (include || this.resourcePath).includes).then(() => {
-                                resolve(result);
+                                if (!this.streamEnd && this.streamEnabled && this.streamStart) this.on("end", () => resolve(result));
+                                else resolve(result);
                             });
                         }catch(err){
                             reject(err);
@@ -687,7 +703,8 @@ export class ODataProcessor extends Transform{
                 }else{
                     try{
                         this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType, (include || this.resourcePath).includes).then(() => {
-                            resolve(result);
+                            if (!this.streamEnd && this.streamEnabled && this.streamStart) this.on("end", () => resolve(result));
+                            else resolve(result);
                         });
                     }catch(err){
                         reject(err);
@@ -816,7 +833,8 @@ export class ODataProcessor extends Transform{
                     if (boundOp == expOp){
                         let expResult = boundOpName == "$count" ? opResult || this.resultCount : opResult;
                         if (elementType && boundOpName == "$value" && Edm.isMediaEntity(elementType)){
-                            this.emit("contentType", Edm.getContentType(elementType));
+                            this.emit("contentType", Edm.getContentType(elementType) || opResult.contentType || "application/octet-stream");
+                            if (opResult.stream) opResult = opResult.stream;
                             opResult.pipe(this);
                             opResult.on("end", resolve);
                             opResult.on("error", reject);
@@ -862,7 +880,18 @@ export class ODataProcessor extends Transform{
             }
         }
         if (entitySet){
+            let resultType = Object.getPrototypeOf(body).constructor;
+            if (resultType != Object && resultType != elementType) elementType = resultType;
+            if (typeof body["@odata.type"] == "function") elementType = body["@odata.type"];
             let keys = Edm.getKeyProperties(elementType);
+            let resolveBaseType = (elementType) => {
+                let baseType = Object.getPrototypeOf(elementType.prototype).constructor;
+                if (baseType != Object && Edm.getProperties(baseType.prototype).length > 0){
+                    keys = Edm.getKeyProperties(baseType).concat(keys);
+                    resolveBaseType(baseType);
+                }
+            };
+            resolveBaseType(elementType);
             if (keys.length > 0){
                 let id;
                 try{
@@ -875,7 +904,8 @@ export class ODataProcessor extends Transform{
                         context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
                         if (typeof elementType == "function" && Edm.isMediaEntity(elementType)) {
                             context["@odata.mediaReadLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})/$value`;
-                            context["@odata.mediaContentType"] = Edm.getContentType(elementType);
+                            let contentType = Edm.getContentType(elementType);
+                            if (contentType) context["@odata.mediaContentType"] = contentType;
                             if (typeof result == "object") result.stream = body;
                         }
                         if (odata.findODataMethod(ctrl, "put", keys) ||
@@ -888,16 +918,16 @@ export class ODataProcessor extends Transform{
         }
     }
 
-    private async __appendODataContext(result:any, elementType:Function, includes?){
+    private async __appendODataContext(result:any, ctrlType:Function, includes?){
         if (typeof result.body == "undefined") return;
         let context:any = {
             "@odata.context": this.odataContext
         };
-        result.elementType = elementType;
+        let elementType = result.elementType = jsPrimitiveTypes.indexOf(result.elementType) >= 0 || result.elementType == String || typeof result.elementType != "function" ? ctrlType : result.elementType;
         if (typeof result.body == "object" && result.body){
             if (typeof result.body["@odata.count"] == "number") context["@odata.count"] = result.body["@odata.count"];
             if (!result.body["@odata.context"]){
-                let ctrl = this.ctrl && this.ctrl.prototype.elementType == elementType ? this.ctrl : this.serverType.getController(elementType);
+                let ctrl = this.ctrl && this.ctrl.prototype.elementType == ctrlType ? this.ctrl : this.serverType.getController(ctrlType);
                 if (result.body.value && Array.isArray(result.body.value)){
                     context.value = result.body.value;
                     await Promise.all(result.body.value.map((entity, i) => {
@@ -923,10 +953,30 @@ export class ODataProcessor extends Transform{
 
     private async __convertEntity(context, result, elementType, includes?){
         if (elementType === Object || this.options.disableEntityConversion) return extend(context, result);
+        let resultType = Object.getPrototypeOf(result).constructor;
+        if (resultType != Object && resultType != this.ctrl.prototype.elementType){
+            elementType = resultType;
+            if (Edm.isEntityType(elementType)) context["@odata.type"] = (elementType.namespace || this.serverType.namespace) + "." + elementType.name;
+        }
+        if (typeof result["@odata.type"] == "function"){
+            elementType = result["@odata.type"];
+            if (Edm.isEntityType(elementType)) context["@odata.type"] = (elementType.namespace || this.serverType.namespace) + "." + elementType.name;
+        }
+        if (typeof context["@odata.type"] == "undefined" && this.ctrl && elementType != this.ctrl.prototype.elementType){
+            if (Edm.isEntityType(elementType)) context["@odata.type"] = (elementType.namespace || this.serverType.namespace) + "." + elementType.name;
+        }
         let props = Edm.getProperties(elementType.prototype);
         if (Edm.isOpenType(elementType)){
             props = Object.getOwnPropertyNames(result).concat(props);
         }
+        let resolveBaseType = (elementType) => {
+            let baseType = Object.getPrototypeOf(elementType.prototype).constructor;
+            if (baseType != Object && Edm.getProperties(baseType.prototype).length > 0){
+                props = Edm.getProperties(baseType.prototype).concat(props);
+                resolveBaseType(baseType);
+            }
+        };
+        resolveBaseType(elementType);
         if (props.length > 0){
             let ctrl = this.serverType.getController(elementType);
             await Promise.all(props.map(prop => (async prop => {
@@ -959,7 +1009,12 @@ export class ODataProcessor extends Transform{
                         context[prop] = new itemType();
                         await this.__convertEntity(context[prop], entity[prop], type, includes);
                     }else if (typeof converter == "function") context[prop] = converter(entity[prop]);
-                    else if (typeof entity[prop] != "undefined") context[prop] = entity[prop];
+                    else if (type == "Edm.Stream"){
+                        context[`${prop}@odata.mediaReadLink`] = `${context["@odata.id"]}/${prop}`;
+                        let contentType = Edm.getContentType(elementType.prototype, prop) || (entity[prop] && entity[prop].contentType);
+                        if (contentType) context[`${prop}@odata.mediaContentType`] = contentType;
+                        context[prop] = new StreamWrapper(entity[prop]);
+                    }else if (typeof entity[prop] != "undefined") context[prop] = entity[prop];
                 }
             })(prop)));
         }
@@ -981,7 +1036,7 @@ export class ODataProcessor extends Transform{
                 let params = {};
                 let stream, streamPromise;
                 if (isCollection){
-                    stream = (<any>include).stream = new ODataStream();
+                    stream = (<any>include).stream = new ODataStreamWrapper();
                     streamPromise = (<any>include).streamPromise = stream.toPromise();
                 }
                 if (fn){

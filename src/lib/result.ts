@@ -1,4 +1,15 @@
 import * as extend from "extend";
+import { Readable } from "stream";
+
+export class ODataStream{
+    stream:Readable
+    contentType:string
+
+    constructor(stream:Readable, contentType?:string){
+        this.stream = stream;
+        this.contentType = contentType;
+    }
+}
 
 export interface IODataResult{
     "@odata.context"?:string

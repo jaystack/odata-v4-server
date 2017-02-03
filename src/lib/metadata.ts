@@ -1,5 +1,6 @@
 import * as extend from "extend";
 import { Edm as Metadata } from "odata-v4-metadata";
+import { Stream as NodeStream } from "stream";
 import { ODataController } from "./controller";
 import { ODataServer } from "./server";
 import * as Edm from "./edm";
@@ -39,7 +40,7 @@ export function createMetadataJSON(server:typeof ODataServer){
     let propNames = getAllPropertyNames(server.prototype).filter(it => it != "constructor");
     let entitySets = odata.getPublicControllers(server);
     let resolvingTypes = [];
-    let resolveType = (elementType, parent) => {
+    let resolveType = (elementType, parent, baseType?) => {
         if (resolvingTypes.indexOf(elementType) >= 0) return null;
         resolvingTypes.push(elementType);
 
@@ -47,6 +48,7 @@ export function createMetadataJSON(server:typeof ODataServer){
         
         let typeDefinition:any = {
             name: elementType.name,
+            baseType: baseType ? (baseType.namespace || server.namespace) + "." + baseType.name : undefined,
             key: [],
             property: [],
             navigationProperty: [],
@@ -164,6 +166,23 @@ export function createMetadataJSON(server:typeof ODataServer){
                     returnType: { type: returnType }
                 };
                 operationSchema.action.push(definition);
+            }
+        });
+
+        let __proto__ = Object.getPrototypeOf(elementType.prototype);
+        if (!baseType && __proto__) baseType = __proto__.constructor;
+        if (baseType && baseType != Object && Edm.getProperties(baseType.prototype).length > 0){
+            typeDefinition.baseType = (baseType.namespace || server.namespace) + "." + baseType.name;
+            let resolvedType = resolveType(baseType, elementType);
+            if (resolvedType && !resolvedType.schema.entityType.filter(et => et.name == resolvedType.definition.name)[0]){
+                resolvedType.schema.entityType.push(resolvedType.definition);
+            }
+        }
+        let children = Edm.getChildren(elementType);
+        children.forEach((child) => {
+            let resolvedType = resolveType(child, elementType, elementType);
+            if (resolvedType && !resolvedType.schema.entityType.filter(et => et.name == resolvedType.definition.name)[0]){
+                resolvedType.schema.entityType.push(resolvedType.definition);
             }
         });
 
@@ -306,5 +325,10 @@ export function createMetadataJSON(server:typeof ODataServer){
         }
     });
 
+    definition.dataServices.schema = definition.dataServices.schema.sort((a, b) => a.namespace.localeCompare(b.namespace));
+    definition.dataServices.schema.forEach((schema) => {
+        schema.entityType = schema.entityType.sort((a, b) => a.name.localeCompare(b.name));
+        schema.complexType = schema.complexType.sort((a, b) => a.name.localeCompare(b.name));
+    });
     return definition;
 }

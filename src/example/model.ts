@@ -27,7 +27,7 @@ export class Product{
     CategoryId:string
 
     @Edm.ForeignKey("CategoryId")
-    @Edm.EntityType("Category")
+    @Edm.EntityType(Edm.ForwardRef(() => Category))
     @Edm.Partner("Products")
     Category:Category
 
@@ -100,7 +100,7 @@ export class Category{
     Name:string
 
     @Edm.ForeignKey("CategoryId")
-    @Edm.Collection(Edm.EntityType("Product"))
+    @Edm.Collection(Edm.EntityType(Product))
     @Edm.Partner("Category")
     Products:Product[]
 

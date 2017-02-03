@@ -12,3 +12,17 @@ export const getAllPropertyNames = function(proto:any):string[]{
     if (proto !== Object.prototype) propNames = propNames.concat(getAllPropertyNames(proto));
     return propNames;
 };
+let GeneratorFunction;
+try{ GeneratorFunction = eval("(function*() {}).constructor"); }catch(err){}
+
+export function isIterator(value){
+    return value instanceof GeneratorFunction;
+}
+
+export function isPromise(value){
+    return value && typeof value.then == "function";
+}
+
+export function isStream(stream){
+    return stream !== null && typeof stream == "object" && typeof stream.pipe == "function";
+}
