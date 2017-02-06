@@ -5,11 +5,10 @@ import * as extend from "extend";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
-import { Transform, Readable, Duplex, TransformOptions } from "stream";
-import { ODataResult, IODataResult } from "./result";
+import { Transform, TransformOptions } from "stream";
+import { ODataResult } from "./result";
 import { ODataController } from "./controller";
 import * as odata from "./odata";
-import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions } from "./processor";
 
@@ -54,7 +53,8 @@ export class ODataServer extends Transform{
                         res.write(chunk, encoding, done);
                     }
                 });
-                processor.execute(req.body || req).then((result:ODataResult) => {
+                let body = req.body && Object.keys(req.body).length > 0 ? req.body : req;
+                processor.execute(body).then((result:ODataResult) => {
                     try{
                         if (result){
                             res.status(result.statusCode || 200);

@@ -1,6 +1,3 @@
-import * as extend from "extend";
-import { ODataServer } from "./server";
-import { ODataResult } from "./result";
 import * as odata from "./odata";
 import { getFunctionParameters } from "./utils";
 
@@ -19,7 +16,6 @@ export class ODataController{
             });
         }
     }
-
 
     /** Enables the filtering
      * @param fn

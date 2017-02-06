@@ -1,13 +1,48 @@
 import * as extend from "extend";
-import { Readable } from "stream";
+import { Readable, Writable } from "stream";
 
 export class ODataStream{
-    stream:Readable
+    stream:any
     contentType:string
 
-    constructor(stream:Readable, contentType?:string){
-        this.stream = stream;
-        this.contentType = contentType;
+    constructor(contentType:string);
+    constructor(stream:any, contentType?:string);
+    constructor(stream:any, contentType?:string){
+        if (typeof stream == "string"){
+            this.stream = null;
+            this.contentType = stream;
+        }else{
+            this.stream = stream;
+            this.contentType = contentType;
+        }
+        this.contentType = this.contentType || "application/octet-stream";
+    }
+
+    pipe(destination:Writable):Promise<Readable>{
+        return new Promise((resolve, reject) => {
+            this.stream.on("open", () => {
+                if (typeof this.stream.close == "function"){
+                    destination.on("finish", () => {
+                        this.stream.close();
+                    });
+                }
+                resolve(this);
+            }).on("error", reject);
+        });
+    }
+
+    write(source:Readable):Promise<Writable>{
+        return new Promise((resolve, reject) => {
+            this.stream.on("open", () => {
+                if (typeof this.stream.close == "function"){
+                    source.on("finish", () => {
+                        this.stream.close();
+                    });
+                }
+                source.pipe(this.stream);
+            }).on("error", reject);
+            source.on("end", () => resolve(this));
+        });
     }
 }
 

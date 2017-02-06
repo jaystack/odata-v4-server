@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { ODataServer } from "./server";
 import { ODataController } from "./controller";
-import { getFunctionParameters, getAllPropertyNames } from "./utils";
+import { getFunctionParameters, getAllPropertyNames, PropertyDecorator } from "./utils";
 
 export class ODataMethodType {
     static GET: string = "GET";
@@ -106,126 +106,150 @@ export const cors = (function cors() {
     };
 })();
 
-function odataMethodFactory(type: string, navigationProperty?: string) {
-    type = type.toLowerCase();
+function odataMethodFactory(type: string, navigationProperty?: string):ODataMethodDecorator | RefExpressionDecorator {
+    if (type.indexOf("/") < 0) type = type.toLowerCase();
     let decorator: any = function (target, targetKey) {
         let existingMethods: any[] = Reflect.getMetadata(ODataMethod, target, targetKey) || [];
-        existingMethods.push(type);
+        existingMethods.unshift(type);
         Reflect.defineMetadata(ODataMethod, existingMethods, target, targetKey);
-        return decorator;
     }
-    let fn: any = function (target: any, targetKey?: string): any {
-        if (arguments.length == 0) return decorator;
-        else return decorator(target, targetKey);
-    };
-    if (typeof navigationProperty == "string") {
-        type += "/" + navigationProperty;
-        fn.$ref = decorator.$ref = function (target, targetKey) {
-            type += "/$ref";
+    let createRefFn = function(navigationProperty){
+        let fn = odataMethodFactory(`${type}/${navigationProperty}`);
+        (<RefExpressionDecorator>fn).$ref = function (target, targetKey) {
             let existingMethods: any[] = Reflect.getMetadata(ODataMethod, target, targetKey) || [];
-            existingMethods.push(type);
+            existingMethods.unshift(`${type}/${navigationProperty}/$ref`);
             Reflect.defineMetadata(ODataMethod, existingMethods, target, targetKey);
         };
-    }
+        return <RefExpressionDecorator>fn;
+    };
+    if (typeof navigationProperty == "string") return createRefFn(navigationProperty);
+    let fn:any = <ExpressionDecorator>function (target: any, targetKey?: string): any {
+        if (typeof target == "string") return createRefFn(target);
+        if (arguments.length == 0) return fn;
+        else decorator(target, targetKey);
+    };
+    (<ExpressionDecorator>fn).$value = function (target, targetKey) {
+        let existingMethods: any[] = Reflect.getMetadata(ODataMethod, target, targetKey) || [];
+        existingMethods.unshift(`${type}/$value`);
+        Reflect.defineMetadata(ODataMethod, existingMethods, target, targetKey);
+    };
 
-    return fn;
+    return <ODataMethodDecorator>fn;
 }
 
-/** Annotate function for OData GET operation
- * @param navigationProperty Navigation property name to handle
- */
-export function GET(navigationProperty: string);
+export interface ExpressionDecorator extends PropertyDecorator<ExpressionDecorator>{
+    /** Annotate function for $value handler */
+    $value:PropertyDecorator<void>
+    /** Annotate function for $count handler */
+    $count:PropertyDecorator<void>
+}
+export interface RefExpressionDecorator extends ExpressionDecorator{
+    $ref:PropertyDecorator<void>
+}
+export interface ODataMethodDecorator extends ExpressionDecorator{
+    ():ExpressionDecorator
+    (navigationProperty: string):RefExpressionDecorator
+}
+
+export interface RefExpressionGETDecorator extends ExpressionDecorator{
+    /** Create reference for OData GET operation */
+    $ref:PropertyDecorator<void>
+}
+export interface ODataGETMethodDecorator extends ExpressionDecorator{
+    /** Annotate function for OData GET operation */
+    ():ExpressionDecorator
+    /** Annotate function for OData GET operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    (navigationProperty: string):RefExpressionGETDecorator
+    /** Annotate function for OData GET operation
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
+     */
+    (target?: any, targetKey?: string):ExpressionDecorator;
+}
 /** Annotate function for OData GET operation */
-export function GET();
-/** Annotate function for OData GET operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function GET(target?: any, targetKey?: string);
-/** Annotate function for OData GET operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function GET(target?: any, targetKey?: string) {
-    if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("GET", target);
-    odataMethodFactory("GET", target)(target, targetKey);
+export const GET = <ODataGETMethodDecorator>odataMethodFactory("GET");
+
+export interface RefExpressionPOSTDecorator extends ExpressionDecorator{
+    /** Create reference for OData POST operation */
+    $ref:PropertyDecorator<void>
 }
-/** Annotate function for OData POST operation
- * @param navigationProperty Navigation property name to handle
- */
-export function POST(navigationProperty: string);
+export interface ODataPOSTMethodDecorator extends ExpressionDecorator{
+    /** Annotate function for OData POST operation */
+    ():ExpressionDecorator
+    /** Annotate function for OData POST operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    (navigationProperty: string):RefExpressionPOSTDecorator
+    /** Annotate function for OData POST operation
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
+     */
+    (target?: any, targetKey?: string):ExpressionDecorator;
+}
 /** Annotate function for OData POST operation */
-export function POST();
-/** Annotate function for OData POST operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function POST(target?: any, targetKey?: string);
-/** Annotate function for OData POST operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function POST(target?: any, targetKey?: string) {
-    if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("POST", target);
-    odataMethodFactory("POST", target)(target, targetKey);
+export const POST = <ODataPOSTMethodDecorator>odataMethodFactory("POST");
+
+export interface RefExpressionPUTDecorator extends ExpressionDecorator{
+    /** Create reference for OData PUT operation */
+    $ref:PropertyDecorator<void>
 }
-/** Annotate function for OData PUT operation
- * @param navigationProperty Navigation property name to handle
- */
-export function PUT(navigationProperty: string);
+export interface ODataPUTMethodDecorator extends ExpressionDecorator{
+    /** Annotate function for OData PUT operation */
+    ():ExpressionDecorator
+    /** Annotate function for OData PUT operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    (navigationProperty: string):RefExpressionPUTDecorator
+    /** Annotate function for OData PUT operation
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
+     */
+    (target?: any, targetKey?: string):ExpressionDecorator;
+}
 /** Annotate function for OData PUT operation */
-export function PUT();
-/** Annotate function for OData PUT operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function PUT(target?: any, targetKey?: string);
-/** Annotate function for OData PUT operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function PUT(target?: any, targetKey?: string) {
-    if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("PUT", target);
-    odataMethodFactory("PUT", target)(target, targetKey);
+export const PUT = <ODataPUTMethodDecorator>odataMethodFactory("PUT");
+
+export interface RefExpressionPATCHDecorator extends ExpressionDecorator{
+    /** Create reference for OData PATCH operation */
+    $ref:PropertyDecorator<void>
 }
-/** Annotate function for OData PATCH operation
- * @param navigationProperty Navigation property name to handle
- */
-export function PATCH(navigationProperty: string);
+export interface ODataPATCHMethodDecorator extends ExpressionDecorator{
+    /** Annotate function for OData PATCH operation */
+    ():ExpressionDecorator
+    /** Annotate function for OData PATCH operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    (navigationProperty: string):RefExpressionPATCHDecorator
+    /** Annotate function for OData PATCH operation
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
+     */
+    (target?: any, targetKey?: string):ExpressionDecorator;
+}
 /** Annotate function for OData PATCH operation */
-export function PATCH();
-/** Annotate function for OData PATCH operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function PATCH(target?: any, targetKey?: string);
-/** Annotate function for OData PATCH operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function PATCH(target?: any, targetKey?: string) {
-    if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("PATCH", target);
-    odataMethodFactory("PATCH", target)(target, targetKey);
+export const PATCH = <ODataPATCHMethodDecorator>odataMethodFactory("PATCH");
+
+export interface RefExpressionDELETEDecorator extends ExpressionDecorator{
+    /** Create reference for OData DELETE operation */
+    $ref:PropertyDecorator<void>
 }
-/** Annotate function for OData DELETE operation
- * @param navigationProperty Navigation property name to handle
- */
-export function DELETE(navigationProperty: string);
+export interface ODataDELETEMethodDecorator extends ExpressionDecorator{
+    /** Annotate function for OData DELETE operation */
+    ():ExpressionDecorator
+    /** Annotate function for OData DELETE operation
+     * @param navigationProperty Navigation property name to handle
+     */
+    (navigationProperty: string):RefExpressionDELETEDecorator
+    /** Annotate function for OData DELETE operation
+     * @param target    The prototype of the class for an instance member
+     * @param targetKey The name of the class method
+     */
+    (target?: any, targetKey?: string):ExpressionDecorator;
+}
 /** Annotate function for OData DELETE operation */
-export function DELETE();
-/** Annotate function for OData DELETE operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function DELETE(target?: any, targetKey?: string);
-/** Annotate function for OData DELETE operation
- * @param target    The prototype of the class for an instance member
- * @param targetKey The name of the class method
- */
-export function DELETE(target?: any, targetKey?: string) {
-    if (typeof target == "string" || typeof target == "undefined") return odataMethodFactory("DELETE", target);
-    odataMethodFactory("DELETE", target)(target, targetKey);
-}
+export const DELETE = <ODataDELETEMethodDecorator>odataMethodFactory("DELETE");
 
 /** Create reference for OData POST operation
  * @param navigationProperty Navigation property name to handle
@@ -247,7 +271,11 @@ export function deleteRef(navigationProperty: string) {
 }
 
 /** Annotate function for a specified OData method operation */
-export function method(method: string, navigationProperty?: string) {
+export function method(method: string):ODataMethodDecorator;
+/** Annotate function for a specified OData method operation */
+export function method(method: string, navigationProperty: string):RefExpressionDecorator;
+/** Annotate function for a specified OData method operation */
+export function method(method: string, navigationProperty?: string):ODataMethodDecorator | RefExpressionDecorator {
     return odataMethodFactory(method.toUpperCase(), navigationProperty);
 }
 /** get metadata value of ODataMethod on the prototype chain of target or targetKey

@@ -1,9 +1,7 @@
 /** ?????????? */ // TODO: check & replace this pattern
 import "reflect-metadata";
 import { ODataController } from "./controller";
-import { getFunctionParameters } from "./utils";
-
-export type Decorator = ((target?:any, targetKey?:string, parameterIndex?:number | TypedPropertyDescriptor<any>) => any);
+import { getFunctionParameters, Decorator } from "./utils";
 
 const EdmProperties:string = "edm:properties";
 const EdmKeyProperties:string = "edm:keyproperties";
@@ -11,7 +9,6 @@ const EdmKeyProperty:string = "edm:keyproperty";
 const EdmForeignKeys:string = "edm:foreignkeys";
 const EdmComputedProperty:string = "edm:computedproperty";
 const EdmNullableProperty:string = "edm:nullableproperty";
-const EdmRequiredProperty:string = "edm:requiredproperty";
 const EdmPartnerProperty:string = "edm:partnerproperty";
 const EdmType:string = "edm:type";
 const EdmElementType:string = "edm:elementtype";
@@ -24,7 +21,6 @@ const EdmReturnType:string = "edm:returntype";
 const EdmParameters:string = "edm:parameters";
 const EdmAnnotations:string = "edm:annotations";
 const EdmConverter:string = "edm:converter";
-const EdmEntitySet:string = "edm:entityset";
 const EdmMediaEntity:string = "edm:mediaentity";
 const EdmOpenType:string = "emd:opentype";
 const EdmChildren:string = "edm:children";

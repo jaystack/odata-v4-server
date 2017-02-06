@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "build:w": "tsc -w",
-    "lint": "tslint src/**/*.ts -t verbose --force > .tslint",
+    "lint": "tslint src/lib/**/*.ts -t verbose --force > .tslint",
     "pretest": "tsc",
     "test": "mocha build/test/**/*.spec.js --reporter mochawesome --reporter-options reportDir=report,reportName=odata-v4-server,reportTitle=\"OData V4 Server\"",
     "coverage": "rm -rf coverage && tsc && node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha build/test/**/*.spec.js --config=.istanbul.yaml -x config/**/*.js && node node_modules/remap-istanbul/bin/remap-istanbul -i coverage/coverage.json -o coverage/html-report -t html",

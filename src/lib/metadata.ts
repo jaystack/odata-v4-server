@@ -1,6 +1,4 @@
 import * as extend from "extend";
-import { Edm as Metadata } from "odata-v4-metadata";
-import { Stream as NodeStream } from "stream";
 import { ODataController } from "./controller";
 import { ODataServer } from "./server";
 import * as Edm from "./edm";

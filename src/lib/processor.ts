@@ -4,14 +4,13 @@ import * as extend from "extend";
 import * as url from "url";
 import * as qs from "qs";
 import * as util from "util";
-import { Transform, Readable, Duplex, TransformOptions } from "stream";
+import { Transform, TransformOptions } from "stream";
 import { getFunctionParameters, isIterator, isPromise, isStream } from "./utils";
-import { ODataResult, IODataResult } from "./result";
+import { ODataResult } from "./result";
 import { ODataController } from "./controller";
 import { ResourcePathVisitor, NavigationPart } from "./visitor";
 import * as Edm from "./edm";
 import * as odata from "./odata";
-import { ODataMethodType } from "./odata";
 import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { ODataServer } from "./server";
 
@@ -128,7 +127,6 @@ const createODataContext = function(context, entitySets, server:typeof ODataServ
 const fnCaller = function(fn, params){
     params = params || {};
     let fnParams:any[];
-    let paramsArray = Object.keys(params);
     fnParams = getFunctionParameters(fn);
     for (var i = 0; i < fnParams.length; i++){
         fnParams[i] = params[fnParams[i]];
@@ -146,21 +144,61 @@ const ODataRequestResult:any = {
 };
 
 const expCalls = {
-    $count: function(){
+    $count: function(processor){
         return this.body && this.body.value ? (this.body.value.length || 0) : 0;
     },
-    $value: function(){
-        if (this.stream) return this.stream;
+    $value: function(processor){
+        let prevPart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
 
-        let result = this.body.value || this.body;
-        for (let prop in result){
-            if (prop.indexOf("@odata") >= 0) delete result[prop];
+        let fn = odata.findODataMethod(processor.ctrl, `${processor.method}/$value`, prevPart.key || []);
+        if (fn){
+            let ctrl = processor.ctrl;
+            let params = {};
+            if (prevPart.key) prevPart.key.forEach((key) => params[key.name] = key.value);
+
+            let fnDesc = fn;
+            processor.__applyParams(ctrl, fnDesc.call, params, processor.url.query, this);
+
+            fn = ctrl.prototype[fnDesc.call];
+            if (fnDesc.key.length == 1 && prevPart.key.length == 1 && fnDesc.key[0].to != prevPart.key[0].name){
+                params[fnDesc.key[0].to] = params[prevPart.key[0].name];
+                delete params[prevPart.key[0].name];
+            }else{
+                for (let i = 0; i < fnDesc.key.length; i++){
+                    if (fnDesc.key[i].to != fnDesc.key[i].from){
+                        params[fnDesc.key[i].to] = params[fnDesc.key[i].from];
+                        delete params[fnDesc.key[i].from];
+                    }
+                }
+            }
+
+            let currentResult = fnCaller.call(ctrl, fn, params);
+
+            if (isIterator(fn)){
+                currentResult = run(currentResult, [
+                    ODataGeneratorHandlers.PromiseHandler,
+                    ODataGeneratorHandlers.StreamHandler
+                ]);
+            }
+
+            if (!isPromise(currentResult)){
+                currentResult = Promise.resolve(currentResult);
+            }
+
+            return currentResult;
+        }else{
+            if (this.stream) return Promise.resolve(this.stream);
+            if (this.body){
+                let result = this.body.value || this.body;
+                for (let prop in result){
+                    if (prop.indexOf("@odata") >= 0) delete result[prop];
+                }
+
+                return Promise.resolve(result.value || result);
+            }
         }
-
-        return result.value || result;
     },
     $ref: function(processor){
-        let part = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 1];
         let prevPart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
         let routePart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 3];
 
@@ -216,7 +254,7 @@ const expCalls = {
         }
 
         if (!isPromise(currentResult)){
-            currentResult = new Promise((resolve) => resolve(currentResult));
+            currentResult = Promise.resolve(currentResult);
         }
 
         return currentResult;
@@ -363,6 +401,7 @@ export class ODataProcessor extends Transform{
     private streamStart = false;
     private streamEnabled = false;
     private streamEnd = false;
+    private elementType:any;
     private resultCount = 0;
 
     constructor(context, server, options?:ODataProcessorOptions){
@@ -401,21 +440,26 @@ export class ODataProcessor extends Transform{
                 }else this.push(',');
                 try{
                     this.streamStart = true;
-                    let entity = {};
-                    this.__appendLinks(this.ctrl, this.ctrl.prototype.elementType, entity, chunk);
-                    this.__convertEntity(entity, chunk, this.ctrl.prototype.elementType, this.resourcePath.includes).then(() => {
-                        chunk = JSON.stringify(entity);
-                        this.push(chunk);
-                        if (typeof done == "function") done();
-                    }, (err) => {
-                        console.log(err);
-                        try{
-                            chunk = chunk.toString();
+                    if (chunk instanceof Object){
+                        let entity = {};
+                        if (this.ctrl) this.__appendLinks(this.ctrl, this.ctrl.prototype.elementType, entity, chunk);
+                        this.__convertEntity(entity, chunk, this.elementType || this.ctrl.prototype.elementType, this.resourcePath.includes).then(() => {
+                            chunk = JSON.stringify(entity);
                             this.push(chunk);
-                        }catch(err){
-                            super.end();
-                        }
-                    });
+                            if (typeof done == "function") done();
+                        }, (err) => {
+                            console.log(err);
+                            try{
+                                chunk = chunk.toString();
+                                this.push(chunk);
+                            }catch(err){
+                                super.end();
+                            }
+                        });
+                    }else{
+                        this.push(JSON.stringify(chunk));
+                        if (typeof done == "function") done();
+                    }
                 }catch(err){
                     console.log(err);
                     try{
@@ -526,7 +570,6 @@ export class ODataProcessor extends Transform{
             }else{
                 let ctrl = this.serverType.getController(elementType);
                 let foreignKeys = Edm.getForeignKeys(resultType, part.name);
-                let typeKeys = Edm.getKeyProperties(elementType);
                 result.foreignKeys = {};
                 (<any>part).key = foreignKeys.map((key) => {
                     result.foreignKeys[key] = result.body[key];
@@ -547,24 +590,82 @@ export class ODataProcessor extends Transform{
             return new Promise((resolve, reject) => {
                 this.__enableStreaming(part);
 
-                let value = result.body[part.name];
-                if (value instanceof StreamWrapper){
-                    value = value.stream;
-                }
-                result.body = {
-                    "@odata.context": result.body["@odata.context"],
-                    value: value
-                };
-                let elementType = result.elementType;
-                if (typeof value == "object") result.elementType = Edm.getType(result.elementType, part.name) || Object;
+                let currentResult;
+                let prevPart = this.resourcePath.navigation[this.resourcePath.navigation.indexOf(part) - 1];
+                let fn = odata.findODataMethod(this.ctrl, `${this.method}/${part.name}`, prevPart.key || []) ||
+                    odata.findODataMethod(this.ctrl, `${this.method}/${part.name}/$value`, prevPart.key || []);
+                if (fn){
+                    let ctrl = this.prevCtrl;
+                    let params = {};
+                    if (prevPart.key) prevPart.key.forEach((key) => params[key.name] = key.value);
 
-                if (isStream(value) || isStream(value.stream)){
-                    this.emit("contentType", Edm.getContentType(elementType.prototype, part.name) || value.contentType || "application/octet-stream");
-                    if (value.stream) value = value.stream;
-                    value.pipe(this);
-                    value.on("end", resolve);
-                    value.on("error", reject);
-                }else resolve(result);
+                    let fnDesc = fn;
+                    this.__applyParams(ctrl, fnDesc.call, params, this.url.query, this);
+
+                    fn = ctrl.prototype[fnDesc.call];
+                    if (fnDesc.key.length == 1 && prevPart.key.length == 1 && fnDesc.key[0].to != prevPart.key[0].name){
+                        params[fnDesc.key[0].to] = params[prevPart.key[0].name];
+                        delete params[prevPart.key[0].name];
+                    }else{
+                        for (let i = 0; i < fnDesc.key.length; i++){
+                            if (fnDesc.key[i].to != fnDesc.key[i].from){
+                                params[fnDesc.key[i].to] = params[fnDesc.key[i].from];
+                                delete params[fnDesc.key[i].from];
+                            }
+                        }
+                    }
+
+                    this.elementType = Edm.getType(result.elementType, part.name) || Object;
+                    if (typeof this.elementType == "string") this.elementType = Object;
+                    currentResult = fnCaller.call(ctrl, fn, params);
+
+                    if (isIterator(fn)){
+                        currentResult = run(currentResult, [
+                            ODataGeneratorHandlers.PromiseHandler,
+                            ODataGeneratorHandlers.StreamHandler
+                        ]);
+                    }
+
+                    if (!isPromise(currentResult)){
+                        currentResult = Promise.resolve(currentResult);
+                    }
+                }else{
+                    let value = result.body[part.name];
+                    if (value instanceof StreamWrapper){
+                        value = value.stream;
+                    }
+
+                    currentResult = Promise.resolve(value);
+                }
+
+                if (this.method == "get"){
+                    currentResult.then((value) => {
+                        try{
+                            result.body = {
+                                "@odata.context": result.body["@odata.context"],
+                                value: value
+                            };
+                            let elementType = result.elementType;
+                            if (value instanceof Object) result.elementType = Edm.getType(result.elementType, part.name) || Object;
+
+                            if (value && (isStream(value) || isStream(value.stream))){
+                                this.emit("contentType", Edm.getContentType(elementType.prototype, part.name) || value.contentType || "application/octet-stream");
+                                if (value.stream) value = value.stream;
+                                value.pipe(this);
+                                value.on("end", resolve);
+                                value.on("error", reject);
+                            }else{
+                                if (this.streamEnabled && this.streamStart) delete result.body;
+                                resolve(result);
+                            }
+                        }catch(err){
+                            console.log(err);
+                            reject(err);
+                        }
+                    }, reject);
+                }else{
+                    ODataResult.NoContent(currentResult).then(resolve, reject);
+                }
             });
         };
     }
@@ -587,7 +688,8 @@ export class ODataProcessor extends Transform{
             else this.prevCtrl = ctrl;
             this.ctrl = ctrl;
 
-            let method = writeMethods.indexOf(this.method) >= 0 && this.resourcePath.navigation.indexOf(part) < this.resourcePath.navigation.length - 1
+            let method = writeMethods.indexOf(this.method) >= 0 &&
+                this.resourcePath.navigation.indexOf(part) < this.resourcePath.navigation.length - 1
                 ? "get"
                 : this.method;
 
@@ -670,7 +772,7 @@ export class ODataProcessor extends Transform{
             }
 
             if (!isPromise(currentResult)){
-                currentResult = new Promise((resolve) => resolve(currentResult));
+                currentResult = Promise.resolve(currentResult);
             }
 
             return currentResult.then((result:any):any => {
@@ -687,8 +789,7 @@ export class ODataProcessor extends Transform{
                     result.on("error", reject);
                 }else if (!(result instanceof ODataResult)){
                     return (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
-                        if (!this.streamEnabled &&
-                            !this.streamStart &&
+                        if (!this.streamStart &&
                             this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
                             writeMethods.indexOf(this.method) < 0 && !result.body) return reject(new ResourceNotFoundError());
                         try{
@@ -831,17 +932,23 @@ export class ODataProcessor extends Transform{
                     }
 
                     if (boundOp == expOp){
-                        let expResult = boundOpName == "$count" ? opResult || this.resultCount : opResult;
-                        if (elementType && boundOpName == "$value" && Edm.isMediaEntity(elementType)){
-                            this.emit("contentType", Edm.getContentType(elementType) || opResult.contentType || "application/octet-stream");
-                            if (opResult.stream) opResult = opResult.stream;
-                            opResult.pipe(this);
-                            opResult.on("end", resolve);
-                            opResult.on("error", reject);
+                        let expResult = Promise.resolve(boundOpName == "$count" ? opResult || this.resultCount : opResult);
+                        if (elementType && boundOpName == "$value" && typeof elementType == "function" && Edm.isMediaEntity(elementType)){
+                            opResult.then((opResult) => {
+                                if (this.method == "get"){
+                                    this.emit("contentType", Edm.getContentType(elementType) || opResult.contentType || "application/octet-stream");
+                                    if (opResult.stream) opResult = opResult.stream;
+                                    opResult.pipe(this);
+                                    opResult.on("end", resolve);
+                                    opResult.on("error", reject);
+                                }else ODataResult.NoContent().then(resolve, reject);
+                            }, reject);
                         }else{
-                            return (<Promise<ODataResult>>(boundOpName == "$ref" && this.method != "get" ? ODataResult.NoContent : ODataRequestResult[this.method])(expResult, typeof expResult == "object" ? "application/json" : "text/plain")).then((result) => {
-                                if (typeof expResult == "object" && boundOpName != "$ref") result.elementType = elementType;
-                                resolve(result);
+                            expResult.then((expResult) => {
+                                return (<Promise<ODataResult>>(boundOpName == "$ref" && this.method != "get" ? ODataResult.NoContent : ODataRequestResult[this.method])(expResult, typeof expResult == "object" ? "application/json" : "text/plain")).then((result) => {
+                                    if (typeof expResult == "object" && boundOpName != "$ref") result.elementType = elementType;
+                                    resolve(result);
+                                }, reject);
                             }, reject);
                         }
                     }
@@ -904,6 +1011,9 @@ export class ODataProcessor extends Transform{
                         context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
                         if (typeof elementType == "function" && Edm.isMediaEntity(elementType)) {
                             context["@odata.mediaReadLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})/$value`;
+                            if (odata.findODataMethod(ctrl, "post/$value", [])){
+                                context["@odata.mediaEditLink"] = `${getODataRoot(this.context)}/${entitySet}(${id})/$value`;
+                            }
                             let contentType = Edm.getContentType(elementType);
                             if (contentType) context["@odata.mediaContentType"] = contentType;
                             if (typeof result == "object") result.stream = body;
@@ -1011,6 +1121,9 @@ export class ODataProcessor extends Transform{
                     }else if (typeof converter == "function") context[prop] = converter(entity[prop]);
                     else if (type == "Edm.Stream"){
                         context[`${prop}@odata.mediaReadLink`] = `${context["@odata.id"]}/${prop}`;
+                        if (odata.findODataMethod(ctrl, `post/${prop}`, []) || odata.findODataMethod(ctrl, `post/${prop}/$value`, [])){
+                            context[`${prop}@odata.mediaEditLink`] = `${context["@odata.id"]}/${prop}`;
+                        }
                         let contentType = Edm.getContentType(elementType.prototype, prop) || (entity[prop] && entity[prop].contentType);
                         if (contentType) context[`${prop}@odata.mediaContentType`] = contentType;
                         context[prop] = new StreamWrapper(entity[prop]);
@@ -1061,7 +1174,6 @@ export class ODataProcessor extends Transform{
                         navigationResult = await this.__read(ctrl, part, params, result, foreignFilter, navigationType, include);
                     }else{
                         const foreignKeys = Edm.getForeignKeys(elementType, include.navigationProperty);
-                        const typeKeys = Edm.getKeyProperties(navigationType);
                         result.foreignKeys = {};
                         let part:any = {};
                         part.key = foreignKeys.map(key => {
@@ -1108,7 +1220,7 @@ export class ODataProcessor extends Transform{
     }
 
     private __applyParams(container:any, name:string, params:any, queryString?:string | Token, result?:any, include?){
-        let queryParam, filterParam, contextParam, streamParam, resultParam, idParam;
+        let queryParam, filterParam, contextParam, streamParam, resultParam, idParam, bodyParam;
 
         queryParam = odata.getQueryParameter(container, name);
         filterParam = odata.getFilterParameter(container, name);
@@ -1116,6 +1228,7 @@ export class ODataProcessor extends Transform{
         streamParam = odata.getStreamParameter(container, name);
         resultParam = odata.getResultParameter(container, name);
         idParam = odata.getIdParameter(container, name);
+        bodyParam = odata.getBodyParameter(container, name);
 
         queryString = queryString || this.url.query;
         let queryAst = queryString ? (typeof queryString == "string" ? ODataParser.query(queryString, { metadata: this.serverType.$metadata().edmx }) : queryString) : null;
@@ -1143,6 +1256,10 @@ export class ODataProcessor extends Transform{
 
         if (idParam){
             params[idParam] = decodeURI(this.resourcePath.id || this.body["@odata.id"]);
+        }
+
+        if (bodyParam && !params[bodyParam]){
+            params[bodyParam] = this.body;
         }
     }
 

@@ -122,22 +122,42 @@ class Music extends PassThrough{
 @odata.type(Music)
 class MusicController extends ODataController{
     @odata.GET
-    mp3(@odata.key() key:number, @odata.context context:ODataHttpContext){
+    findOne(@odata.key() key:number, @odata.context context:ODataHttpContext){
         let music = new Music();
         music.Id = 1;
         music.Artist = "Dream Theater";
         music.Title = "Six degrees of inner turbulence";
-        let file = fs.createReadStream("../6doit.mp3");
+        return music;
+    }
+
+    @odata.GET.$value
+    mp3(@odata.key key:number, @odata.context context:ODataHttpContext){
+        let file = fs.createReadStream("tmp.mp3");
         return new Promise((resolve, reject) => {
             file.on("open", () => {
-                file.pipe(music);
                 context.response.on("finish", () => {
                     file.close();
                 });
-                resolve(music);
+                resolve(file);
             }).on("error", reject);
         });
     }
+
+    @odata.POST.$value
+    post(@odata.key key:number, @odata.body upload:Readable){
+        let file = fs.createWriteStream("tmp.mp3");
+        return new Promise((resolve, reject) => {
+            file.on('open', () => {
+                upload.pipe(file);
+            }).on('error', reject);
+            upload.on('end', resolve);
+        });
+    }
+}
+
+class ImageMember{
+    @Edm.String
+    value:string
 }
 
 class Image{
@@ -149,11 +169,14 @@ class Image{
     @Edm.String
     Filename:string
 
-    @Edm.Stream
+    @Edm.Collection(Edm.ComplexType(ImageMember))
+    Members:ImageMember[]
+
+    @Edm.Stream("image/png")
     Data:ODataStream
 
     @Edm.Stream("image/png")
-    Data2:Readable
+    Data2:ODataStream
 }
 
 @odata.type(Image)
@@ -162,12 +185,29 @@ class ImagesController extends ODataController{
     images(@odata.key id:number, @odata.context context:ODataHttpContext){
         let image = new Image();
         image.Id = id;
-        image.Filename = "../iis-85.png";
-        let file = fs.createReadStream(image.Filename);
-        image.Data = new ODataStream(file, "image/png");
-        image.Data2 = file;
-        context.response.on("close", () => file.close());
+        image.Filename = "tmp.png";
         return image;
+    }
+
+    @odata.GET("Members")
+    *getMembers(@odata.key id:number, @odata.stream stream:Writable){
+        for (let i = 0; i < 10; i++){
+            stream.write({ value: `Member #${i}` });
+            yield delay(1);
+        }
+        stream.end();
+    }
+
+    @odata.GET("Data")
+    @odata.GET("Data2").$value
+    getData(@odata.key id:number, @odata.context context:ODataHttpContext){
+        return new ODataStream(fs.createReadStream("tmp.png")).pipe(context.response);
+    }
+
+    @odata.POST("Data")
+    @odata.POST("Data2").$value
+    postData(@odata.key id:number, @odata.body data:Readable){
+        return new ODataStream(fs.createWriteStream("tmp.png")).write(data);
     }
 }
 
