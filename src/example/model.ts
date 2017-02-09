@@ -1,5 +1,5 @@
 import { ObjectID } from "mongodb";
-import { Edm, odata } from "../lib/index";
+import { Edm } from "../lib/index";
 
 const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFromHexString(_id) : _id;
 
@@ -22,9 +22,14 @@ export class Product{
     _id:ObjectID
 
     @Edm.String
+    get IdName(){
+        return `${this._id} - ${this.Name}`;
+    }
+
+    @Edm.String
     @Edm.Required
     @Edm.Convert(toObjectID)
-    CategoryId:string
+    CategoryId:ObjectID
 
     @Edm.ForeignKey("CategoryId")
     @Edm.EntityType(Edm.ForwardRef(() => Category))

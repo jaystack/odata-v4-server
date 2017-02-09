@@ -62,7 +62,7 @@ export class ODataResult{
     constructor(statusCode:number, contentType?:string, result?:any){
         this.statusCode = statusCode;
         if (typeof result != "undefined"){
-            this.body = typeof result == "object" && result ? extend({}, result) : result;
+            this.body = result;
             if (result && result.constructor) this.elementType = result.constructor;
             this.contentType = contentType || "application/json";
         }

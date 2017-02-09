@@ -18,7 +18,13 @@ export class ProductsController extends ODataController{
     async find(@odata.query query:ODataQuery, @odata.stream stream:Writable){
         let mongodbQuery = createQuery(query);
         if (mongodbQuery.query.CategoryId) mongodbQuery.query.CategoryId = new ObjectID(mongodbQuery.query.CategoryId);
-        return (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).stream().pipe(stream);
+        return (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).stream({
+            transform: (data) => {
+                let product = new Product();
+                Object.assign(product, data);
+                return product;
+            }
+        }).pipe(stream);
     }
 
     @odata.GET
@@ -26,6 +32,10 @@ export class ProductsController extends ODataController{
         let mongodbQuery = createQuery(query);
         return (await mongodb()).collection("Products").findOne({ _id: new ObjectID(key) }, {
             fields: mongodbQuery.projection
+        }).then((data) => {
+            let product = new Product();
+            Object.assign(product, data);
+            return product;
         });
     }
 

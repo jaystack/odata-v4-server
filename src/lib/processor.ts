@@ -781,7 +781,7 @@ export class ODataProcessor extends Transform{
                         (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
                             return this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType, (include || this.resourcePath).includes).then(() => {
                                 resolve(result);
-                            });
+                            }, reject);
                         }, reject);
                     }, reject);
                 }else if (isStream(result) && (!part.key || !Edm.isMediaEntity(elementType || this.ctrl.prototype.elementType))){
@@ -796,7 +796,7 @@ export class ODataProcessor extends Transform{
                             this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType, (include || this.resourcePath).includes).then(() => {
                                 if (!this.streamEnd && this.streamEnabled && this.streamStart) this.on("end", () => resolve(result));
                                 else resolve(result);
-                            });
+                            }, reject);
                         }catch(err){
                             reject(err);
                         }
@@ -806,7 +806,7 @@ export class ODataProcessor extends Transform{
                         this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType, (include || this.resourcePath).includes).then(() => {
                             if (!this.streamEnd && this.streamEnabled && this.streamStart) this.on("end", () => resolve(result));
                             else resolve(result);
-                        });
+                        }, reject);
                     }catch(err){
                         reject(err);
                     }
@@ -1099,8 +1099,9 @@ export class ODataProcessor extends Transform{
                 let converter:Function = Edm.getConverter(elementType, prop);
                 let isCollection = Edm.isCollection(elementType, prop);
                 let entity = result;
-                if (isCollection && entity[prop]){
-                    let value = Array.isArray(entity[prop]) ? entity[prop] : (typeof entity[prop] != "undefined" ? [entity[prop]] : []);
+                let propValue = entity[prop];
+                if (isCollection && propValue){
+                    let value = Array.isArray(propValue) ? propValue : (typeof propValue != "undefined" ? [propValue] : []);
                     if (includes && includes[prop]){
                         await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
                     }else if (typeof type == "function"){
@@ -1110,24 +1111,26 @@ export class ODataProcessor extends Transform{
                             await this.__convertEntity(item, it, type, includes);
                             return item;
                         })(it));
-                    }else if (typeof converter == "function") context[prop] = value.map(it => converter(it));
-                    else context[prop] = value;
+                    }else if (typeof converter == "function"){
+                        context[prop] = value.map(it => converter(it));
+                    }else context[prop] = value;
                 }else{
                     if (includes && includes[prop]){
                         await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
-                    }else if (typeof type == "function" && entity[prop]){
+                    }else if (typeof type == "function" && propValue){
                         context[prop] = new itemType();
-                        await this.__convertEntity(context[prop], entity[prop], type, includes);
-                    }else if (typeof converter == "function") context[prop] = converter(entity[prop]);
-                    else if (type == "Edm.Stream"){
+                        await this.__convertEntity(context[prop], propValue, type, includes);
+                    }else if (typeof converter == "function"){
+                        context[prop] = converter(propValue);
+                    }else if (type == "Edm.Stream"){
                         context[`${prop}@odata.mediaReadLink`] = `${context["@odata.id"]}/${prop}`;
                         if (odata.findODataMethod(ctrl, `post/${prop}`, []) || odata.findODataMethod(ctrl, `post/${prop}/$value`, [])){
                             context[`${prop}@odata.mediaEditLink`] = `${context["@odata.id"]}/${prop}`;
                         }
-                        let contentType = Edm.getContentType(elementType.prototype, prop) || (entity[prop] && entity[prop].contentType);
+                        let contentType = Edm.getContentType(elementType.prototype, prop) || (propValue && propValue.contentType);
                         if (contentType) context[`${prop}@odata.mediaContentType`] = contentType;
-                        context[prop] = new StreamWrapper(entity[prop]);
-                    }else if (typeof entity[prop] != "undefined") context[prop] = entity[prop];
+                        context[prop] = new StreamWrapper(propValue);
+                    }else if (typeof propValue != "undefined") context[prop] = propValue;
                 }
             })(prop)));
         }

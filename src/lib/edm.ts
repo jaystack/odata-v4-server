@@ -61,7 +61,7 @@ function typeDecoratorFactory(type:string):any{
             if (typeof target == "function"){
                 register(target);
             }
-            if (targetKey != EdmType && typeof target[targetKey] != "function") {
+            if (targetKey != EdmType && (Object.getOwnPropertyDescriptor(target, targetKey) || (!Object.getOwnPropertyDescriptor(target, targetKey) && typeof target[targetKey] != "function"))) {
                 let properties:string[] = Reflect.getOwnMetadata(EdmProperties, target) || [];
                 if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
                 Reflect.defineMetadata(EdmProperties, properties, target);
@@ -207,7 +207,7 @@ export function Collection(elementType:Function):Decorator{
                 }
                 Reflect.defineMetadata(EdmChildren, children, baseType);
             }
-            if (typeof target[targetKey] != "function") {
+            if (Object.getOwnPropertyDescriptor(target, targetKey) || (!Object.getOwnPropertyDescriptor(target, targetKey) && typeof target[targetKey] != "function")) {
                 let properties:string[] = Reflect.getOwnMetadata(EdmProperties, target) || [];
                 if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
                 Reflect.defineMetadata(EdmProperties, properties, target);
@@ -527,7 +527,7 @@ export function ComplexType(type:Function){
             }
             Reflect.defineMetadata(EdmChildren, children, baseType);
         }
-        if (targetKey && targetKey != EdmType && typeof target[targetKey] != "function") {
+        if (targetKey && targetKey != EdmType && (Object.getOwnPropertyDescriptor(target, targetKey) || (!Object.getOwnPropertyDescriptor(target, targetKey) && typeof target[targetKey] != "function"))) {
             let properties:string[] = Reflect.getOwnMetadata(EdmProperties, target) || [];
             if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
             Reflect.defineMetadata(EdmProperties, properties, target);
@@ -570,7 +570,7 @@ export function EntityType(type?:Function | string){
         if (typeof target == "function"){
             register(target);
         }
-        if (targetKey && targetKey != EdmType && typeof target[targetKey] != "function") {
+        if (targetKey && targetKey != EdmType && (Object.getOwnPropertyDescriptor(target, targetKey) || (!Object.getOwnPropertyDescriptor(target, targetKey) && typeof target[targetKey] != "function"))) {
             let properties:string[] = Reflect.getOwnMetadata(EdmProperties, target) || [];
             if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
             Reflect.defineMetadata(EdmProperties, properties, target);
@@ -583,6 +583,7 @@ export function EntityType(type?:Function | string){
 export function isEntityType(target:Function, propertyKey?:string):boolean{
     return Reflect.hasMetadata(EdmEntityType, target.prototype, propertyKey);
 }
+
 /** ?????????? */
 export function register(type:Function){
     if (EdmContainer.indexOf(type) < 0) EdmContainer.push(type);
