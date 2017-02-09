@@ -1087,6 +1087,9 @@ export class ODataProcessor extends Transform{
             }
         };
         resolveBaseType(elementType);
+        let entityType = function(){};
+        util.inherits(entityType, elementType);
+        result = Object.assign(new entityType(), result);
         if (props.length > 0){
             let ctrl = this.serverType.getController(elementType);
             await Promise.all(props.map(prop => (async prop => {

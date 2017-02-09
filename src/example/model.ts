@@ -22,11 +22,6 @@ export class Product{
     _id:ObjectID
 
     @Edm.String
-    get IdName(){
-        return `${this._id} - ${this.Name}`;
-    }
-
-    @Edm.String
     @Edm.Required
     @Edm.Convert(toObjectID)
     CategoryId:ObjectID
