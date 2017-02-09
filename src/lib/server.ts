@@ -201,6 +201,9 @@ export class ODataServer extends Transform{
 /** Create Express middleware for OData error handling */
 export function ODataErrorHandler(err, req, res, next){
     if (err){
+        if (res.headersSent) {
+            return next(err);
+        }
         console.log(err);
         res.status(err.statusCode || 500);
         res.send({

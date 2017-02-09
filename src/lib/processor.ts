@@ -4,7 +4,7 @@ import * as extend from "extend";
 import * as url from "url";
 import * as qs from "qs";
 import * as util from "util";
-import { Transform, TransformOptions } from "stream";
+import { Transform, TransformOptions, Readable } from "stream";
 import { getFunctionParameters, isIterator, isPromise, isStream } from "./utils";
 import { ODataResult } from "./result";
 import { ODataController } from "./controller";
@@ -449,12 +449,7 @@ export class ODataProcessor extends Transform{
                             if (typeof done == "function") done();
                         }, (err) => {
                             console.log(err);
-                            try{
-                                chunk = chunk.toString();
-                                this.push(chunk);
-                            }catch(err){
-                                super.end();
-                            }
+                            if (typeof done == "function") done(err);
                         });
                     }else{
                         this.push(JSON.stringify(chunk));
@@ -462,12 +457,7 @@ export class ODataProcessor extends Transform{
                     }
                 }catch(err){
                     console.log(err);
-                    try{
-                        chunk = chunk.toString();
-                        this.push(chunk);
-                    }catch(err){
-                        super.end();
-                    }
+                    if (typeof done == "function") done(err);
                 }
             }else{
                 this.push(chunk);
@@ -1061,6 +1051,23 @@ export class ODataProcessor extends Transform{
         result.body = context;
     }
 
+    private async __resolveAsync(propValue, entity){
+        if (isIterator(propValue)){
+            propValue = await run(propValue.call(entity), [
+                ODataGeneratorHandlers.PromiseHandler,
+                ODataGeneratorHandlers.StreamHandler
+            ]);
+        }
+        if (typeof propValue == "function") propValue = propValue.call(entity);
+        if (isPromise(propValue)) propValue = await propValue;
+        if (isStream(propValue)){
+            let stream = new ODataStreamWrapper();
+            (<Readable>propValue).pipe(stream);
+            propValue = await stream.toPromise();
+        }
+        return propValue;
+    }
+
     private async __convertEntity(context, result, elementType, includes?){
         if (elementType === Object || this.options.disableEntityConversion) return extend(context, result);
         let resultType = Object.getPrototypeOf(result).constructor;
@@ -1103,18 +1110,26 @@ export class ODataProcessor extends Transform{
                 let isCollection = Edm.isCollection(elementType, prop);
                 let entity = result;
                 let propValue = entity[prop];
+
+                propValue = await this.__resolveAsync(propValue, entity);
+
                 if (isCollection && propValue){
                     let value = Array.isArray(propValue) ? propValue : (typeof propValue != "undefined" ? [propValue] : []);
+                    for (let i = 0; i < value.length; i++){
+                        value[i] = await this.__resolveAsync(value[i], entity);
+                    }
                     if (includes && includes[prop]){
                         await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
                     }else if (typeof type == "function"){
-                        context[prop] = value.map(async it => await (async it => {
+                        for (let i = 0; i < value.length; i++){
+                            let it = value[i];
                             if (!it) return it;
                             let item = new itemType();
                             await this.__convertEntity(item, it, type, includes);
-                            return item;
-                        })(it));
-                    }else if (typeof converter == "function"){
+                            value[i] = item;
+                        }
+                    }
+                    if (typeof converter == "function"){
                         context[prop] = value.map(it => converter(it));
                     }else context[prop] = value;
                 }else{
