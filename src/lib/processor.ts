@@ -1051,7 +1051,7 @@ export class ODataProcessor extends Transform{
         result.body = context;
     }
 
-    private async __resolveAsync(propValue, entity){
+    private async __resolveAsync(type, prop, propValue, entity){
         if (isIterator(propValue)){
             propValue = await run(propValue.call(entity), [
                 ODataGeneratorHandlers.PromiseHandler,
@@ -1060,7 +1060,7 @@ export class ODataProcessor extends Transform{
         }
         if (typeof propValue == "function") propValue = propValue.call(entity);
         if (isPromise(propValue)) propValue = await propValue;
-        if (isStream(propValue)){
+        if (type != "Edm.Stream" && isStream(propValue)){
             let stream = new ODataStreamWrapper();
             (<Readable>propValue).pipe(stream);
             propValue = await stream.toPromise();
@@ -1111,12 +1111,12 @@ export class ODataProcessor extends Transform{
                 let entity = result;
                 let propValue = entity[prop];
 
-                propValue = await this.__resolveAsync(propValue, entity);
+                propValue = await this.__resolveAsync(type, prop, propValue, entity);
 
                 if (isCollection && propValue){
                     let value = Array.isArray(propValue) ? propValue : (typeof propValue != "undefined" ? [propValue] : []);
                     for (let i = 0; i < value.length; i++){
-                        value[i] = await this.__resolveAsync(value[i], entity);
+                        value[i] = await this.__resolveAsync(type, prop, value[i], entity);
                     }
                     if (includes && includes[prop]){
                         await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
