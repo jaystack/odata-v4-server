@@ -59,6 +59,7 @@ export class ResourcePathVisitor{
                     visitor = this.VisitBoundFunctionCall;
                     break;
                 case "PrimitiveProperty":
+                case "PrimitiveKeyProperty":
                 case "PrimitiveCollectionProperty":
                 case "ComplexProperty":
                 case "ComplexCollectionProperty":

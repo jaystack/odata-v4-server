@@ -421,6 +421,13 @@ describe("ODataServer", () => {
             contentType: "text/plain"
         });
 
+        createTest("should return entity key property value", TestServer, "GET /EntitySet(1)/id/$value", {
+            statusCode: 200,
+            body: 1,
+            elementType: Number,
+            contentType: "text/plain"
+        });
+
         createTest("should return entity value", TestServer, "GET /EntitySet(1)/$value", {
             statusCode: 200,
             body: {

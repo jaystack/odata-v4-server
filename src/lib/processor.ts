@@ -185,6 +185,7 @@ const expCalls = {
                 currentResult = Promise.resolve(currentResult);
             }
 
+            if (prevPart.type == "PrimitiveProperty" || prevPart.type == "PrimitiveKeyProperty") return currentResult.then(value => value.toString());
             return currentResult;
         }else{
             if (this.stream) return Promise.resolve(this.stream);
@@ -194,7 +195,9 @@ const expCalls = {
                     if (prop.indexOf("@odata") >= 0) delete result[prop];
                 }
 
-                return Promise.resolve(result.value || result);
+                result = result.value || result;
+                if (typeof result == "object" && (prevPart.type == "PrimitiveProperty" || prevPart.type == "PrimitiveKeyProperty")) return Promise.resolve(result.toString());
+                return Promise.resolve(result);
             }
         }
     },
@@ -658,6 +661,10 @@ export class ODataProcessor extends Transform{
                 }
             });
         };
+    }
+
+    private __PrimitiveKeyProperty(part:NavigationPart):Function{
+        return this.__PrimitiveProperty(part);
     }
 
     private __PrimitiveCollectionProperty(part:NavigationPart):Function{
