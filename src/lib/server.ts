@@ -207,8 +207,11 @@ export function ODataErrorHandler(err, req, res, next){
         console.log(err);
         res.status(err.statusCode || 500);
         res.send({
-            error: err.message,
-            stack: err.stack
+            error: {
+                code: err.statusCode || 500,
+                message: err.message,
+                stack: err.stack
+            }
         });
     }else next();
 }

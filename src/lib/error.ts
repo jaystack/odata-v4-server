@@ -7,18 +7,18 @@ export class CustomError extends Error{
     }
 }
 
-export class NotImplementedError extends CustomError{
-    static MESSAGE:string = "Not implemented.";
-    constructor(){
-        super(NotImplementedError.MESSAGE);
-    }
-}
-
 export class HttpRequestError extends CustomError{
     statusCode:number
     constructor(statusCode:number, message:string){
         super(message);
         this.statusCode = statusCode;
+    }
+}
+
+export class NotImplementedError extends HttpRequestError{
+    static MESSAGE:string = "Not implemented.";
+    constructor(){
+        super(501, NotImplementedError.MESSAGE);
     }
 }
 
@@ -33,5 +33,12 @@ export class MethodNotAllowedError extends HttpRequestError{
     static MESSAGE:string = "Method not allowed.";
     constructor(){
         super(405, MethodNotAllowedError.MESSAGE);
+    }
+}
+
+export class UnsupportedMediaTypeError extends HttpRequestError{
+    static MESSAGE:string = "Unsupported media type.";
+    constructor(){
+        super(415, UnsupportedMediaTypeError.MESSAGE);
     }
 }
