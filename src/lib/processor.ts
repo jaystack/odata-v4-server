@@ -1228,6 +1228,7 @@ export class ODataProcessor extends Transform{
             delete navigationResult.body["@odata.context"];
             if (isCollection && navigationResult.body.value && Array.isArray(navigationResult.body.value)){
                 context[prop + "@odata.context"] = entitySet ? `${getODataRoot(this.context)}/$metadata#${entitySet}` : `${this.odataContext}/${include.navigationProperty}`;
+                context[prop + "@odata.count"] = navigationResult.body["@odata.count"];
                 context[prop] = navigationResult.body.value;
             }else if (navigationResult.body && Object.keys(navigationResult.body).length > 0){
                 context[prop + "@odata.context"] = entitySet ? `${getODataRoot(this.context)}/$metadata#${entitySet}/$entity` : `${this.odataContext}/${include.navigationProperty}`;
