@@ -204,11 +204,11 @@ export function ODataErrorHandler(err, req, res, next){
         if (res.headersSent) {
             return next(err);
         }
-        console.log(err);
-        res.status(err.statusCode || 500);
+        let statusCode = err.statusCode || err.status || res.statusCode || 500;
+        if (!res.statusCode || res.statusCode < 400) res.status(statusCode);
         res.send({
             error: {
-                code: err.statusCode || 500,
+                code: statusCode,
                 message: err.message,
                 stack: err.stack
             }
