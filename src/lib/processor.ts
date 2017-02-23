@@ -175,10 +175,7 @@ const expCalls = {
             let currentResult = fnCaller.call(ctrl, fn, params);
 
             if (isIterator(fn)){
-                currentResult = run(currentResult, [
-                    ODataGeneratorHandlers.PromiseHandler,
-                    ODataGeneratorHandlers.StreamHandler
-                ]);
+                currentResult = run(currentResult, defaultHandlers);
             }
 
             if (!isPromise(currentResult)){
@@ -250,10 +247,7 @@ const expCalls = {
         let currentResult = fnCaller.call(ctrl, fn, params);
 
         if (isIterator(fn)){
-            currentResult = run(currentResult, [
-                ODataGeneratorHandlers.PromiseHandler,
-                ODataGeneratorHandlers.StreamHandler
-            ]);
+            currentResult = run(currentResult, defaultHandlers);
         }
 
         if (!isPromise(currentResult)){
@@ -322,7 +316,18 @@ export namespace ODataGeneratorHandlers{
             }).then(next);
         }
     }
+
+    export function GeneratorHandler(request:any, next:GeneratorAction){
+        if (isIterator(request)){
+            return run(request(), defaultHandlers).then(next);
+        }
+    }
 }
+const defaultHandlers = [
+    ODataGeneratorHandlers.GeneratorHandler,
+    ODataGeneratorHandlers.PromiseHandler,
+    ODataGeneratorHandlers.StreamHandler
+];
 
 function run(iterator, handlers){
     function id(x){ return x; }
@@ -613,10 +618,7 @@ export class ODataProcessor extends Transform{
                     currentResult = fnCaller.call(ctrl, fn, params);
 
                     if (isIterator(fn)){
-                        currentResult = run(currentResult, [
-                            ODataGeneratorHandlers.PromiseHandler,
-                            ODataGeneratorHandlers.StreamHandler
-                        ]);
+                        currentResult = run(currentResult, defaultHandlers);
                     }
 
                     if (!isPromise(currentResult)){
@@ -762,10 +764,7 @@ export class ODataProcessor extends Transform{
             }
 
             if (isIterator(fn)){
-                currentResult = run(currentResult, [
-                    ODataGeneratorHandlers.PromiseHandler,
-                    ODataGeneratorHandlers.StreamHandler
-                ]);
+                currentResult = run(currentResult, defaultHandlers);
             }
 
             if (!isPromise(currentResult)){
@@ -841,10 +840,7 @@ export class ODataProcessor extends Transform{
                     let result = fnCaller.call(data, fn, part.params);
 
                     if (isIterator(fn)){
-                        result = run(result, [
-                            ODataGeneratorHandlers.PromiseHandler,
-                            ODataGeneratorHandlers.StreamHandler
-                        ]);
+                        result = run(result, defaultHandlers);
                     }
 
                     if (isAction){
@@ -922,10 +918,7 @@ export class ODataProcessor extends Transform{
                     let opResult = fnCaller.call(scope, boundOp, part.params);
 
                     if (isIterator(boundOp)){
-                        opResult = run(opResult, [
-                            ODataGeneratorHandlers.PromiseHandler,
-                            ODataGeneratorHandlers.StreamHandler
-                        ]);
+                        opResult = run(opResult, defaultHandlers);
                     }
 
                     if (boundOp == expOp){
@@ -1060,10 +1053,7 @@ export class ODataProcessor extends Transform{
 
     private async __resolveAsync(type, prop, propValue, entity){
         if (isIterator(propValue)){
-            propValue = await run(propValue.call(entity), [
-                ODataGeneratorHandlers.PromiseHandler,
-                ODataGeneratorHandlers.StreamHandler
-            ]);
+            propValue = await run(propValue.call(entity), defaultHandlers);
         }
         if (typeof propValue == "function") propValue = propValue.call(entity);
         if (isPromise(propValue)) propValue = await propValue;
