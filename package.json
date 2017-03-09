@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-server",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "description": "OData V4 Server",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
@@ -70,7 +70,6 @@
     "mochawesome": "^1.5.3",
     "mongodb": "^2.2.6",
     "mssql": "^3.3.0",
-    "node-uuid": "^1.4.7",
     "npm-watch": "^0.1.6",
     "odata-v4-inmemory": "^0.1.7",
     "odata-v4-mongodb": "^0.1.5",
@@ -80,6 +79,6 @@
     "typedoc": "^0.5.1",
     "typedoc-default-themes": "^0.4.0",
     "typedoc-plugin-external-module-name": "^1.0.5",
-    "typescript": "^2.1.4"
+    "typescript": "^2.2.1"
   }
 }

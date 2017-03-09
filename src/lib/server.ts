@@ -10,7 +10,8 @@ import { ODataResult } from "./result";
 import { ODataController } from "./controller";
 import * as odata from "./odata";
 import { createMetadataJSON } from "./metadata";
-import { ODataProcessor, ODataProcessorOptions } from "./processor";
+import { ODataProcessor, ODataProcessorOptions, ODataMetadataType } from "./processor";
+import { HttpRequestError, UnsupportedMediaTypeError } from "./error";
 
 /** HTTP context interface when using the server HTTP request handler */
 export interface ODataHttpContext{
@@ -34,6 +35,11 @@ export class ODataServer extends Transform{
         return (req, res, next) => {
             try{
                 res.setHeader("OData-Version", "4.0");
+                let metadata:ODataMetadataType = ODataMetadataType.minimal;
+                if (req.headers && req.headers.accept && req.headers.accept.indexOf("odata.metadata=") >= 0){
+                    if (req.headers.accept.indexOf("odata.metadata=full") >= 0) metadata = ODataMetadataType.full;
+                    else if (req.headers.accept.indexOf("odata.metadata=none") >= 0) metadata = ODataMetadataType.none;
+                }
                 res.contentType("application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8");
                 let processor = this.createProcessor({
                     url: req.url,
@@ -43,9 +49,13 @@ export class ODataServer extends Transform{
                     base: req.baseUrl,
                     request: req,
                     response: res
+                }, <ODataProcessorOptions>{
+                    metadata: metadata
                 });
-                processor.on("contentType", (contentType) => {
-                    res.contentType(contentType);
+                processor.on("header", (headers) => {
+                    for (let prop in headers){
+                        res.setHeader(prop, headers[prop]);
+                    }
                 });
                 let hasError = false;
                 processor.on("data", (chunk, encoding, done) => {
@@ -94,7 +104,9 @@ export class ODataServer extends Transform{
             context.url = url;
             context.method = method;
         }
-        let processor = this.createProcessor(context);
+        let processor = this.createProcessor(context, <ODataProcessorOptions>{
+            metadata: context.metadata || ODataMetadataType.minimal
+        });
         let response = "";
         processor.on("data", (chunk) => response += chunk.toString());
         return processor.execute(context.body || body).then((result:ODataResult) => {
@@ -174,8 +186,22 @@ export class ODataServer extends Transform{
     static create(path?:string | RegExp | number, port?:number | string, hostname?:string):void | express.Router{
         let server = this;
         let router = express.Router();
+        router.use((req, res, next) => {
+            req.url = req.url.replace(/[\/]+/g, "/").replace(":/", "://");
+            if (req.headers["odata-maxversion"] && req.headers["odata-maxversion"] < "4.0") return next(new HttpRequestError(500, "Only OData version 4.0 supported"));
+            next();
+        });
         router.use(bodyParser.json());
         if ((<any>server).cors) router.use(cors());
+        router.use((req, res, next) => {
+            res.setHeader("OData-Version", "4.0");
+            if (req.headers.accept &&
+                req.headers.accept.indexOf("application/json") < 0 &&
+                req.headers.accept.indexOf("text/html") < 0 &&
+                req.headers.accept.indexOf("xml") < 0){
+                next(new UnsupportedMediaTypeError());
+            }else next();
+        });
         router.get("/", server.document().requestHandler());
         router.get("/\\$metadata", server.$metadata().requestHandler());
         router.use(server.requestHandler());
@@ -204,7 +230,7 @@ export function ODataErrorHandler(err, req, res, next){
         if (res.headersSent) {
             return next(err);
         }
-        let statusCode = err.statusCode || err.status || res.statusCode || 500;
+        let statusCode = err.statusCode || err.status || (res.statusCode < 400 ? 500 : res.statusCode);
         if (!res.statusCode || res.statusCode < 400) res.status(statusCode);
         res.send({
             error: {
