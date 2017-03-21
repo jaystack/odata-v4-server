@@ -643,6 +643,7 @@ export class ODataProcessor extends Transform{
                         : odata.findODataMethod(this.ctrl, `${this.method}`, prevPart.key || []);
                     if (fn){
                         let body = this.body;
+                        if (Edm.getTypeName(result.elementType, part.name) != "Edm.Stream") body = body.body || body;
                         this.body = {};
                         this.body[part.name] = this.method == "delete" ? null : body.value || body;
                     }
@@ -804,13 +805,15 @@ export class ODataProcessor extends Transform{
                     this.odataContext += "/$entity";
                 case "put":
                 case "patch":
+                    let body = data ? extend(this.body, data.foreignKeys) : this.body;
                     let bodyParam = odata.getBodyParameter(ctrl, fn.name);
+                    let typeParam = odata.getTypeParameter(ctrl, fn.name);
+                    if (typeParam){
+                        params[typeParam] = (body["@odata.type"] || (`${(<any>ctrl.prototype.elementType).namespace}.${(<any>ctrl.prototype.elementType).name}`)).replace(/^#/, "");
+                    }
                     if (bodyParam){
-                        params[bodyParam] = data ? extend(this.body, data.foreignKeys) : this.body;
-                        for (let prop in params[bodyParam]) {
-                            if (prop.indexOf("@odata") >= 0)
-                                delete params[bodyParam][prop];
-                        }
+                        this.__stripOData(body);
+                        params[bodyParam] = body;
                     }
                     if (!part.key){
                         let properties:string[] = Edm.getProperties((elementType || ctrl.prototype.elementType).prototype);
@@ -847,7 +850,6 @@ export class ODataProcessor extends Transform{
                 }else if (!(result instanceof ODataResult)){
                     return (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
                         if (!this.streamStart &&
-                            this.resourcePath.navigation.indexOf(part) == this.resourcePath.navigation.length - 1 &&
                             writeMethods.indexOf(this.method) < 0 && !result.body) return reject(new ResourceNotFoundError());
                         try{
                             this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType, (include || this.resourcePath).includes).then(() => {
@@ -870,6 +872,14 @@ export class ODataProcessor extends Transform{
                 }
             }, reject);
         });
+    }
+
+    private __stripOData(obj){
+        for (let prop in obj) {
+            if (prop.indexOf("@odata") >= 0)
+                delete obj[prop];
+            if (typeof obj[prop] == "object") this.__stripOData(obj[prop]);
+        }
     }
 
     private __EntitySetName(part:NavigationPart):Function{

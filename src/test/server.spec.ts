@@ -63,7 +63,6 @@ class SyncTestController extends ODataController{
 
     put(@odata.body body:any){
         body.id = 1;
-        return body;
     }
 
     patch(@odata.key key:number, @odata.body delta:any){

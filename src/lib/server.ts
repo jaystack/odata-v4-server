@@ -24,6 +24,48 @@ export interface ODataHttpContext{
     response:express.Response
 }
 
+function ensureODataMetadataType(req, res){
+    let metadata:ODataMetadataType = ODataMetadataType.minimal;
+    if (req.headers && req.headers.accept && req.headers.accept.indexOf("odata.metadata=") >= 0){
+        if (req.headers.accept.indexOf("odata.metadata=full") >= 0) metadata = ODataMetadataType.full;
+        else if (req.headers.accept.indexOf("odata.metadata=none") >= 0) metadata = ODataMetadataType.none;
+    }
+
+    res["metadata"] = metadata;
+}
+function ensureODataContentType(req, res, contentType?){
+    contentType = contentType || "application/json";
+    if (contentType.indexOf("odata.metadata=") < 0) contentType += `;odata.metadata=${ODataMetadataType[res["metadata"]]}`;
+    if (contentType.indexOf("odata.streaming=") < 0) contentType += ";odata.streaming=true";
+    if (contentType.indexOf("IEEE754Compatible=") < 0) contentType += ";IEEE754Compatible=false";
+    if (req.headers.accept && req.headers.accept.indexOf("charset") > 0){
+        contentType += `;charset=${res["charset"]}`;
+    }
+    res.contentType(contentType);
+}
+function ensureODataHeaders(req, res, next?){
+    res.setHeader("OData-Version", "4.0");
+
+    ensureODataMetadataType(req, res);
+    let charset = req.headers["accept-charset"] || "utf-8";
+    res["charset"] = charset;
+    ensureODataContentType(req, res);
+
+    if ((req.headers.accept && req.headers.accept.indexOf("charset") < 0) || req.headers["accept-charset"]){
+        const bufferEncoding = {
+            "utf-8": "utf8",
+            "utf-16": "utf16le"
+        };
+        let origsend = res.send;
+        res.send = <any>((data) => {
+            if (typeof data == "object") data = JSON.stringify(data);
+            origsend.call(res, new Buffer(data, bufferEncoding[charset]));
+        });
+    }
+
+    if (typeof next == "function") next();
+}
+
 /** ODataServer base class to be extended by concrete OData Server data sources */
 export class ODataServer extends Transform{
     private static _metadataCache:any
@@ -34,13 +76,7 @@ export class ODataServer extends Transform{
     static requestHandler(){
         return (req, res, next) => {
             try{
-                res.setHeader("OData-Version", "4.0");
-                let metadata:ODataMetadataType = ODataMetadataType.minimal;
-                if (req.headers && req.headers.accept && req.headers.accept.indexOf("odata.metadata=") >= 0){
-                    if (req.headers.accept.indexOf("odata.metadata=full") >= 0) metadata = ODataMetadataType.full;
-                    else if (req.headers.accept.indexOf("odata.metadata=none") >= 0) metadata = ODataMetadataType.none;
-                }
-                res.contentType("application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8");
+                ensureODataHeaders(req, res);
                 let processor = this.createProcessor({
                     url: req.url,
                     method: req.method,
@@ -50,11 +86,15 @@ export class ODataServer extends Transform{
                     request: req,
                     response: res
                 }, <ODataProcessorOptions>{
-                    metadata: metadata
+                    metadata: res["metadata"]
                 });
                 processor.on("header", (headers) => {
                     for (let prop in headers){
-                        res.setHeader(prop, headers[prop]);
+                        if (prop.toLowerCase() == "content-type"){
+                            ensureODataContentType(req, res, headers[prop]);
+                        }else{
+                            res.setHeader(prop, headers[prop]);
+                        }
                     }
                 });
                 let hasError = false;
@@ -68,7 +108,9 @@ export class ODataServer extends Transform{
                     try{
                         if (result){
                             res.status(result.statusCode || 200);
-                            if (!res.headersSent) res.contentType((result.contentType || "text/plain") + ";odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8");
+                            if (!res.headersSent){
+                                ensureODataContentType(req, res, result.contentType || "text/plain");
+                            }
                             if (typeof result.body != "undefined"){
                                 if (typeof result.body != "object") res.send("" + result.body);
                                 else res.send(result.body);
@@ -202,7 +244,10 @@ export class ODataServer extends Transform{
                 next(new UnsupportedMediaTypeError());
             }else next();
         });
-        router.get("/", server.document().requestHandler());
+        router.get("/", ensureODataHeaders, (req, res, next) => {
+            if (typeof req.query == "object" && Object.keys(req.query).length > 0) return next(new HttpRequestError(500, "Unsupported query"));
+            next();
+        }, server.document().requestHandler());
         router.get("/\\$metadata", server.$metadata().requestHandler());
         router.use(server.requestHandler());
         router.use(ODataErrorHandler);

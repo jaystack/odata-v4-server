@@ -22,14 +22,24 @@ const ODataContextParameter: string = "odata:contextparameter";
 const ODataStreamParameter: string = "odata:streamparameter";
 const ODataResultParameter: string = "odata:resultparameter";
 const ODataIdParameter: string = "odata:idparameter";
+const ODataTypeParameter: string = "odata:typeparameter";
 
 /** Set element type
  * @param elementType The type of element
  */
-export function type(elementType: Function) {
-    return function (constructor: Function) {
-        constructor.prototype.elementType = elementType;
-    };
+export function type(elementType: Function);
+export function type(target:Function, targetKey:string, parameterIndex:number);
+export function type(elementType: Function, targetKey?, parameterIndex?) {
+    if (typeof parameterIndex == "number"){
+        let target = elementType;
+        let parameterNames = getFunctionParameters(target, targetKey);
+        let paramName = parameterNames[parameterIndex];
+        Reflect.defineMetadata(ODataTypeParameter, paramName, target, targetKey);
+    }else{
+        return function (constructor: Function) {
+            constructor.prototype.elementType = elementType;
+        };
+    }
 }
 
 /** Set namespace
@@ -568,6 +578,14 @@ export const id = (function id() {
  */
 export function getIdParameter(target, targetKey) {
     return Reflect.getMetadata(ODataIdParameter, target.prototype, targetKey);
+}
+
+/** Gives the decorated type parameter.
+ * @param target    The prototype of the class for an instance member
+ * @param targetKey The name of the class method
+ */
+export function getTypeParameter(target, targetKey) {
+    return Reflect.getMetadata(ODataTypeParameter, target.prototype, targetKey);
 }
 
 /** Sets a parameter decorator for the given parameter.
