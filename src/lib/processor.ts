@@ -1158,10 +1158,12 @@ export class ODataProcessor extends Transform{
         if (Edm.isOpenType(elementType)){
             props = Object.getOwnPropertyNames(result).concat(props);
         }
+        let ctrl = this.serverType.getController(elementType);
         let resolveBaseType = (elementType) => {
             let baseType = Object.getPrototypeOf(elementType.prototype).constructor;
             if (baseType != Object && Edm.getProperties(baseType.prototype).length > 0){
                 props = Edm.getProperties(baseType.prototype).concat(props);
+                ctrl = ctrl || this.serverType.getController(baseType);
                 resolveBaseType(baseType);
             }
         };
@@ -1171,7 +1173,6 @@ export class ODataProcessor extends Transform{
         result = Object.assign(new entityType(), result);
         if (props.length > 0){
             let metadata = {};
-            let ctrl = this.serverType.getController(elementType);
             await Promise.all(props.map(prop => (async prop => {
                 let type:any = Edm.getType(elementType, prop);
                 let itemType;
