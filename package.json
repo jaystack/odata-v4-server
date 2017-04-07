@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-server",
-  "version": "0.1.33",
+  "version": "0.1.34",
   "description": "OData V4 Server",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
