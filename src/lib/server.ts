@@ -240,6 +240,7 @@ export class ODataServer extends Transform{
             if (req.headers.accept &&
                 req.headers.accept.indexOf("application/json") < 0 &&
                 req.headers.accept.indexOf("text/html") < 0 &&
+                req.headers.accept.indexOf("*/*") < 0 &&
                 req.headers.accept.indexOf("xml") < 0){
                 next(new UnsupportedMediaTypeError());
             }else next();
