@@ -1,7 +1,9 @@
 import * as odata from "./odata";
 import { getFunctionParameters } from "./utils";
 
-export class ODataController{
+export class ODataControllerBase{}
+export const ConfigurableController = odata.MixinConfigurable(ODataControllerBase);
+export class ODataController extends ConfigurableController{
     entitySetName:string
     elementType:Function
 

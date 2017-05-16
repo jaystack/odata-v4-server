@@ -612,3 +612,61 @@ export function parameters(parameters: any) {
         }
     }
 }
+
+export interface ODataConfigurableInstance{}
+export interface ODataConfigurable<T> {
+    config(...decorators:Array<Function | Object>);
+    new (...args: any[]):ODataConfigurableInstance;
+}
+export type Constructor<T> = new(...args: any[]) => T;
+export function MixinConfigurable<T extends Constructor<{}>>(Base: T): ODataConfigurable<T> & T{
+    return class extends Base{
+        constructor(...args){
+            super(...args);
+        }
+
+        /** Configure with decorators */
+        static config(...decorators:Array<Function | Object>):T{
+            decorators.forEach(decorator => {
+                if (typeof decorator == 'function'){
+                    decorator(this);
+                }else if (typeof decorator == 'object'){
+                    let props = Object.keys(decorator);
+                    props.forEach(prop => {
+                        let propDecorators = decorator[prop];
+                        if (!Array.isArray(propDecorators)) propDecorators = [propDecorators];
+                        propDecorators.forEach(propDecorator => {
+                            if (typeof propDecorator == 'function'){
+                                propDecorator(this.prototype, prop);
+                            }else if (typeof propDecorator == 'object'){
+                                let params = Object.keys(propDecorator);
+                                let parameterNames = getFunctionParameters(this.prototype[prop]);
+                                params.forEach(param => {
+                                    let paramDecorators = propDecorator[param];
+                                    if (!Array.isArray(paramDecorators)) paramDecorators = [paramDecorators];
+                                    paramDecorators.forEach(paramDecorator => {
+                                        if (typeof paramDecorator == 'function'){
+                                            paramDecorator(this.prototype, prop, parameterNames.indexOf(param));
+                                        }else{
+                                            console.log('Unsupported parameter decorator on', this.name || this, prop, param, paramDecorator);
+                                        }
+                                    });
+                                });
+                            }else{
+                                console.log('Unsupported member decorator on', this.name || this, prop, propDecorator);
+                            }
+                        });
+                    });
+                }else{
+                    console.log('Unsupported decorator on', this.name || this, decorator);
+                }
+            });
+
+            return this;
+        }
+    };
+}
+
+export class ConfigurableBase{}
+export const ConfigurableClass = MixinConfigurable(ConfigurableBase);
+export class Configurable extends ConfigurableClass{}

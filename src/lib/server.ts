@@ -66,8 +66,9 @@ function ensureODataHeaders(req, res, next?){
     if (typeof next == "function") next();
 }
 
+export const ConfigurableTransform = odata.MixinConfigurable(Transform);
 /** ODataServer base class to be extended by concrete OData Server data sources */
-export class ODataServer extends Transform{
+export class ODataServer extends ConfigurableTransform{
     private static _metadataCache:any
     static namespace:string
     static containerName:string
