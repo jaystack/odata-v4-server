@@ -365,7 +365,7 @@ class ODataStreamWrapper extends Transform{
         this.buffer = [];
     }
 
-    protected _transform(chunk:any, encoding:string, done:Function){
+    _transform(chunk:any, encoding:string, done:Function){
         this.buffer.push(chunk);
         if (typeof done == "function") done();
     }
@@ -469,7 +469,7 @@ export class ODataProcessor extends Transform{
         });
     }
 
-    protected _transform(chunk:any, encoding:string, done:Function){
+    _transform(chunk:any, encoding:string, done:Function){
         if (this.streamEnabled){
             if (!(chunk instanceof Buffer)){
                 if (!this.streamStart){
