@@ -18,6 +18,12 @@ const getODataRoot = function(context){
     return (context.protocol || "http") + "://" + (context.host || "localhost") + (context.base || "");
 }
 
+const arrayIntersect = function(a1, a2) {
+    return a1.filter(function(i) {
+        return a2.indexOf(i) !== -1;
+    });
+}
+
 const createODataContext = function(context, entitySets, server:typeof ODataServer, resourcePath, processor){
     let odataContextBase = getODataRoot(context) + "/$metadata#";
     let odataContext = "";
@@ -1181,9 +1187,16 @@ export class ODataProcessor extends Transform{
         let entityType = function(){};
         util.inherits(entityType, elementType);
         result = Object.assign(new entityType(), result);
-        if (props.length > 0){
+
+        let resultKeys = Object.keys(result);
+        let propsToUse = props;
+        if (props.length > resultKeys.length) {
+            propsToUse = arrayIntersect(props, resultKeys);
+        }
+
+        if (propsToUse.length > 0){
             let metadata = {};
-            await Promise.all(props.map(prop => (async prop => {
+            await Promise.all(propsToUse.map(prop => (async prop => {
                 let type:any = Edm.getType(elementType, prop);
                 let itemType;
                 if (typeof type == "function"){
