@@ -71,7 +71,7 @@ function typeDecoratorFactory(type:string):any{
         }
     };
 
-    return function(...args:any[]){
+    return function(this:any, ...args:any[]){
         if (arguments.length == 0) return decorator;
         else return decorator.apply(this, args);
     };
@@ -107,7 +107,7 @@ export const Single = typeDecoratorFactory("Edm.Single");
 /** Edm.Stream primitive type property decorator */
 export function Stream(contentType?:string);
 export function Stream(target?:any, targetKey?:string);
-export function Stream(target?:any, targetKey?:string){
+export function Stream(this:any, target?:any){
     if (typeof target == "string"){
         const contentType = target;
         return function(target, targetKey){
@@ -465,7 +465,7 @@ export function FunctionImport(returnType?:any);
 /** Edm.FunctionImport decorator for describing unbound actions callable from the service root */
 export function FunctionImport(target?:any, targetKey?:string);
 export function FunctionImport(target?:any, targetKey?:string){
-    if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
+    if (arguments.length > 1) return operationDecoratorFactory(EdmFunction)(target, targetKey);
     else return operationDecoratorFactory(EdmFunction, target);
 }
 /** ?????????? */
@@ -478,7 +478,7 @@ export function Function(returnType?:any);
 /** Edm.Function decorator for describing actions */
 export function Function(target?:any, targetKey?:string);
 export function Function(target?:any, targetKey?:string){
-    if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
+    if (arguments.length > 1) return operationDecoratorFactory(EdmFunction)(target, targetKey);
     else return operationDecoratorFactory(EdmFunction, target);
 }
 /** ?????????? */

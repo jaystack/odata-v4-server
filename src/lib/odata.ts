@@ -29,7 +29,7 @@ const ODataTypeParameter: string = "odata:typeparameter";
  */
 export function type(elementType: Function);
 export function type(target:Function, targetKey:string, parameterIndex:number);
-export function type(elementType: Function, targetKey?, parameterIndex?) {
+export function type(elementType: Function, targetKey?, parameterIndex?):Function | void {
     if (typeof parameterIndex == "number"){
         let target = elementType;
         let parameterNames = getFunctionParameters(target, targetKey);
@@ -147,7 +147,7 @@ function odataMethodFactory(type: string, navigationProperty?: string):ODataMeth
     return <ODataMethodDecorator>fn;
 }
 
-export interface ExpressionDecorator extends PropertyDecorator<ExpressionDecorator>{
+export interface ExpressionDecorator extends PropertyDecorator<ExpressionDecorator>, TypedPropertyDescriptor<any>{
     /** Annotate function for $value handler */
     $value:PropertyDecorator<void>
     /** Annotate function for $count handler */
@@ -431,6 +431,8 @@ export function findODataMethod(target, method, keys) {
             };
         }
     }
+
+    return null;
 }
 
 /** Provides access to all OData query options.
@@ -613,20 +615,14 @@ export function parameters(parameters: any) {
     }
 }
 
-export interface ODataConfigurableInstance{}
-export interface ODataConfigurable<T> {
-    config(...decorators:Array<Function | Object>);
-    new (...args: any[]):ODataConfigurableInstance;
+export interface IODataBase<T, C>{
+    new(...args: any[]): T;
+    define?(...decorators:Array<Function | Object>): IODataBase<T, C> & C;
 }
-export type Constructor<T> = new(...args: any[]) => T;
-export function MixinConfigurable<T extends Constructor<{}>>(Base: T): ODataConfigurable<T> & T{
-    return class extends Base{
-        constructor(...args){
-            super(...args);
-        }
-
-        /** Configure with decorators */
-        static config(...decorators:Array<Function | Object>):T{
+export function ODataBase<T, C>(Base: C): IODataBase<T, C> & C{
+    class ODataBaseClass extends (<any>Base) {
+        /** Define class, properties and parameters with decorators */
+        static define(...decorators:Array<Function | Object>): IODataBase<T, C> & C{
             decorators.forEach(decorator => {
                 if (typeof decorator == 'function'){
                     decorator(this);
@@ -662,11 +658,11 @@ export function MixinConfigurable<T extends Constructor<{}>>(Base: T): ODataConf
                 }
             });
 
-            return this;
+            return <any>this;
         }
-    };
+    }
+    return <IODataBase<T, C> & C>ODataBaseClass;
 }
 
-export class ConfigurableBase{}
-export const ConfigurableClass = MixinConfigurable(ConfigurableBase);
-export class Configurable extends ConfigurableClass{}
+export class ODataEntityBase{}
+export class ODataEntity extends ODataBase<ODataEntityBase, typeof ODataEntityBase>(ODataEntityBase){}

@@ -1,6 +1,5 @@
 import { ObjectID } from "mongodb";
 import { createFilter } from "odata-v4-inmemory";
-import * as extend from "extend";
 import { odata, ODataController, ODataServer, ODataQuery } from "../lib/index";
 let categories = require("./categories").map((category) => {
     category._id = category._id.toString();

@@ -67,7 +67,7 @@ export class InheritanceController extends ODataController{
     }
 
     @odata.GET
-    one(@odata.key id: number, @odata.key subid: number){
+    one(@odata.key _: number, @odata.key __: number){
         return new SubcategoryDetails("Games", "Diablo 3", "RPG game");
     }
 }

@@ -6,19 +6,31 @@
   "typings": "build/lib/index",
   "scripts": {
     "prebuild": "rimraf build",
-    "build": "tsc",
-    "prebuild:w": "npm run build",
-    "build:w": "tsc -w",
+    "build": "npm run tsc",
+    "pretsc": "npm run lint",
+    "tsc": "tsc",
+    "prewatch": "rimraf build",
+    "watch": "npm-watch",
+    "es6": "copyfiles -u 1 src/**/*.js build",
     "lint": "tslint src/lib/**/*.ts -t verbose --force > .tslint",
     "pretest": "npm run build",
     "test": "mocha build/test/**/*.spec.js --reporter mochawesome --reporter-options reportDir=report,reportName=odata-v4-server,reportTitle=\"OData V4 Server\"",
-    "coverage": "rm -rf coverage && tsc && node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha build/test/**/*.spec.js --config=.istanbul.yaml -x config/**/*.js && node node_modules/remap-istanbul/bin/remap-istanbul -i coverage/coverage.json -o coverage/html-report -t html",
+    "precoverage": "npm run build",
+    "coverage": "rm -rf coverage && node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha build/test/**/*.spec.js --config=.istanbul.yaml -x config/**/*.js && node node_modules/remap-istanbul/bin/remap-istanbul -i coverage/coverage.json -o coverage/html-report -t html",
     "prepublish": "npm run test",
     "typedoc": "rimraf docs && typedoc --name \"JayStack OData v4 Server\" --exclude \"**/?(utils|index).ts\" --excludeExternals --excludeNotExported --hideGenerator --excludePrivate --out docs src/lib/*.ts"
   },
   "watch": {
-    "coverage": "{lib,test}/*.js",
-    "lint": "{lib}/*.js"
+    "tsc": {
+      "patterns": ["src"],
+      "extensions": "ts",
+      "quiet": false
+    },
+    "es6": {
+      "patterns": ["src"],
+      "extensions": "js",
+      "quiet": false
+    }
   },
   "repository": {
     "type": "git",
@@ -65,6 +77,7 @@
     "JSONStream": "^1.2.1",
     "benchmark": "^2.1.1",
     "chai": "^3.5.0",
+    "copyfiles": "^1.2.0",
     "event-stream": "^3.3.4",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.2",
@@ -76,7 +89,7 @@
     "odata-v4-mongodb": "^0.1.5",
     "remap-istanbul": "^0.6.4",
     "rimraf": "^2.5.4",
-    "tslint": "^3.15.1",
+    "tslint": "^5.4.3",
     "typedoc": "^0.5.10",
     "typedoc-default-themes": "^0.4.0",
     "typedoc-plugin-external-module-name": "^1.0.5",

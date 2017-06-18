@@ -1,11 +1,9 @@
 /// <reference types="mocha" />
 let expect = require("chai").expect;
-import * as assert from "assert";
 import * as extend from "extend";
 import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
-import { ObjectID } from "mongodb";
-import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata } from "../lib/index";
+import { ODataController, ODataServer, ODataMethodType, ODataResult, Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
 let categories = require("../example/categories");
 let products = require("../example/products");
@@ -46,7 +44,7 @@ class Foobar{
 @odata.type(Foobar)
 class SyncTestController extends ODataController{
     @odata.GET
-    entitySet(@odata.query query:Token, @odata.context context:any, @odata.result result:any, @odata.stream stream:ODataProcessor){
+    entitySet(/*@odata.query query:Token, @odata.context context:any, @odata.result result:any, @odata.stream stream:ODataProcessor*/){
         return [{ id: 1,  a: 1 }];
     }
 
@@ -89,28 +87,40 @@ class AsyncTestController extends ODataController{
     @odata.GET
     entitySet(){
         return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve([{ id: 1, a: 1 }]);
-            });
+            try{
+                setTimeout(() => {
+                    resolve([{ id: 1, a: 1 }]);
+                });
+            }catch(err){
+                reject(err);
+            }
         });
     }
 
     @odata.GET
     entity(@odata.key key:number){
         return ODataResult.Ok(new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve({ id: key });
-            });
+            try{
+                setTimeout(() => {
+                    resolve({ id: key });
+                });
+            }catch(err){
+                reject(err);
+            }
         }));
     }
 
     @odata.POST
     insert(@odata.body body:any){
         return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                body.id = 1;
-                resolve(body);
-            });
+            try{
+                setTimeout(() => {
+                    body.id = 1;
+                    resolve(body);
+                });
+            }catch(err){
+                reject(err);
+            }
         });
     }
 }
@@ -136,7 +146,7 @@ class BoundOperationController extends ODataController{
 
     @Edm.Function(Edm.String)
     Function(@Edm.Int16 value:number){
-        return "foobar";
+        return `foobar:${value}`;
     }
 
     @Edm.Function(Edm.String)
@@ -182,10 +192,9 @@ class CategoriesController extends ODataController{
 
     @odata.GET
     @odata.parameters({
-        key: odata.key,
-        result: odata.result
+        key: odata.key
     })
-    findOne(key:string, result:any):Category{
+    findOne(key:string):Category{
         return categories.filter(category => category._id.toString() == key)[0] || null;
     }
 }
@@ -225,7 +234,7 @@ class UsersController extends ODataController{
 
     @odata.GET
     findOne(@odata.key key:number){
-        return new User(1, new Location("Budapest", "Virág utca"));
+        return new User(key, new Location("Budapest", "Virág utca"));
     }
 
     @odata.namespace("Session")
@@ -509,7 +518,7 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Edm.String",
-                value: "foobar"
+                value: "foobar:42"
             },
             elementType: "Edm.String",
             contentType: "application/json"
@@ -549,7 +558,7 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Edm.String",
-                value: "foobar"
+                value: "foobar:42"
             },
             elementType: "Edm.String",
             contentType: "application/json"

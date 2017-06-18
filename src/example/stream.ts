@@ -1,13 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as express from "express";
-import * as bodyParser from "body-parser";
-import * as cors from "cors";
 import { Writable } from "stream";
-import { MongoClient, Collection, Db, ObjectID } from "mongodb";
-import { createFilter, createQuery } from "odata-v4-mongodb";
+import { MongoClient, Db, ObjectID } from "mongodb";
+import { createQuery } from "odata-v4-mongodb";
 import { Readable, PassThrough } from "stream";
-import { ODataServer, ODataController, Edm, odata, ODataErrorHandler, ODataStream, ODataQuery, ODataHttpContext } from "../lib/index";
+import { ODataServer, ODataController, Edm, odata, ODataStream, ODataQuery, ODataHttpContext } from "../lib";
 import { Category, Product } from "./model";
 
 const mongodb = async function():Promise<Db>{
@@ -79,7 +76,7 @@ class ProductsController extends ODataController{
 @odata.type(Category)
 class CategoriesController extends ODataController{
     @odata.GET
-    *find(@odata.query query:ODataQuery, @odata.stream stream:Writable):any{
+    *find(@odata.query query:ODataQuery):any{
         let db:Db = yield mongodb();
         let mongodbQuery = createQuery(query);
         if (typeof mongodbQuery.query._id == "string") mongodbQuery.query._id = new ObjectID(mongodbQuery.query._id);
@@ -122,7 +119,7 @@ class Music extends PassThrough{
 @odata.type(Music)
 class MusicController extends ODataController{
     @odata.GET
-    findOne(@odata.key() key:number, @odata.context context:ODataHttpContext){
+    findOne(@odata.key() _:number){
         let music = new Music();
         music.Id = 1;
         music.Artist = "Dream Theater";
@@ -131,7 +128,7 @@ class MusicController extends ODataController{
     }
 
     @odata.GET.$value
-    mp3(@odata.key key:number, @odata.context context:ODataHttpContext){
+    mp3(@odata.key _:number, @odata.context context:ODataHttpContext){
         let file = fs.createReadStream("tmp.mp3");
         return new Promise((resolve, reject) => {
             file.on("open", () => {
@@ -144,7 +141,7 @@ class MusicController extends ODataController{
     }
 
     @odata.POST.$value
-    post(@odata.key key:number, @odata.body upload:Readable){
+    post(@odata.key _:number, @odata.body upload:Readable){
         let file = fs.createWriteStream("tmp.mp3");
         return new Promise((resolve, reject) => {
             file.on('open', () => {
@@ -182,7 +179,7 @@ class Image{
 @odata.type(Image)
 class ImagesController extends ODataController{
     @odata.GET
-    images(@odata.key id:number, @odata.context context:ODataHttpContext){
+    images(@odata.key id:number){
         let image = new Image();
         image.Id = id;
         image.Filename = "tmp.png";
@@ -190,7 +187,7 @@ class ImagesController extends ODataController{
     }
 
     @odata.GET("Members")
-    *getMembers(@odata.key id:number, @odata.stream stream:Writable){
+    *getMembers(@odata.key _:number, @odata.stream stream:Writable){
         for (let i = 0; i < 10; i++){
             stream.write({ value: `Member #${i}` });
             yield delay(1);
@@ -200,13 +197,13 @@ class ImagesController extends ODataController{
 
     @odata.GET("Data")
     @odata.GET("Data2").$value
-    getData(@odata.key id:number, @odata.context context:ODataHttpContext){
+    getData(@odata.key _:number, @odata.context context:ODataHttpContext){
         return new ODataStream(fs.createReadStream("tmp.png")).pipe(context.response);
     }
 
     @odata.POST("Data")
     @odata.POST("Data2").$value
-    postData(@odata.key id:number, @odata.body data:Readable){
+    postData(@odata.key _:number, @odata.body data:Readable){
         return new ODataStream(fs.createWriteStream("tmp.png")).write(data);
     }
 }

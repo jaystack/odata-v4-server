@@ -27,7 +27,7 @@ const createODataContext = function(context, entitySets, server:typeof ODataServ
     if (processor.query && processor.query.$select){
         selectContext = `(${processor.query.$select})`;
     }
-    resourcePath.navigation.forEach((baseResource, i) => {
+    resourcePath.navigation.forEach((baseResource, i): string | void => {
         let next = resourcePath.navigation[i + 1];
         let selectContextPart = (i == resourcePath.navigation.length - 1) ? selectContext : ""; 
         if (next && next.type == TokenType.RefExpression) return;
@@ -124,7 +124,7 @@ const createODataContext = function(context, entitySets, server:typeof ODataServ
     return odataContextBase + odataContext;
 }
 
-const fnCaller = function(fn, params){
+const fnCaller = function(this:any, fn, params){
     params = params || {};
     let fnParams:any[];
     fnParams = getFunctionParameters(fn);
@@ -146,10 +146,10 @@ const ODataRequestResult:any = {
 };
 
 const expCalls = {
-    $count: function(processor){
+    $count: function(this:ODataResult){
         return this.body && this.body.value ? (this.body.value.length || 0) : 0;
     },
-    $value: function(processor){
+    $value: function(this:ODataResult, processor){
         let prevPart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
 
         let fn = odata.findODataMethod(processor.ctrl, `${processor.method}/$value`, prevPart.key || []);
@@ -200,7 +200,7 @@ const expCalls = {
             }
         }
     },
-    $ref: function(processor){
+    $ref: function(this:any, processor){
         let prevPart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
         let routePart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 3];
 
@@ -291,6 +291,8 @@ const getResourcePartFunction = (type) => {
         case "ValueExpression":
         case "RefExpression":
             return "__actionOrFunction";
+        default:
+            return null;
     }
 };
 
@@ -309,16 +311,17 @@ const writeMethods = [
     "patch"
 ];
 
-export type GeneratorAction = (value?) => {};
+export type GeneratorAction = (value?) => any;
+export type PromiseGeneratorHandler = Promise<any> | void;
 
 export namespace ODataGeneratorHandlers{
-    export function PromiseHandler(request:any, next:GeneratorAction){
+    export function PromiseHandler(request:any, next:GeneratorAction):PromiseGeneratorHandler{
         if (isPromise(request)){
             return request.then(next);
         }
     }
 
-    export function StreamHandler(request:any, next:GeneratorAction){
+    export function StreamHandler(request:any, next:GeneratorAction):PromiseGeneratorHandler{
         if (isStream(request)){
             return new Promise((resolve, reject) => {
                 request.on("end", resolve);
@@ -327,7 +330,7 @@ export namespace ODataGeneratorHandlers{
         }
     }
 
-    export function GeneratorHandler(request:any, next:GeneratorAction){
+    export function GeneratorHandler(request:any, next:GeneratorAction):PromiseGeneratorHandler{
         if (isIterator(request)){
             return run(request(), defaultHandlers).then(next);
         }
@@ -365,7 +368,7 @@ class ODataStreamWrapper extends Transform{
         this.buffer = [];
     }
 
-    _transform(chunk:any, encoding:string, done:Function){
+    _transform(chunk:any, _:string, done:Function){
         this.buffer.push(chunk);
         if (typeof done == "function") done();
     }
@@ -452,24 +455,41 @@ export class ODataProcessor extends Transform{
         if (resourcePath.navigation.length == 0) throw new ResourceNotFoundError();
         this.workflow = resourcePath.navigation.map((part, i) => {
             let next = resourcePath.navigation[i + 1];
-            if (next && next.type == TokenType.RefExpression) return;
-            let fn = this[getResourcePartFunction(part.type) || ("__" + part.type)];
-            if (fn) return fn.call(this, part);
+            if (next && next.type == TokenType.RefExpression) return null;
+            let fn = getResourcePartFunction(part.type) || ("__" + part.type);
+            switch (fn) {
+                case "__actionOrFunction":
+                    return this.__actionOrFunction.call(this, part);
+                case "__actionOrFunctionImport":
+                    return this.__actionOrFunctionImport.call(this, part);
+                case "__PrimitiveKeyProperty":
+                case "__PrimitiveCollectionProperty":
+                case "__ComplexProperty":
+                case "__ComplexCollectionProperty":
+                case "__PrimitiveProperty":
+                    return this.__PrimitiveProperty.call(this, part);
+                case "__EntitySetName":
+                    return this.__EntitySetName.call(this, part);
+                case "__EntityCollectionNavigationProperty":
+                    return this.__EntityCollectionNavigationProperty.call(this, part);
+                case "__EntityNavigationProperty":
+                    return this.__EntityNavigationProperty.call(this, part);
+                default:
+                    return null;
+            }
         }).filter(it => !!it);
 
         this.workflow.push((result) => {
-            return new Promise((resolve, reject) => {
-                if (result && result.statusCode && result.statusCode == 201){
-                    this.emit("header", {
-                        "Location": result.body["@odata.id"]
-                    });
-                }
-                resolve(result);
-            });
+            if (result && result.statusCode && result.statusCode == 201){
+                this.emit("header", {
+                    "Location": result.body["@odata.id"]
+                });
+            }
+            return Promise.resolve(result);
         });
     }
 
-    _transform(chunk:any, encoding:string, done:Function){
+    _transform(chunk:any, _:string, done:Function){
         if (this.streamEnabled){
             if (!(chunk instanceof Buffer)){
                 if (!this.streamStart){
@@ -721,22 +741,6 @@ export class ODataProcessor extends Transform{
         };
     }
 
-    private __PrimitiveKeyProperty(part:NavigationPart):Function{
-        return this.__PrimitiveProperty(part);
-    }
-
-    private __PrimitiveCollectionProperty(part:NavigationPart):Function{
-        return this.__PrimitiveProperty(part);
-    }
-
-    private __ComplexProperty(part:NavigationPart):Function{
-        return this.__PrimitiveProperty(part);
-    }
-
-    private __ComplexCollectionProperty(part:NavigationPart):Function{
-        return this.__PrimitiveProperty(part);
-    }
-
     private __read(ctrl:typeof ODataController, part:any, params:any, data?:any, filter?:string | Function, elementType?:any, include?){
         return new Promise((resolve, reject) => {
             if (this.ctrl) this.prevCtrl = this.ctrl;
@@ -933,7 +937,7 @@ export class ODataProcessor extends Transform{
                         }, reject);
                     }
                 }catch(err){
-                    reject(err);
+                    return Promise.reject(err);
                 }
             });
         };
@@ -1128,7 +1132,7 @@ export class ODataProcessor extends Transform{
         result.body = context;
     }
 
-    private async __resolveAsync(type, prop, propValue, entity){
+    private async __resolveAsync(type, _, propValue, entity){
         if (isIterator(propValue)){
             propValue = await run(propValue.call(entity), defaultHandlers);
         }

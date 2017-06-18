@@ -94,7 +94,7 @@ export class ResourcePathVisitor{
                 visitor = new ResourcePathVisitor();
                 this.includes[expandPath] = visitor;
             }
-            visitor.Visit(item);
+            visitor.Visit(item, context);
         });
     }
 
@@ -109,15 +109,15 @@ export class ResourcePathVisitor{
         }
     }
 
-    protected VisitExpandPath(node: Token, context: any) {
+    protected VisitExpandPath(node: Token) {
         this.navigationProperty = node.raw;
     }
 
-    protected VisitId(node:Token, context:any){
+    protected VisitId(node:Token){
         this.id = node.value;
     }
 
-    protected VisitInlineCount(node:Token, context:any){
+    protected VisitInlineCount(node:Token){
         this.inlinecount = Literal.convert(node.value.value, node.value.raw);
     }
     
@@ -132,16 +132,16 @@ export class ResourcePathVisitor{
         this.Visit(node.value.navigation, context);
     }
 
-    protected VisitSingletonEntity(node:Token, context:any){
+    protected VisitSingletonEntity(node:Token){
         this.singleton = node.raw;
     }
 
-    protected VisitEntitySetName(node:Token, context:any){
+    protected VisitEntitySetName(node:Token){
         this.navigation.push({ name: node.value.name, type: node.type });
         this.path += "/" + node.value.name;
     }
 
-    protected VisitCountExpression(node:Token, context:any){
+    protected VisitCountExpression(node:Token){
         this.navigation.push({
             name: "$count",
             type: node.type,
@@ -159,7 +159,7 @@ export class ResourcePathVisitor{
         this.Visit(node.value.navigation, context);
     }
 
-    protected VisitSimpleKey(node:Token, context:any){
+    protected VisitSimpleKey(node:Token){
         let lastNavigationPart = this.navigation[this.navigation.length - 1];
         lastNavigationPart.key = [{
             name: node.value.key,
@@ -169,7 +169,7 @@ export class ResourcePathVisitor{
         this.path += "(\\(([^,]+)\\))";
     }
 
-    protected VisitCompoundKey(node:Token, context:any){
+    protected VisitCompoundKey(node:Token){
         this.path += "(\\(";
         let lastNavigationPart = this.navigation[this.navigation.length - 1];
         lastNavigationPart.key = node.value.map((pair, i) => {
@@ -192,12 +192,12 @@ export class ResourcePathVisitor{
         this.Visit(node.value.navigation, context);
     }
 
-    protected VisitProperty(node:Token, context:any){
+    protected VisitProperty(node:Token){
         this.navigation.push({ name: node.value.name, type: node.type });
         this.path += "/" + node.value.name;
     };
 
-    protected VisitValueExpression(node:Token, context:any){
+    protected VisitValueExpression(node:Token){
         this.navigation.push({
             name: "$value",
             type: node.type,
@@ -206,7 +206,7 @@ export class ResourcePathVisitor{
         this.path += "/$value";
     }
 
-    protected VisitRefExpression(node:Token, context:any){
+    protected VisitRefExpression(node:Token){
         this.navigation.push({
             name: "$ref",
             type: node.type,
@@ -220,7 +220,7 @@ export class ResourcePathVisitor{
         this.Visit(node.value.navigation, context);
     }
 
-    protected VisitBoundActionCall(node:Token, context:any){
+    protected VisitBoundActionCall(node:Token){
         let part = {
             type: node.type,
             name: node.raw
@@ -229,7 +229,7 @@ export class ResourcePathVisitor{
         this.path += "/" + part.name;
     }
 
-    protected VisitBoundFunctionCall(node:Token, context:any){
+    protected VisitBoundFunctionCall(node:Token){
         let part = {
             type: node.type,
             name: node.value.call.value.namespace + "." + node.value.call.value.name,
@@ -266,7 +266,7 @@ export class ResourcePathVisitor{
         delete context.literal;
     }
 
-    protected VisitActionImportCall(node:Token, context:any){
+    protected VisitActionImportCall(node:Token){
         let part = {
             type: node.value.type,
             name: node.value.value.name
