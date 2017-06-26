@@ -6,6 +6,7 @@ import { createQuery } from "odata-v4-mongodb";
 import { Readable, PassThrough } from "stream";
 import { ODataServer, ODataController, Edm, odata, ODataStream, ODataQuery, ODataHttpContext } from "../lib";
 import { Category, Product } from "./model";
+import { createMetadataJSON } from "../lib/metadata";
 
 const mongodb = async function():Promise<Db>{
     return await MongoClient.connect("mongodb://localhost:27017/odataserver");
@@ -102,29 +103,69 @@ class CategoriesController extends ODataController{
     }
 }
 
+enum Genre{
+    Unknown,
+    Pop,
+    Rock,
+    Metal,
+    Classic
+}
+
 @Edm.MediaEntity("audio/mp3")
 class Music extends PassThrough{
     @Edm.Key
     @Edm.Computed
-    @Edm.Int32
-    Id:number
+    @Edm.TypeDefinition(ObjectID)
+    //@Edm.Int32
+    Id:ObjectID
 
     @Edm.String
     Artist:string
 
     @Edm.String
     Title:string
+
+    @Edm.EnumType(Genre)
+    Genre:Genre
+
+    @Edm.TypeDefinition(ObjectID)
+    uid:ObjectID
+}
+
+@odata.namespace("NorthwindTypes")
+class NorthwindTypes extends Edm.ContainerBase{
+    @Edm.Flags
+    @Edm.Int64
+    @Edm.Serialize(value => `NorthwindTypes.Genre2'${value}'`)
+    Genre2 = Genre
+
+    @Edm.String
+    @Edm.URLDeserialize((value:string) => new Promise(resolve => setTimeout(_ => resolve(new ObjectID(value)), 1000)))
+    @Edm.Deserialize(value => new ObjectID(value))
+    ObjectID2 = ObjectID
+
+    Music2 = Music
 }
 
 @odata.type(Music)
+@odata.container("Media")
 class MusicController extends ODataController{
     @odata.GET
     findOne(@odata.key() _:number){
         let music = new Music();
-        music.Id = 1;
+        music.Id = new ObjectID;
         music.Artist = "Dream Theater";
         music.Title = "Six degrees of inner turbulence";
+        music.Genre = Genre.Metal;
+        music.uid = new ObjectID();
         return music;
+    }
+
+    @odata.POST
+    insert(@odata.body body: Music){
+        body.Id = new ObjectID();
+        console.log(body);
+        return body;
     }
 
     @odata.GET.$value
@@ -177,6 +218,7 @@ class Image{
 }
 
 @odata.type(Image)
+@odata.container("Media")
 class ImagesController extends ODataController{
     @odata.GET
     images(@odata.key id:number){
@@ -208,11 +250,19 @@ class ImagesController extends ODataController{
     }
 }
 
+@Edm.Container(NorthwindTypes)
 @odata.controller(ProductsController, true)
 @odata.controller(CategoriesController, true)
 @odata.controller(MusicController, true)
 @odata.controller(ImagesController, true)
 class StreamServer extends ODataServer{
+    @Edm.TypeDefinition(ObjectID)
+    @Edm.FunctionImport
+    objid(@Edm.TypeDefinition(ObjectID) v:ObjectID){
+        return v.toHexString();
+    }
+
+    @odata.container("almafa")
     @Edm.FunctionImport(Edm.Stream)
     async Fetch(@Edm.String filename:string, @odata.stream stream:Writable, @odata.context context:any){
         let file = fs.createReadStream(filename);
@@ -222,5 +272,7 @@ class StreamServer extends ODataServer{
         });
     }
 }
-
+console.dir(createMetadataJSON(StreamServer).dataServices.schema[0]["function"][1].parameter);
+//console.log(createMetadataJSON(StreamServer).dataServices.schema[0].entityType[2]);
+//console.log(StreamServer.$metadata().edmx.dataServices.schemas[0].typeDefinitions);
 StreamServer.create("/odata", 3000);

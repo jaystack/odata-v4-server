@@ -83,7 +83,7 @@ const createODataContext = function(context, entitySets, server:typeof ODataServ
         if (baseResource.type == TokenType.EntityCollectionNavigationProperty){
             prevResource = baseResource;
             odataContext += "/" + baseResource.name;
-            prevType = baseResource.key ? Edm.getType(prevType, baseResource.name) : server.getController(<Function>Edm.getType(prevType, baseResource.name));
+            prevType = baseResource.key ? Edm.getType(prevType, baseResource.name, server.container) : server.getController(<Function>Edm.getType(prevType, baseResource.name, server.container));
             let ctrl = server.getController(prevType);
             let entitySet = null;
             for (let prop in entitySets) {
@@ -102,7 +102,7 @@ const createODataContext = function(context, entitySets, server:typeof ODataServ
         }
         if (baseResource.type == TokenType.EntityNavigationProperty){
             prevResource = baseResource;
-            prevType = Edm.getType(prevType, baseResource.name);
+            prevType = Edm.getType(prevType, baseResource.name, server.container);
             let ctrl = server.getController(prevType);
             let entitySet = null;
             for (let prop in entitySets) {
@@ -117,7 +117,7 @@ const createODataContext = function(context, entitySets, server:typeof ODataServ
             baseResource.type == TokenType.PrimitiveCollectionProperty ||
             baseResource.type == TokenType.ComplexProperty ||
             baseResource.type == TokenType.ComplexCollectionProperty){
-                prevType = Edm.getType(prevType, baseResource.name);
+                prevType = Edm.getType(prevType, baseResource.name, server.container);
                 return odataContext += "/" + baseResource.name;
             }
     });
@@ -152,7 +152,10 @@ const expCalls = {
     $value: function(this:ODataResult, processor){
         let prevPart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
 
-        let fn = odata.findODataMethod(processor.ctrl, `${processor.method}/$value`, prevPart.key || []);
+        let fn = odata.findODataMethod(processor.ctrl, `${processor.method}/${prevPart.name}/$value`, prevPart.key || []);
+        if (!fn && typeof this.elementType == "function" && Edm.isMediaEntity(this.elementType)){
+            fn = odata.findODataMethod(processor.ctrl, `${processor.method}/$value`, prevPart.key || []);
+        }
         if (fn){
             let ctrl = processor.ctrl;
             let params = {};
@@ -219,7 +222,7 @@ const expCalls = {
             linkUrl = decodeURIComponent(linkUrl);
             processor.emit("header", { "OData-EntityId": linkUrl });
             linkAst = ODataParser.odataUri(linkUrl, { metadata: processor.serverType.$metadata().edmx });
-            linkPath = new ResourcePathVisitor().Visit(linkAst);
+            linkPath = new ResourcePathVisitor(processor.serverType, processor.entitySets).Visit(linkAst);
             linkPart = linkPath.navigation[linkPath.navigation.length - 1];
         }else linkPart = prevPart;
 
@@ -448,45 +451,50 @@ export class ODataProcessor extends Transform{
         this.url = url.parse(context.url);
         this.query = qs.parse(this.url.query);
         let ast = ODataParser.odataUri(context.url, { metadata: this.serverType.$metadata().edmx });
-        let resourcePath = this.resourcePath = new ResourcePathVisitor().Visit(ast);
         let entitySets = this.entitySets = odata.getPublicControllers(this.serverType);
-        this.odataContext = createODataContext(context, entitySets, server, resourcePath, this);
 
-        if (resourcePath.navigation.length == 0) throw new ResourceNotFoundError();
-        this.workflow = resourcePath.navigation.map((part, i) => {
-            let next = resourcePath.navigation[i + 1];
-            if (next && next.type == TokenType.RefExpression) return null;
-            let fn = getResourcePartFunction(part.type) || ("__" + part.type);
-            switch (fn) {
-                case "__actionOrFunction":
-                    return this.__actionOrFunction.call(this, part);
-                case "__actionOrFunctionImport":
-                    return this.__actionOrFunctionImport.call(this, part);
-                case "__PrimitiveKeyProperty":
-                case "__PrimitiveCollectionProperty":
-                case "__ComplexProperty":
-                case "__ComplexCollectionProperty":
-                case "__PrimitiveProperty":
-                    return this.__PrimitiveProperty.call(this, part);
-                case "__EntitySetName":
-                    return this.__EntitySetName.call(this, part);
-                case "__EntityCollectionNavigationProperty":
-                    return this.__EntityCollectionNavigationProperty.call(this, part);
-                case "__EntityNavigationProperty":
-                    return this.__EntityNavigationProperty.call(this, part);
-                default:
-                    return null;
-            }
-        }).filter(it => !!it);
+        this.workflow = [async (body) => {
+            let resourcePath = this.resourcePath = await new ResourcePathVisitor(this.serverType, this.entitySets).Visit(ast);
+            this.odataContext = createODataContext(context, entitySets, server, resourcePath, this);
 
-        this.workflow.push((result) => {
-            if (result && result.statusCode && result.statusCode == 201){
-                this.emit("header", {
-                    "Location": result.body["@odata.id"]
-                });
-            }
-            return Promise.resolve(result);
-        });
+            if (resourcePath.navigation.length == 0) throw new ResourceNotFoundError();
+            this.workflow.push(...resourcePath.navigation.map((part, i) => {
+                let next = resourcePath.navigation[i + 1];
+                if (next && next.type == TokenType.RefExpression) return null;
+                let fn = getResourcePartFunction(part.type) || ("__" + part.type);
+                switch (fn) {
+                    case "__actionOrFunction":
+                        return this.__actionOrFunction.call(this, part);
+                    case "__actionOrFunctionImport":
+                        return this.__actionOrFunctionImport.call(this, part);
+                    case "__PrimitiveKeyProperty":
+                    case "__PrimitiveCollectionProperty":
+                    case "__ComplexProperty":
+                    case "__ComplexCollectionProperty":
+                    case "__PrimitiveProperty":
+                        return this.__PrimitiveProperty.call(this, part);
+                    case "__EntitySetName":
+                        return this.__EntitySetName.call(this, part);
+                    case "__EntityCollectionNavigationProperty":
+                        return this.__EntityCollectionNavigationProperty.call(this, part);
+                    case "__EntityNavigationProperty":
+                        return this.__EntityNavigationProperty.call(this, part);
+                    default:
+                        return null;
+                }
+            }).filter(it => !!it));
+
+            this.workflow.push((result) => {
+                if (result && result.statusCode && result.statusCode == 201){
+                    this.emit("header", {
+                        "Location": result.body["@odata.id"]
+                    });
+                }
+                return Promise.resolve(result);
+            });
+
+            return body;
+        }];
     }
 
     _transform(chunk:any, _:string, done:Function){
@@ -506,8 +514,11 @@ export class ODataProcessor extends Transform{
                             this.streamInlineCount = chunk["@odata.count"] || chunk.inlinecount;
                         }
                         let entity = {};
-                        if (this.ctrl) this.__appendLinks(this.ctrl, this.ctrl.prototype.elementType, entity, chunk);
-                        this.__convertEntity(entity, chunk, this.elementType || this.ctrl.prototype.elementType, this.resourcePath.includes).then(() => {
+                        let defer;
+                        if (this.ctrl) defer = this.__appendLinks(this.ctrl, this.ctrl.prototype.elementType, entity, chunk);
+                        let deferConvert = this.__convertEntity(entity, chunk, this.elementType || this.ctrl.prototype.elementType, this.resourcePath.includes);
+                        defer = defer ? defer.then(_ => deferConvert) : deferConvert;
+                        defer.then(() => {
                             chunk = JSON.stringify(entity);
                             this.push(chunk);
                             if (typeof done == "function") done();
@@ -552,9 +563,9 @@ export class ODataProcessor extends Transform{
     }
 
     private __EntityCollectionNavigationProperty(part:NavigationPart):Function{
-        return (result) => {
+        return async (result) => {
             let resultType = result.elementType;
-            let elementType = <Function>Edm.getType(resultType, part.name);
+            let elementType = <Function>Edm.getType(resultType, part.name, this.serverType.container);
             let partIndex = this.resourcePath.navigation.indexOf(part);
             let method = writeMethods.indexOf(this.method) >= 0 && partIndex < this.resourcePath.navigation.length - 1
                 ? "get"
@@ -588,10 +599,10 @@ export class ODataProcessor extends Transform{
                 let foreignKeys = Edm.getForeignKeys(resultType, part.name);
                 let typeKeys = Edm.getKeyProperties(resultType);
                 result.foreignKeys = {};
-                let foreignFilter = foreignKeys.map((key) => {
+                let foreignFilter = (await Promise.all(foreignKeys.map(async key => {
                     result.foreignKeys[key] = result.body[typeKeys[0]];
-                    return `${key} eq ${Edm.escape(result.body[typeKeys[0]], Edm.getTypeName(elementType, key))}`;
-                }).join(" and ");
+                    return `${key} eq ${await Edm.escape(result.body[typeKeys[0]], Edm.getTypeName(elementType, key, this.serverType.container))}`;
+                }))).join(" and ");
                 let params = {};
                 if (part.key) part.key.forEach((key) => params[key.name] = key.value);
                 return this.__read(ctrl, part, params, result, foreignFilter);
@@ -602,7 +613,7 @@ export class ODataProcessor extends Transform{
     private __EntityNavigationProperty(part:NavigationPart):Function{
         return (result) => {
             let resultType = result.elementType;
-            let elementType = <Function>Edm.getType(resultType, part.name);
+            let elementType = <Function>Edm.getType(resultType, part.name, this.serverType.container);
             let partIndex = this.resourcePath.navigation.indexOf(part);
             let method = writeMethods.indexOf(this.method) >= 0 && partIndex < this.resourcePath.navigation.length - 1
                 ? "get"
@@ -663,7 +674,7 @@ export class ODataProcessor extends Transform{
                         : odata.findODataMethod(this.ctrl, `${this.method}`, prevPart.key || []);
                     if (fn){
                         let body = this.body;
-                        if (Edm.getTypeName(result.elementType, part.name) != "Edm.Stream") body = body.body || body;
+                        if (Edm.getTypeName(result.elementType, part.name, this.serverType.container) != "Edm.Stream") body = body.body || body;
                         this.body = {};
                         this.body[part.name] = this.method == "delete" ? null : body.value || body;
                     }
@@ -689,7 +700,7 @@ export class ODataProcessor extends Transform{
                         }
                     }
 
-                    this.elementType = Edm.getType(result.elementType, part.name) || Object;
+                    this.elementType = Edm.getType(result.elementType, part.name, this.serverType.container) || Object;
                     if (typeof this.elementType == "string") this.elementType = Object;
                     currentResult = fnCaller.call(ctrl, fn, params);
 
@@ -717,7 +728,10 @@ export class ODataProcessor extends Transform{
                                 value: value
                             };
                             let elementType = result.elementType;
-                            if (value instanceof Object) result.elementType = Edm.getType(result.elementType, part.name) || Object;
+                            //if (value instanceof Object)
+                            result.elementType = Edm.isEnumType(result.elementType, part.name)
+                                ? Edm.getTypeName(result.elementType, part.name, this.serverType.container)
+                                : Edm.getType(result.elementType, part.name, this.serverType.container) || Object;
 
                             if (value && (isStream(value) || isStream(value.stream))){
                                 this.emit("header", { "Content-Type": Edm.getContentType(elementType.prototype, part.name) || value.contentType || "application/octet-stream" });
@@ -727,6 +741,7 @@ export class ODataProcessor extends Transform{
                                 value.on("error", reject);
                             }else{
                                 if (this.streamEnabled && this.streamStart) delete result.body;
+                                delete result.stream;
                                 resolve(result);
                             }
                         }catch(err){
@@ -742,7 +757,7 @@ export class ODataProcessor extends Transform{
     }
 
     private __read(ctrl:typeof ODataController, part:any, params:any, data?:any, filter?:string | Function, elementType?:any, include?){
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (this.ctrl) this.prevCtrl = this.ctrl;
             else this.prevCtrl = ctrl;
             this.ctrl = ctrl;
@@ -816,6 +831,7 @@ export class ODataProcessor extends Transform{
                         params[typeParam] = (body["@odata.type"] || (`${(<any>ctrl.prototype.elementType).namespace}.${(<any>ctrl.prototype.elementType).name}`)).replace(/^#/, "");
                     }
                     if (bodyParam){
+                        await this.__deserialize(body, ctrl.prototype.elementType);
                         this.__stripOData(body);
                         params[bodyParam] = body;
                     }
@@ -876,6 +892,18 @@ export class ODataProcessor extends Transform{
                 }
             }, reject);
         });
+    }
+
+    private async __deserialize(obj, type){
+        for (let prop in obj) {
+            let propType = Edm.getType(type, prop, this.serverType.container);
+            let fn = Edm.getDeserializer(type, prop, propType, this.serverType.container);
+            if (typeof fn == "function"){
+                obj[prop] = await fn(obj[prop], prop, propType);
+            }else if (typeof obj[prop] == "object"){
+                await this.__deserialize(obj[prop], propType);
+            }
+        }
     }
 
     private __stripOData(obj){
@@ -1009,7 +1037,7 @@ export class ODataProcessor extends Transform{
                                 }else ODataResult.NoContent().then(resolve, reject);
                             }, reject);
                         }else{
-                            expResult.then((expResult) => {
+                            return expResult.then((expResult) => {
                                 return (<Promise<ODataResult>>(boundOpName == "$ref" && this.method != "get" ? ODataResult.NoContent : ODataRequestResult[this.method])(expResult, typeof expResult == "object" ? "application/json" : "text/plain")).then((result) => {
                                     if (typeof expResult == "object" && boundOpName != "$ref") result.elementType = elementType;
                                     resolve(result);
@@ -1041,7 +1069,7 @@ export class ODataProcessor extends Transform{
         };
     }
 
-    private __appendLinks(ctrl, elementType, context, body, result?){
+    private async __appendLinks(ctrl, elementType, context, body, result?){
         if (this.options.metadata == ODataMetadataType.none) return;
         let entitySet = this.entitySets[this.resourcePath.navigation[0].name] == ctrl ? this.resourcePath.navigation[0].name : null;
         if (!entitySet){
@@ -1074,9 +1102,27 @@ export class ODataProcessor extends Transform{
                 let id;
                 try{
                     if (keys.length == 1){
-                        id = Edm.escape(body[keys[0]], Edm.getTypeName(elementType, keys[0]));
+                        id = await Edm.escape(
+                            body[keys[0]],
+                            Edm.getTypeName(elementType, keys[0], this.serverType.container),
+                            Edm.getURLSerializer(
+                                elementType,
+                                keys[0],
+                                Edm.getType(elementType, keys[0], this.serverType.container),
+                                this.serverType.container
+                            ));
                     }else{
-                        id = keys.map(it => `${it}=${Edm.escape(body[it], Edm.getTypeName(elementType, it))}`).join(",");
+                        id = (await Promise.all(keys.map(async it => 
+                            `${it}=${
+                                await Edm.escape(
+                                    body[it],
+                                    Edm.getTypeName(elementType, it, this.serverType.container),
+                                    Edm.getURLSerializer(
+                                        elementType,
+                                        it,
+                                        Edm.getType(elementType, keys[0], this.serverType.container),
+                                        this.serverType.container
+                                    ))}`))).join(",");
                     }
                     if (typeof id != "undefined"){
                         context["@odata.id"] = `${getODataRoot(this.context)}/${entitySet}(${id})`;
@@ -1115,14 +1161,14 @@ export class ODataProcessor extends Transform{
                         return (async (entity, i) => {
                             if (typeof entity == "object"){
                                 let item = {};
-                                if (ctrl) this.__appendLinks(ctrl, elementType, item, entity);
+                                if (ctrl) await this.__appendLinks(ctrl, elementType, item, entity);
                                 await this.__convertEntity(item, entity, elementType, includes);
                                 context.value[i] = item;
                             }
                         })(entity, i);
                     }));
                 }else{
-                    if (ctrl) this.__appendLinks(ctrl, elementType, context, result.body, result);
+                    if (ctrl) await this.__appendLinks(ctrl, elementType, context, result.body, result);
                     await this.__convertEntity(context, result.body, elementType, includes);
                 }
             }
@@ -1146,22 +1192,31 @@ export class ODataProcessor extends Transform{
         return propValue;
     }
 
+    private __setODataType(context, elementType){
+        let containerType = this.serverType.container.resolve(elementType);
+        if (containerType){
+            context["@odata.type"] = `#${(this.serverType.container["namespace"] || elementType.namespace || this.serverType.namespace)}.${containerType}`;
+        }else{
+            context["@odata.type"] = `#${(elementType.namespace || this.serverType.namespace)}.${elementType.name}`;
+        }
+    }
+
     private async __convertEntity(context, result, elementType, includes?){
         if (elementType === Object || this.options.disableEntityConversion) return extend(context, result);
         let resultType = Object.getPrototypeOf(result).constructor;
         if (resultType != Object && resultType != this.ctrl.prototype.elementType){
             elementType = resultType;
-            if (this.options.metadata != ODataMetadataType.none && Edm.isEntityType(elementType)) context["@odata.type"] = `#${(elementType.namespace || this.serverType.namespace)}.${elementType.name}`;
+            if (this.options.metadata != ODataMetadataType.none && Edm.isEntityType(elementType)) this.__setODataType(context, elementType);
         }
         if (typeof result["@odata.type"] == "function"){
             elementType = result["@odata.type"];
-            if (this.options.metadata != ODataMetadataType.none && Edm.isEntityType(elementType)) context["@odata.type"] = `#${(elementType.namespace || this.serverType.namespace)}.${elementType.name}`;
+            if (this.options.metadata != ODataMetadataType.none && Edm.isEntityType(elementType)) this.__setODataType(context, elementType);
         }
         if (typeof context["@odata.type"] == "undefined" && this.ctrl && elementType != this.ctrl.prototype.elementType){
-            if (this.options.metadata != ODataMetadataType.none && Edm.isEntityType(elementType)) context["@odata.type"] = `#${(elementType.namespace || this.serverType.namespace)}.${elementType.name}`;
+            if (this.options.metadata != ODataMetadataType.none && Edm.isEntityType(elementType)) this.__setODataType(context, elementType);
         }
         if (this.options.metadata == ODataMetadataType.full){
-            context["@odata.type"] = `#${(elementType.namespace || this.serverType.namespace)}.${elementType.name}`;
+            this.__setODataType(context, elementType);
         }
         let props = Edm.getProperties(elementType.prototype);
         if (Edm.isOpenType(elementType)){
@@ -1188,13 +1243,13 @@ export class ODataProcessor extends Transform{
         if (props.length > 0){
             let metadata = {};
             await Promise.all(props.map(prop => (async prop => {
-                let type:any = Edm.getType(elementType, prop);
+                let type:any = Edm.getType(elementType, prop, this.serverType.container);
                 let itemType;
-                if (typeof type == "function"){
+                if (typeof type == "function" && !Edm.isTypeDefinition(elementType, prop)){
                     itemType = function(){};
                     util.inherits(itemType, type);
                 }
-                let converter:Function = Edm.getConverter(elementType, prop);
+                let converter:Function = Edm.getSerializer(elementType, prop, type, this.serverType.container) || Edm.getConverter(elementType, prop);
                 let isCollection = Edm.isCollection(elementType, prop);
                 let entity = result;
                 let propValue = entity[prop];
@@ -1208,7 +1263,7 @@ export class ODataProcessor extends Transform{
                     }
                     if (includes && includes[prop]){
                         await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
-                    }else if (typeof type == "function"){
+                    }else if (typeof type == "function" && !Edm.isTypeDefinition(elementType, prop)){
                         for (let i = 0; i < value.length; i++){
                             let it = value[i];
                             if (!it) return it;
@@ -1218,7 +1273,7 @@ export class ODataProcessor extends Transform{
                         }
                     }
                     if (typeof converter == "function"){
-                        context[prop] = value.map(it => converter(it));
+                        context[prop] = await Promise.all(value.map(async it => await converter(it, prop, type)));
                     }else context[prop] = value;
                 }else{
                     if (this.options.metadata == ODataMetadataType.full){
@@ -1228,18 +1283,18 @@ export class ODataProcessor extends Transform{
                                 metadata[`${prop}@odata.navigationLink`] = `${context["@odata.id"]}/${prop}`;
                             }
                         }else if (type != "Edm.String" && type != "Edm.Boolean"){
-                            let typeName = Edm.getTypeName(elementType, prop);
+                            let typeName = Edm.getTypeName(elementType, prop, this.serverType.container);
                             if (typeof type == "string" && type.indexOf("Edm.") == 0) typeName = typeName.replace(/Edm\./, "");
                             context[`${prop}@odata.type`] = `#${typeName}`;
                         }
                     }
                     if (includes && includes[prop]){
                         await this.__include(includes[prop], context, prop, ctrl, entity, elementType);
-                    }else if (typeof type == "function" && propValue){
+                    }else if (typeof type == "function" && propValue && !Edm.isTypeDefinition(elementType, prop)){
                         context[prop] = new itemType();
                         await this.__convertEntity(context[prop], propValue, type, includes);
                     }else if (typeof converter == "function"){
-                        context[prop] = converter(propValue);
+                        context[prop] = await converter(propValue, prop, type);
                     }else if (type == "Edm.Stream"){
                         if (this.options.metadata != ODataMetadataType.none){
                             context[`${prop}@odata.mediaReadLink`] = `${context["@odata.id"]}/${prop}`;
@@ -1262,7 +1317,7 @@ export class ODataProcessor extends Transform{
             let oldPrevCtrl = this.prevCtrl;
             let oldCtrl = this.ctrl;
             const isCollection = Edm.isCollection(elementType, include.navigationProperty);
-            const navigationType = <Function>Edm.getType(elementType, include.navigationProperty);
+            const navigationType = <Function>Edm.getType(elementType, include.navigationProperty, this.serverType.container);
             let navigationResult;
             if (typeof result[prop] == "object"){
                 navigationResult = await ODataResult.Ok(result[prop]);
@@ -1290,10 +1345,10 @@ export class ODataProcessor extends Transform{
                         let typeKeys = Edm.getKeyProperties(navigationType);
                         result.foreignKeys = {};
                         let part:any = {};
-                        let foreignFilter = foreignKeys.map((key) => {
+                        let foreignFilter = (await Promise.all(foreignKeys.map(async (key) => {
                             result.foreignKeys[key] = result[typeKeys[0]];
-                            return `${key} eq ${Edm.escape(result[typeKeys[0]], Edm.getTypeName(navigationType, key))}`;
-                        }).join(" and ");
+                            return `${key} eq ${await Edm.escape(result[typeKeys[0]], Edm.getTypeName(navigationType, key, this.serverType.container))}`;
+                        }))).join(" and ");
                         if (part.key) part.key.forEach((key) => params[key.name] = key.value);
                         navigationResult = await this.__read(ctrl, part, params, result, foreignFilter, navigationType, include);
                     }else{
@@ -1390,14 +1445,12 @@ export class ODataProcessor extends Transform{
         }
     }
 
-    execute(body?:any):Promise<ODataResult>{
+    async execute(body?:any):Promise<ODataResult>{
         this.body = body;
-        this.workflow[0] = this.workflow[0].call(this, body);
-        for (let i = 1; i < this.workflow.length; i++){
-            this.workflow[0] = this.workflow[0].then((...args) => {
-                return this.workflow[i].apply(this, args);
-            });
+        let next = await this.workflow.shift().call(this, body);
+        while (this.workflow.length > 0){
+            next = await this.workflow.shift().call(this, next);
         }
-        return this.workflow[0];
+        return next;
     }
 }

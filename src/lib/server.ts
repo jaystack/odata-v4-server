@@ -13,6 +13,7 @@ import { ODataBase } from "./odata";
 import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions, ODataMetadataType } from "./processor";
 import { HttpRequestError, UnsupportedMediaTypeError } from "./error";
+import { ContainerBase } from "./edm";
 
 /** HTTP context interface when using the server HTTP request handler */
 export interface ODataHttpContext{
@@ -71,7 +72,7 @@ function ensureODataHeaders(req, res, next?){
 export class ODataServerBase extends Transform{
     private static _metadataCache:any
     static namespace:string
-    static containerName:string
+    static container = new ContainerBase();
     private serverType:typeof ODataServer
 
     static requestHandler(){

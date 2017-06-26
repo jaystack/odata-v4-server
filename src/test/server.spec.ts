@@ -418,7 +418,7 @@ describe("ODataServer", () => {
                 "@odata.context": "http://localhost/$metadata#EntitySet(1)/foo",
                 value: "bar"
             },
-            elementType: Foobar,
+            elementType: "Edm.String",
             contentType: "application/json"
         });
 

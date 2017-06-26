@@ -5,6 +5,7 @@ import { getFunctionParameters } from "./utils";
 export class ODataControllerBase{
     entitySetName:string
     elementType:Function
+    static containerName:string
 
     static on(method:string, fn:Function | string, ...keys:string[]){
         let fnName = <string>((<any>fn).name || fn);

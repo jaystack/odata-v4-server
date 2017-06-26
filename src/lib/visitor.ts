@@ -1,11 +1,15 @@
 import { Token, TokenType } from "odata-v4-parser/lib/lexer";
 import { Literal } from "odata-v4-literal";
 import * as qs from "qs";
+import { ODataServer } from "./server";
+import { ODataController } from "./controller";
+import * as Edm from "./edm";
 
 export interface KeyValuePair{
     name:string
     value:any,
     raw?:string
+    node:Token
 }
 
 export interface NavigationPart{
@@ -13,9 +17,17 @@ export interface NavigationPart{
     type:TokenType
     key?:KeyValuePair[]
     params?:any
+    node:Token
 }
 
+export const ODATA_TYPE = "@odata.type";
+export const ODATA_TYPENAME = "@odata.type.name";
 export class ResourcePathVisitor{
+    private serverType: typeof ODataServer
+    private entitySets: {
+        [entitySet:string]: typeof ODataController
+    }
+
     navigation:NavigationPart[]
     alias:any
     path:string
@@ -29,17 +41,21 @@ export class ResourcePathVisitor{
         [navigationProperty: string]: ResourcePathVisitor
     } = {};
 
-    constructor(){
+    constructor(serverType: typeof ODataServer, entitySets: { [entitySet:string]: typeof ODataController }){
         this.navigation = [];
         this.path = "";
         this.alias = {};
+        this.serverType = serverType;
+        this.entitySets = entitySets;
     }
 
-    Visit(node:Token, context?:any):ResourcePathVisitor{
+    async Visit(node:Token, context?:any, type?: any):Promise<ResourcePathVisitor>{
         this.ast = this.ast || node;
+        if (!type) type = this.serverType;
         context = context || {};
 
         if (node){
+            node[ODATA_TYPE] = type;
             let visitor;
             switch (node.type){
                 case "PrimitiveFunctionImportCall":
@@ -71,41 +87,50 @@ export class ResourcePathVisitor{
                     visitor = this[`Visit${node.type}`];
             }
             
-            if (visitor) visitor.call(this, node, context);
+            if (visitor) await visitor.call(this, node, context, type);
         }
 
         return this;
     }
 
-    protected VisitODataUri(node:Token, context:any){
-        this.Visit(node.value.query, context);
-        this.Visit(node.value.resource, context);
-    }
-
-    protected VisitQueryOptions(node:Token, context:any){
-        node.value.options.forEach((option) => this.Visit(option, context));
-    }
-
-    protected VisitExpand(node: Token, context: any) {
-        node.value.items.forEach((item) => {
-            let expandPath = item.value.path.raw;
-            let visitor = this.includes[expandPath];
-            if (!visitor){
-                visitor = new ResourcePathVisitor();
-                this.includes[expandPath] = visitor;
+    protected async VisitODataUri(node:Token, context:any){
+        await this.Visit(node.value.resource, context);
+        await this.Visit(node.value.query, context);
+        this.navigation.forEach(it => {
+            if (it.params){
+                for (let prop in it.params){
+                    if (typeof it.params[prop] == "function"){
+                        it.params[prop] = it.params[prop]();
+                    }
+                }
             }
-            visitor.Visit(item, context);
         });
     }
 
-    protected VisitExpandItem(node: Token, context: any) {
-        this.Visit(node.value.path, context);
+    protected async VisitQueryOptions(node:Token, context:any){
+        await Promise.all(node.value.options.map(async (option) => await this.Visit(option, Object.assign({}, context))));
+    }
+
+    protected async VisitExpand(node: Token, context: any) {
+        await Promise.all(node.value.items.map(async (item) => {
+            let expandPath = item.value.path.raw;
+            let visitor = this.includes[expandPath];
+            if (!visitor){
+                visitor = new ResourcePathVisitor(node[ODATA_TYPE], this.entitySets);
+                this.includes[expandPath] = visitor;
+            }
+            await visitor.Visit(item, Object.assign({}, context));
+        }));
+    }
+
+    protected async VisitExpandItem(node: Token, context: any) {
+        await this.Visit(node.value.path, context);
         if (node.value.options){
             this.ast = new Token(node);
             this.ast.type = TokenType.QueryOptions;
             this.ast.raw = node.value.options.map(n => n.raw).join("&");
             this.query = qs.parse(this.ast.raw);
-            node.value.options.forEach((item) => this.Visit(item, context));
+            await Promise.all(node.value.options.map(async (item) => await this.Visit(item, Object.assign({}, context))));
         }
     }
 
@@ -121,23 +146,25 @@ export class ResourcePathVisitor{
         this.inlinecount = Literal.convert(node.value.value, node.value.raw);
     }
     
-    protected VisitAliasAndValue(node:Token, context:any){
-        this.Visit(node.value.value.value, context);
+    protected async VisitAliasAndValue(node:Token, context:any){
+        await this.Visit(node.value.value.value, context);
         this.alias[node.value.alias.value.name] = context.literal;
         delete context.literal;
     }
     
-    protected VisitResourcePath(node:Token, context:any){
-        this.Visit(node.value.resource, context);
-        this.Visit(node.value.navigation, context);
+    protected async VisitResourcePath(node:Token, context:any){
+        await this.Visit(node.value.resource, context);
+        await this.Visit(node.value.navigation, context, context[ODATA_TYPE]);
+        delete context[ODATA_TYPE];
     }
 
     protected VisitSingletonEntity(node:Token){
         this.singleton = node.raw;
     }
 
-    protected VisitEntitySetName(node:Token){
-        this.navigation.push({ name: node.value.name, type: node.type });
+    protected VisitEntitySetName(node:Token, context: any){
+        node[ODATA_TYPE] = context[ODATA_TYPE] = this.entitySets[node.value.name].prototype.elementType;
+        this.navigation.push({ name: node.value.name, type: node.type, node });
         this.path += "/" + node.value.name;
     }
 
@@ -145,55 +172,70 @@ export class ResourcePathVisitor{
         this.navigation.push({
             name: "$count",
             type: node.type,
-            params: {}
+            params: {},
+            node
         });
         this.path += "/$count";
     };
 
-    protected VisitCollectionNavigation(node:Token, context:any){
-        this.Visit(node.value.path, context);
+    protected async VisitCollectionNavigation(node:Token, context:any, type: any){
+        await this.Visit(node.value.path, context, type);
     }
 
-    protected VisitCollectionNavigationPath(node:Token, context:any){
-        this.Visit(node.value.predicate, context);
-        this.Visit(node.value.navigation, context);
+    protected async VisitCollectionNavigationPath(node:Token, context:any, type: any){
+        await this.Visit(node.value.predicate, context, type);
+        await this.Visit(node.value.navigation, context, type);
     }
 
-    protected VisitSimpleKey(node:Token){
+    protected async VisitSimpleKey(node:Token, _:any, type:any){
         let lastNavigationPart = this.navigation[this.navigation.length - 1];
+        node[ODATA_TYPENAME] = Edm.getTypeName(type, node.value.key, this.serverType.container);
+        node[ODATA_TYPE] = Edm.getType(type, node.value.key, this.serverType.container);
+        let value = Literal.convert(node.value.value.value, node.value.value.raw);
+        let deserializer = Edm.getURLDeserializer(type, node.value.key, node[ODATA_TYPE], this.serverType.container);
+        if (typeof deserializer == "function") value = await deserializer(value);
         lastNavigationPart.key = [{
             name: node.value.key,
-            value: Literal.convert(node.value.value.value, node.value.value.raw),
-            raw: node.value.value.raw
+            value,
+            raw: node.value.value.raw,
+            node
         }];
         this.path += "(\\(([^,]+)\\))";
     }
 
-    protected VisitCompoundKey(node:Token){
+    protected async VisitCompoundKey(node:Token, _:any, type:any){
         this.path += "(\\(";
         let lastNavigationPart = this.navigation[this.navigation.length - 1];
-        lastNavigationPart.key = node.value.map((pair, i) => {
+        lastNavigationPart.key = await Promise.all<KeyValuePair>(node.value.map(async (pair, i) => {
             this.path += i == node.value.length -1 ? "([^,]+)" : "([^,]+,)";
+            node[ODATA_TYPENAME] = Edm.getTypeName(type, pair.value.key.value.name, this.serverType.container);
+            node[ODATA_TYPE] = Edm.getType(type, pair.value.key.value.name, this.serverType.container);
+            let value = Literal.convert(pair.value.value.value, pair.value.value.raw);
+            let deserializer = Edm.getURLDeserializer(type, pair.value.key.value.name, node[ODATA_TYPE], this.serverType.container);
+            if (typeof deserializer == "function") value = await deserializer(value);
             return {
                 name: pair.value.key.value.name,
-                value: Literal.convert(pair.value.value.value, pair.value.value.raw),
-                raw: pair.value.value.raw
+                value,
+                raw: pair.value.value.raw,
+                node
             };
-        });
+        }));
         this.path += "\\))";
     }
 
-    protected VisitSingleNavigation(node:Token, context:any){
-        this.Visit(node.value.path, context);
+    protected async VisitSingleNavigation(node:Token, context:any, type: any){
+        await this.Visit(node.value.path, context, type);
     }
 
-    protected VisitPropertyPath(node:Token, context:any){
-        this.Visit(node.value.path, context);
-        this.Visit(node.value.navigation, context);
+    protected async VisitPropertyPath(node:Token, context:any, type: any){
+        await this.Visit(node.value.path, context, type);
+        await this.Visit(node.value.navigation, context, type);
     }
 
-    protected VisitProperty(node:Token){
-        this.navigation.push({ name: node.value.name, type: node.type });
+    protected VisitProperty(node:Token, _:any){
+        node[ODATA_TYPENAME] = Edm.getTypeName(node[ODATA_TYPE], node.value.name, this.serverType.container);
+        node[ODATA_TYPE] = Edm.getType(node[ODATA_TYPE], node.value.name, this.serverType.container);
+        this.navigation.push({ name: node.value.name, type: node.type, node });
         this.path += "/" + node.value.name;
     };
 
@@ -201,7 +243,8 @@ export class ResourcePathVisitor{
         this.navigation.push({
             name: "$value",
             type: node.type,
-            params: {}
+            params: {},
+            node
         });
         this.path += "/$value";
     }
@@ -210,58 +253,62 @@ export class ResourcePathVisitor{
         this.navigation.push({
             name: "$ref",
             type: node.type,
-            params: {}
+            params: {},
+            node
         });
         this.path += "/$ref";
     }
 
-    protected VisitBoundOperation(node:Token, context:any){
-        this.Visit(node.value.operation, context);
-        this.Visit(node.value.navigation, context);
+    protected async VisitBoundOperation(node:Token, context:any){
+        await this.Visit(node.value.operation, context);
+        await this.Visit(node.value.navigation, context);
     }
 
     protected VisitBoundActionCall(node:Token){
         let part = {
             type: node.type,
-            name: node.raw
+            name: node.raw,
+            node
         };
         this.navigation.push(part);
         this.path += "/" + part.name;
     }
 
-    protected VisitBoundFunctionCall(node:Token){
+    protected async VisitBoundFunctionCall(node:Token){
         let part = {
             type: node.type,
             name: node.value.call.value.namespace + "." + node.value.call.value.name,
-            params: {}
+            params: {},
+            node
         };
         this.navigation.push(part);
         this.path += "/" + part.name;
         this.path += "(\\(";
-        node.value.params.value.forEach((param, i) => {
-            this.Visit(param, context);
+        await Promise.all(node.value.params.value.map(async (param, i) => {
+            await this.Visit(param, context);
             if (i < node.value.params.value.length - 1) this.path += ",";
-        });
+        }));
         this.path += "\\))";
     }
     
-    protected VisitFunctionImportCall(node:Token, context:any){
+    protected async VisitFunctionImportCall(node:Token, context:any){
         let part = {
             type: node.type,
             name: node.value.import.value.name,
-            params: {}
+            params: {},
+            node
         };
         this.navigation.push(part);
         this.path += "/" + part.name;
         this.path += "(\\(";
-        node.value.params.forEach((param) => this.Visit(param, context));
+        await Promise.all(node.value.params.map(async (param) => await this.Visit(param, context)));
         this.path += "\\))";
     }
     
-    protected VisitFunctionParameter(node:Token, context:any){
-        this.Visit(node.value.value, context);
+    protected async VisitFunctionParameter(node:Token, context:any){
+        await this.Visit(node.value.value, context = Object.assign({}, context));
         let params = this.navigation[this.navigation.length - 1].params;
-        params[node.value.name.value.name] = this.alias[node.value.name.value.name] || context.literal;
+        params[node.value.name.value.name] = (literal => _ => typeof literal == "function" ? literal() : literal)(context.literal);
         this.path += node.value.name.value.name + "=([^,]+)";
         delete context.literal;
     }
@@ -269,14 +316,15 @@ export class ResourcePathVisitor{
     protected VisitActionImportCall(node:Token){
         let part = {
             type: node.value.type,
-            name: node.value.value.name
+            name: node.value.value.name,
+            node
         };
         this.navigation.push(part);
         this.path += "/" + part.name;
     }
     
     protected VisitParameterAlias(node:Token, context:any){
-        context.literal = this.alias[node.value.name];
+        context.literal = (name => _ => this.alias[name])(node.value.name);
     }
     
     protected VisitLiteral(node:Token, context:any){

@@ -14,6 +14,7 @@ let products = require("./products").map((product) => {
 export class ProductsController extends ODataController{
     @odata.GET
     find(@odata.filter filter:ODataQuery){
+        console.dir(filter.value);
         if (filter) return products.filter(createFilter(filter));
         return products;
     }
