@@ -239,14 +239,14 @@ class ImagesController extends ODataController{
 
     @odata.GET("Data")
     @odata.GET("Data2").$value
-    getData(@odata.key _:number, @odata.context context:ODataHttpContext){
-        return new ODataStream(fs.createReadStream("tmp.png")).pipe(context.response);
+    getData(@odata.key _:number, @odata.context context:ODataHttpContext, @odata.result result: Image){
+        return new ODataStream(fs.createReadStream(result.Filename)).pipe(context.response);
     }
 
     @odata.POST("Data")
     @odata.POST("Data2").$value
-    postData(@odata.key _:number, @odata.body data:Readable){
-        return new ODataStream(fs.createWriteStream("tmp.png")).write(data);
+    postData(@odata.key _:number, @odata.body data:Readable, @odata.result result: Image){
+        return new ODataStream(fs.createWriteStream(result.Filename)).write(data);
     }
 }
 

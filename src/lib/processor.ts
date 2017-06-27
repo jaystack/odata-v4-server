@@ -685,7 +685,7 @@ export class ODataProcessor extends Transform{
                     if (prevPart.key) prevPart.key.forEach((key) => params[key.name] = key.value);
 
                     let fnDesc = fn;
-                    this.__applyParams(ctrl, fnDesc.call, params, this.url.query, this);
+                    this.__applyParams(ctrl, fnDesc.call, params, this.url.query, result);
 
                     fn = ctrl.prototype[fnDesc.call];
                     if (fnDesc.key.length == 1 && prevPart.key.length == 1 && fnDesc.key[0].to != prevPart.key[0].name){

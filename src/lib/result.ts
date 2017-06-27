@@ -45,16 +45,16 @@ export class ODataStream{
     }
 }
 
-export interface IODataResult{
+export interface IODataResult<T = {}>{
     "@odata.context"?:string
     "@odata.count"?:number
-    value?:any
+    value?:T[]
     [x: string]:any
 }
 
-export class ODataResult{
+export class ODataResult<T = {}>{
     statusCode:number
-    body:IODataResult
+    body:IODataResult<T> & T
     elementType:Function
     contentType:string
     stream?:any
