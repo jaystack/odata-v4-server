@@ -5,8 +5,10 @@ import * as extend from "extend";
 import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ObjectID } from "mongodb";
-import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata } from "../lib/index";
+import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
 import { Product, Category } from "../example/model";
+import { Readable } from "stream";
+import * as fs from "fs";
 let categories = require("../example/categories");
 let products = require("../example/products");
 
@@ -41,6 +43,19 @@ class Foobar{
     echoMany(@Edm.String message){
         return [message];
     }
+}
+
+class Image {
+    @Edm.Key
+    @Edm.Computed
+    @Edm.Int32
+    Id: number
+
+    @Edm.String
+    Filename: string
+
+    @Edm.Stream("image/png")
+    Data: ODataStream
 }
 
 @odata.type(Foobar)
@@ -155,6 +170,35 @@ class BoundOperationController extends ODataController{
     }
 }
 
+@odata.type(Image)
+class ImagesController extends ODataController {
+    @odata.GET
+    entitySet( @odata.query query: Token, @odata.context context: any, @odata.result result: any, @odata.stream stream: ODataProcessor) {
+        let image = new Image();
+        image.Id = 1;
+        image.Filename = "tmp.png";
+        return [image];
+    }
+
+    @odata.GET()
+    entity( @odata.key() key: number) {
+        let image = new Image();
+        image.Id = key;
+        image.Filename = "tmp.png";
+        return image;
+    }
+
+    @odata.GET("Data")
+    getData(@odata.key id:number, @odata.context context:ODataHttpContext){
+        return new ODataStream(fs.createReadStream("tmp.png")).pipe(context.response);
+    }
+
+    @odata.POST("Data")
+    postData( @odata.key id: number, @odata.body data: Readable) {
+        return new ODataStream(fs.createWriteStream("tmp.png")).write(data);
+    }
+}
+
 @odata.type(Product)
 @Edm.EntitySet("Products")
 class ProductsController extends ODataController{
@@ -241,6 +285,7 @@ class HiddenController extends ODataController{}
 @odata.controller(AsyncTestController, "AsyncEntitySet")
 @odata.controller(InlineCountController, "InlineCountEntitySet")
 @odata.controller(BoundOperationController, "BoundOperationEntitySet")
+@odata.controller(ImagesController, "ImagesControllerEntitySet")
 @odata.controller(ProductsController, true)
 @odata.controller(CategoriesController, true)
 @odata.controller(UsersController, true, User)
@@ -582,6 +627,40 @@ describe("ODataServer", () => {
                 value: "The number is 42 and your message was hello world."
             },
             elementType: "Edm.String",
+            contentType: "application/json"
+        });
+
+        createTest("should return stream property entity set result", TestServer, "GET /ImagesControllerEntitySet", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet",
+                value: [
+                    {
+                        "@odata.id": "http://localhost/ImagesControllerEntitySet(1)",
+                        "Id": 1,
+                        "Filename": "tmp.png",
+                        "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                        "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                        "Data@odata.mediaContentType": "image/png"
+                    }
+                ]
+            },
+            elementType: Image,
+            contentType: "application/json"
+        });
+
+        createTest("should return stream property entity result", TestServer, "GET /ImagesControllerEntitySet(1)", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet/$entity",
+                "@odata.id": "http://localhost/ImagesControllerEntitySet(1)",
+                "Id": 1,
+                "Filename": "tmp.png",
+                "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                "Data@odata.mediaContentType": "image/png"
+            },
+            elementType: Image,
             contentType: "application/json"
         });
 
