@@ -52,7 +52,8 @@
     "odata-v4-service-document": "0.0.3",
     "odata-v4-service-metadata": "^0.1.5",
     "qs": "^6.3.0",
-    "reflect-metadata": "^0.1.8"
+    "reflect-metadata": "^0.1.8",
+    "stream-buffers": "^3.0.1"
   },
   "devDependencies": {
     "@types/benchmark": "^1.0.30",

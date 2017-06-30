@@ -7,10 +7,11 @@ import { createFilter } from "odata-v4-inmemory";
 import { ObjectID } from "mongodb";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { Readable } from "stream";
+import { Readable, PassThrough } from "stream";
 import * as fs from "fs";
 let categories = require("../example/categories");
 let products = require("../example/products");
+let streamBuffers = require("stream-buffers");
 
 class Foobar{
     @Edm.Key
@@ -56,6 +57,20 @@ class Image {
 
     @Edm.Stream("image/png")
     Data: ODataStream
+}
+
+@Edm.MediaEntity("audio/mp3")
+class Music extends PassThrough{
+    @Edm.Key
+    @Edm.Computed
+    @Edm.Int32
+    Id:number
+
+    @Edm.String
+    Artist:string
+
+    @Edm.String
+    Title:string
 }
 
 @odata.type(Foobar)
@@ -170,6 +185,8 @@ class BoundOperationController extends ODataController{
     }
 }
 
+let globalWritableImgStrBuffer = new streamBuffers.WritableStreamBuffer();
+let globalReadableImgStrBuffer = new streamBuffers.ReadableStreamBuffer();
 @odata.type(Image)
 class ImagesController extends ODataController {
     @odata.GET
@@ -189,13 +206,48 @@ class ImagesController extends ODataController {
     }
 
     @odata.GET("Data")
-    getData(@odata.key id:number, @odata.context context:ODataHttpContext){
-        return new ODataStream(fs.createReadStream("tmp.png")).pipe(context.response);
+    getData( @odata.key id: number, @odata.context context: ODataHttpContext) {
+        globalReadableImgStrBuffer.put(globalWritableImgStrBuffer.getContents());
+        return globalReadableImgStrBuffer.pipe(context.response);
     }
 
     @odata.POST("Data")
-    postData( @odata.key id: number, @odata.body data: Readable) {
-        return new ODataStream(fs.createWriteStream("tmp.png")).write(data);
+    postData( @odata.key id: number, @odata.body data: any) {
+        return data.pipe(globalWritableImgStrBuffer);
+    }
+}
+
+let globalWritableMediaStrBuffer = new streamBuffers.WritableStreamBuffer();
+let globalReadableMediaStrBuffer = new streamBuffers.ReadableStreamBuffer();
+@odata.type(Music)
+class MusicController extends ODataController {
+    @odata.GET
+    findAll( @odata.context context: ODataHttpContext) {
+        let music = new Music();
+        music.Id = 1;
+        music.Artist = "Dream Theater";
+        music.Title = "Six degrees of inner turbulence";
+        return [music];
+    }
+
+    @odata.GET
+    findOne( @odata.key() key: number, @odata.context context: ODataHttpContext) {
+        let music = new Music();
+        music.Id = 1;
+        music.Artist = "Dream Theater";
+        music.Title = "Six degrees of inner turbulence";
+        return music;
+    }
+
+    @odata.GET.$value
+    mp3( @odata.key key: number, @odata.context context: ODataHttpContext) {
+        globalReadableMediaStrBuffer.put(globalWritableMediaStrBuffer.getContents());
+        return globalReadableMediaStrBuffer.pipe(context.response);
+    }
+
+    @odata.POST.$value
+    post( @odata.key key: number, @odata.body upload: Readable) {
+        return upload.pipe(globalWritableMediaStrBuffer);
     }
 }
 
@@ -286,6 +338,7 @@ class HiddenController extends ODataController{}
 @odata.controller(InlineCountController, "InlineCountEntitySet")
 @odata.controller(BoundOperationController, "BoundOperationEntitySet")
 @odata.controller(ImagesController, "ImagesControllerEntitySet")
+@odata.controller(MusicController, "MusicControllerEntitySet")
 @odata.controller(ProductsController, true)
 @odata.controller(CategoriesController, true)
 @odata.controller(UsersController, true, User)
@@ -649,7 +702,7 @@ describe("ODataServer", () => {
             contentType: "application/json"
         });
 
-        createTest("should return stream property entity result", TestServer, "GET /ImagesControllerEntitySet(1)", {
+        createTest("should return stream property entity by key", TestServer, "GET /ImagesControllerEntitySet(1)", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet/$entity",
@@ -660,7 +713,43 @@ describe("ODataServer", () => {
                 "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
                 "Data@odata.mediaContentType": "image/png"
             },
-            elementType: Image,
+            elementType: Music,
+            contentType: "application/json"
+        });
+
+        createTest("should return media entity set result", TestServer, "GET /MusicControllerEntitySet", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#MusicControllerEntitySet",
+                value: [
+                    {
+                        "@odata.id": "http://localhost/MusicControllerEntitySet(1)",
+                        "Id": 1,
+                        "@odata.mediaContentType": "audio/mp3",
+                        "@odata.mediaEditLink": "http://localhost/MusicControllerEntitySet(1)/$value",
+                        "@odata.mediaReadLink": "http://localhost/MusicControllerEntitySet(1)/$value",
+                        "Artist": "Dream Theater",
+                        "Title": "Six degrees of inner turbulence"
+                    }
+                ]
+            },
+            elementType: Music,
+            contentType: "application/json"
+        });
+
+        createTest("should return media entity by key", TestServer, "GET /MusicControllerEntitySet(1)", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#MusicControllerEntitySet/$entity",
+                "@odata.id": "http://localhost/MusicControllerEntitySet(1)",
+                "Id": 1,
+                "@odata.mediaContentType": "audio/mp3",
+                "@odata.mediaEditLink": "http://localhost/MusicControllerEntitySet(1)/$value",
+                "@odata.mediaReadLink": "http://localhost/MusicControllerEntitySet(1)/$value",
+                "Artist": "Dream Theater",
+                "Title": "Six degrees of inner turbulence"
+            },
+            elementType: Music,
             contentType: "application/json"
         });
 
@@ -735,6 +824,24 @@ describe("ODataServer", () => {
     describe("Code coverage", () => {
         it("should return empty object when no public controllers on server", () => {
             expect(odata.getPublicControllers(NoServer)).to.deep.equal({});
+        });
+
+        it("stream property POST", () => {
+            let readableStrBuffer = new streamBuffers.ReadableStreamBuffer();
+            readableStrBuffer.put('tmp.png');
+            return TestServer.execute("/ImagesControllerEntitySet(1)/Data", "POST", readableStrBuffer).then((result) => {
+                console.log('result', result);
+                expect(result).to.deep.equal('tmp.png');
+            });
+        });
+
+        it("media entity POST", () => {
+            let readableStrBuffer = new streamBuffers.ReadableStreamBuffer();
+            readableStrBuffer.put('tmp.mp3');
+            return TestServer.execute("/MusicControllerEntitySet(1)/$value", "POST", readableStrBuffer).then((result) => {
+                console.log('result', result);
+                expect(result).to.deep.equal('tmp.mp3');
+            });
         });
 
         it("should not allow non-OData methods", () => {
