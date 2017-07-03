@@ -22,12 +22,16 @@
   },
   "watch": {
     "tsc": {
-      "patterns": ["src"],
+      "patterns": [
+        "src"
+      ],
       "extensions": "ts",
       "quiet": false
     },
     "es6": {
-      "patterns": ["src"],
+      "patterns": [
+        "src"
+      ],
       "extensions": "js",
       "quiet": false
     }
@@ -94,6 +98,7 @@
     "typedoc": "^0.5.10",
     "typedoc-default-themes": "^0.4.0",
     "typedoc-plugin-external-module-name": "^1.0.5",
-    "typescript": "^2.2.1"
+    "typescript": "^2.2.1",
+    "xml-beautifier": "^0.3.0"
   }
 }
