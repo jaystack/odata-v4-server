@@ -1133,7 +1133,13 @@ export class ODataProcessor extends Transform{
                             }
                             let contentType = Edm.getContentType(elementType);
                             if (contentType) context["@odata.mediaContentType"] = contentType;
-                            if (typeof result == "object") result.stream = body;
+                            if (typeof result == "object"){
+                                Object.defineProperty(result, "stream", {
+                                    enumerable: false,
+                                    writable: false,
+                                    value: body
+                                });
+                            }
                         }
                         if (odata.findODataMethod(ctrl, "put", keys) ||
                             odata.findODataMethod(ctrl, "patch", keys)){
@@ -1304,7 +1310,11 @@ export class ODataProcessor extends Transform{
                             let contentType = Edm.getContentType(elementType.prototype, prop) || (propValue && propValue.contentType);
                             if (contentType) context[`${prop}@odata.mediaContentType`] = contentType;
                         }
-                        context[prop] = new StreamWrapper(propValue);
+                        Object.defineProperty(context, prop, {
+                            enumerable: false,
+                            writable: false,
+                            value: new StreamWrapper(propValue)
+                        });
                     }else if (typeof propValue != "undefined") context[prop] = propValue;
                 }
             })(prop)));

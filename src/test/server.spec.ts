@@ -691,76 +691,6 @@ describe("ODataServer", () => {
             contentType: "application/json"
         });
 
-        createTest("should return stream property entity set result", TestServer, "GET /ImagesControllerEntitySet", {
-            statusCode: 200,
-            body: {
-                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet",
-                value: [
-                    {
-                        "@odata.id": "http://localhost/ImagesControllerEntitySet(1)",
-                        "Id": 1,
-                        "Filename": "tmp.png",
-                        "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
-                        "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
-                        "Data@odata.mediaContentType": "image/png"
-                    }
-                ]
-            },
-            elementType: Image,
-            contentType: "application/json"
-        });
-
-        createTest("should return stream property entity by key", TestServer, "GET /ImagesControllerEntitySet(1)", {
-            statusCode: 200,
-            body: {
-                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet/$entity",
-                "@odata.id": "http://localhost/ImagesControllerEntitySet(1)",
-                "Id": 1,
-                "Filename": "tmp.png",
-                "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
-                "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
-                "Data@odata.mediaContentType": "image/png"
-            },
-            elementType: Music,
-            contentType: "application/json"
-        });
-
-        createTest("should return media entity set result", TestServer, "GET /MusicControllerEntitySet", {
-            statusCode: 200,
-            body: {
-                "@odata.context": "http://localhost/$metadata#MusicControllerEntitySet",
-                value: [
-                    {
-                        "@odata.id": "http://localhost/MusicControllerEntitySet(1)",
-                        "Id": 1,
-                        "@odata.mediaContentType": "audio/mp3",
-                        "@odata.mediaEditLink": "http://localhost/MusicControllerEntitySet(1)/$value",
-                        "@odata.mediaReadLink": "http://localhost/MusicControllerEntitySet(1)/$value",
-                        "Artist": "Dream Theater",
-                        "Title": "Six degrees of inner turbulence"
-                    }
-                ]
-            },
-            elementType: Music,
-            contentType: "application/json"
-        });
-
-        createTest("should return media entity by key", TestServer, "GET /MusicControllerEntitySet(1)", {
-            statusCode: 200,
-            body: {
-                "@odata.context": "http://localhost/$metadata#MusicControllerEntitySet/$entity",
-                "@odata.id": "http://localhost/MusicControllerEntitySet(1)",
-                "Id": 1,
-                "@odata.mediaContentType": "audio/mp3",
-                "@odata.mediaEditLink": "http://localhost/MusicControllerEntitySet(1)/$value",
-                "@odata.mediaReadLink": "http://localhost/MusicControllerEntitySet(1)/$value",
-                "Artist": "Dream Theater",
-                "Title": "Six degrees of inner turbulence"
-            },
-            elementType: Music,
-            contentType: "application/json"
-        });
-
         createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products", {
             statusCode: 200,
             body: {
@@ -829,27 +759,103 @@ describe("ODataServer", () => {
         });
     });
 
-    describe("Code coverage", () => {
-        it("should return empty object when no public controllers on server", () => {
-            expect(odata.getPublicControllers(NoServer)).to.deep.equal({});
+    describe("Stream properties", () => {
+        createTest("should return stream property entity set result", TestServer, "GET /ImagesControllerEntitySet", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet",
+                value: [
+                    {
+                        "@odata.id": "http://localhost/ImagesControllerEntitySet(1)",
+                        "Id": 1,
+                        "Filename": "tmp.png",
+                        "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                        "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                        "Data@odata.mediaContentType": "image/png"
+                    }
+                ]
+            },
+            elementType: Image,
+            contentType: "application/json"
+        });
+
+        createTest("should return stream property entity by key", TestServer, "GET /ImagesControllerEntitySet(1)", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet/$entity",
+                "@odata.id": "http://localhost/ImagesControllerEntitySet(1)",
+                "Id": 1,
+                "Filename": "tmp.png",
+                "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                "Data@odata.mediaContentType": "image/png"
+            },
+            elementType: Image,
+            contentType: "application/json"
         });
 
         it("stream property POST", () => {
             let readableStrBuffer = new streamBuffers.ReadableStreamBuffer();
             readableStrBuffer.put('tmp.png');
             return TestServer.execute("/ImagesControllerEntitySet(1)/Data", "POST", readableStrBuffer).then((result) => {
-                console.log('result', result);
-                expect(result).to.deep.equal('tmp.png');
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
             });
+        });
+    });
+
+    describe("Media entity", () => {
+        createTest("should return media entity set result", TestServer, "GET /MusicControllerEntitySet", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#MusicControllerEntitySet",
+                value: [
+                    {
+                        "@odata.id": "http://localhost/MusicControllerEntitySet(1)",
+                        "Id": 1,
+                        "@odata.mediaContentType": "audio/mp3",
+                        "@odata.mediaEditLink": "http://localhost/MusicControllerEntitySet(1)/$value",
+                        "@odata.mediaReadLink": "http://localhost/MusicControllerEntitySet(1)/$value",
+                        "Artist": "Dream Theater",
+                        "Title": "Six degrees of inner turbulence"
+                    }
+                ]
+            },
+            elementType: Music,
+            contentType: "application/json"
+        });
+
+        createTest("should return media entity by key", TestServer, "GET /MusicControllerEntitySet(1)", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#MusicControllerEntitySet/$entity",
+                "@odata.id": "http://localhost/MusicControllerEntitySet(1)",
+                "Id": 1,
+                "@odata.mediaContentType": "audio/mp3",
+                "@odata.mediaEditLink": "http://localhost/MusicControllerEntitySet(1)/$value",
+                "@odata.mediaReadLink": "http://localhost/MusicControllerEntitySet(1)/$value",
+                "Artist": "Dream Theater",
+                "Title": "Six degrees of inner turbulence"
+            },
+            elementType: Music,
+            contentType: "application/json"
         });
 
         it("media entity POST", () => {
             let readableStrBuffer = new streamBuffers.ReadableStreamBuffer();
             readableStrBuffer.put('tmp.mp3');
             return TestServer.execute("/MusicControllerEntitySet(1)/$value", "POST", readableStrBuffer).then((result) => {
-                console.log('result', result);
-                expect(result).to.deep.equal('tmp.mp3');
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
             });
+        });
+    });
+
+    describe("Code coverage", () => {
+        it("should return empty object when no public controllers on server", () => {
+            expect(odata.getPublicControllers(NoServer)).to.deep.equal({});
         });
 
         it("should not allow non-OData methods", () => {
