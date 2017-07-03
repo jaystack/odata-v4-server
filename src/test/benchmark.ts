@@ -9,7 +9,7 @@ let suite = new Benchmark.Suite();
 class InMemoryController extends ODataController{
     @odata.GET
     find(@odata.filter filter:ODataQuery){
-        let filterFn = inmemory(filter);
+        inmemory(filter);
         return data;
     }
 }
@@ -17,7 +17,7 @@ class InMemoryController extends ODataController{
 class MongoDBController extends ODataController{
     @odata.GET
     find(@odata.filter filter:ODataQuery){
-        let query = mongodb(filter);
+        mongodb(filter);
         return data;
     }
 }

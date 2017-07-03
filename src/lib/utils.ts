@@ -28,7 +28,7 @@ export function isStream(stream){
 }
 
 export interface PropertyDecorator<T>{
-    (target?:any, targetKey?:string): T
+    (target?:any, targetKey?:string): T;
 }
 export interface Decorator{
     (target?:any, targetKey?:string, parameterIndex?:number | TypedPropertyDescriptor<any>): any

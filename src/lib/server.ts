@@ -9,9 +9,11 @@ import { Transform, TransformOptions } from "stream";
 import { ODataResult } from "./result";
 import { ODataController } from "./controller";
 import * as odata from "./odata";
+import { ODataBase } from "./odata";
 import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions, ODataMetadataType } from "./processor";
 import { HttpRequestError, UnsupportedMediaTypeError } from "./error";
+import { ContainerBase } from "./edm";
 
 /** HTTP context interface when using the server HTTP request handler */
 export interface ODataHttpContext{
@@ -67,10 +69,10 @@ function ensureODataHeaders(req, res, next?){
 }
 
 /** ODataServer base class to be extended by concrete OData Server data sources */
-export class ODataServer extends Transform{
+export class ODataServerBase extends Transform{
     private static _metadataCache:any
     static namespace:string
-    static containerName:string
+    static container = new ContainerBase();
     private serverType:typeof ODataServer
 
     static requestHandler(){
@@ -164,7 +166,7 @@ export class ODataServer extends Transform{
         this.serverType = Object.getPrototypeOf(this).constructor;
     }
 
-    _transform(chunk:any, encoding?:string, done?:Function){
+    _transform(chunk:any, _?:string, done?:Function){
         if ((chunk instanceof Buffer) || typeof chunk == "string"){
             try{
                 chunk = JSON.parse(chunk.toString());
@@ -228,7 +230,7 @@ export class ODataServer extends Transform{
     static create(path?:string | RegExp | number, port?:number | string, hostname?:string):void | express.Router{
         let server = this;
         let router = express.Router();
-        router.use((req, res, next) => {
+        router.use((req, _, next) => {
             req.url = req.url.replace(/[\/]+/g, "/").replace(":/", "://");
             if (req.headers["odata-maxversion"] && req.headers["odata-maxversion"] < "4.0") return next(new HttpRequestError(500, "Only OData version 4.0 supported"));
             next();
@@ -245,7 +247,7 @@ export class ODataServer extends Transform{
                 next(new UnsupportedMediaTypeError());
             }else next();
         });
-        router.get("/", ensureODataHeaders, (req, res, next) => {
+        router.get("/", ensureODataHeaders, (req, _, next) => {
             if (typeof req.query == "object" && Object.keys(req.query).length > 0) return next(new HttpRequestError(500, "Unsupported query"));
             next();
         }, server.document().requestHandler());
@@ -268,10 +270,11 @@ export class ODataServer extends Transform{
         return router;
     }
 }
+export class ODataServer extends ODataBase<ODataServerBase, typeof ODataServerBase>(ODataServerBase){}
 
 /** ?????????? */
 /** Create Express middleware for OData error handling */
-export function ODataErrorHandler(err, req, res, next){
+export function ODataErrorHandler(err, _, res, next){
     if (err){
         if (res.headersSent) {
             return next(err);

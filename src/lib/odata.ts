@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { ODataServer } from "./server";
 import { ODataController } from "./controller";
+import * as Edm from "./edm";
 import { getFunctionParameters, getAllPropertyNames, PropertyDecorator } from "./utils";
 
 export class ODataMethodType {
@@ -29,7 +30,7 @@ const ODataTypeParameter: string = "odata:typeparameter";
  */
 export function type(elementType: Function);
 export function type(target:Function, targetKey:string, parameterIndex:number);
-export function type(elementType: Function, targetKey?, parameterIndex?) {
+export function type(elementType: Function, targetKey?, parameterIndex?):Function | void {
     if (typeof parameterIndex == "number"){
         let target = elementType;
         let parameterNames = getFunctionParameters(target, targetKey);
@@ -56,8 +57,9 @@ export function namespace(namespace: string) {
  * @param name  Name of the container
  */
 export function container(name: string) {
-    return function (server: typeof ODataServer) {
-        server.containerName = name;
+    return function (target: any, targetKey?: string) {
+        if (targetKey) target[targetKey].containerName = name;
+        else target.containerName = name;
     };
 }
 
@@ -98,6 +100,7 @@ export function controller(controller: typeof ODataController, entitySetName?: s
         if (!controller.prototype.elementType) {
             controller.prototype.elementType = Object;
         }
+        Edm.EntityType(controller.prototype.elementType)(server.prototype, (<any>controller).name);
     };
 }
 /** Gives the public controllers of the given server
@@ -147,7 +150,7 @@ function odataMethodFactory(type: string, navigationProperty?: string):ODataMeth
     return <ODataMethodDecorator>fn;
 }
 
-export interface ExpressionDecorator extends PropertyDecorator<ExpressionDecorator>{
+export interface ExpressionDecorator extends PropertyDecorator<ExpressionDecorator>, TypedPropertyDescriptor<any>{
     /** Annotate function for $value handler */
     $value:PropertyDecorator<void>
     /** Annotate function for $count handler */
@@ -431,6 +434,8 @@ export function findODataMethod(target, method, keys) {
             };
         }
     }
+
+    return null;
 }
 
 /** Provides access to all OData query options.
@@ -612,3 +617,55 @@ export function parameters(parameters: any) {
         }
     }
 }
+
+export interface IODataBase<T, C>{
+    new(...args: any[]): T;
+    define?(...decorators:Array<Function | Object>): IODataBase<T, C> & C;
+}
+export function ODataBase<T, C>(Base: C): IODataBase<T, C> & C{
+    class ODataBaseClass extends (<any>Base) {
+        /** Define class, properties and parameters with decorators */
+        static define(...decorators:Array<Function | Object>): IODataBase<T, C> & C{
+            decorators.forEach(decorator => {
+                if (typeof decorator == 'function'){
+                    decorator(this);
+                }else if (typeof decorator == 'object'){
+                    let props = Object.keys(decorator);
+                    props.forEach(prop => {
+                        let propDecorators = decorator[prop];
+                        if (!Array.isArray(propDecorators)) propDecorators = [propDecorators];
+                        propDecorators.forEach(propDecorator => {
+                            if (typeof propDecorator == 'function'){
+                                propDecorator(this.prototype, prop);
+                            }else if (typeof propDecorator == 'object'){
+                                let params = Object.keys(propDecorator);
+                                let parameterNames = getFunctionParameters(this.prototype[prop]);
+                                params.forEach(param => {
+                                    let paramDecorators = propDecorator[param];
+                                    if (!Array.isArray(paramDecorators)) paramDecorators = [paramDecorators];
+                                    paramDecorators.forEach(paramDecorator => {
+                                        if (typeof paramDecorator == 'function'){
+                                            paramDecorator(this.prototype, prop, parameterNames.indexOf(param));
+                                        }else{
+                                            console.log('Unsupported parameter decorator on', this.name || this, prop, param, paramDecorator);
+                                        }
+                                    });
+                                });
+                            }else{
+                                console.log('Unsupported member decorator on', this.name || this, prop, propDecorator);
+                            }
+                        });
+                    });
+                }else{
+                    console.log('Unsupported decorator on', this.name || this, decorator);
+                }
+            });
+
+            return <any>this;
+        }
+    }
+    return <IODataBase<T, C> & C>ODataBaseClass;
+}
+
+export class ODataEntityBase{}
+export class ODataEntity extends ODataBase<ODataEntityBase, typeof ODataEntityBase>(ODataEntityBase){}

@@ -1,4 +1,3 @@
-import * as JSONStream from "JSONStream";
 import * as es from "event-stream";
 import { ODataServer, ODataController, odata } from "../lib/index";
 

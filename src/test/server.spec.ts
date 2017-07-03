@@ -1,14 +1,11 @@
 /// <reference types="mocha" />
 let expect = require("chai").expect;
-import * as assert from "assert";
 import * as extend from "extend";
 import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
-import { ObjectID } from "mongodb";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
 import { Product, Category } from "../example/model";
 import { Readable, PassThrough } from "stream";
-import * as fs from "fs";
 let categories = require("../example/categories");
 let products = require("../example/products");
 let streamBuffers = require("stream-buffers");
@@ -76,7 +73,7 @@ class Music extends PassThrough{
 @odata.type(Foobar)
 class SyncTestController extends ODataController{
     @odata.GET
-    entitySet(@odata.query query:Token, @odata.context context:any, @odata.result result:any, @odata.stream stream:ODataProcessor){
+    entitySet(/*@odata.query query:Token, @odata.context context:any, @odata.result result:any, @odata.stream stream:ODataProcessor*/){
         return [{ id: 1,  a: 1 }];
     }
 
@@ -119,28 +116,40 @@ class AsyncTestController extends ODataController{
     @odata.GET
     entitySet(){
         return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve([{ id: 1, a: 1 }]);
-            });
+            try{
+                setTimeout(() => {
+                    resolve([{ id: 1, a: 1 }]);
+                });
+            }catch(err){
+                reject(err);
+            }
         });
     }
 
     @odata.GET
     entity(@odata.key key:number){
         return ODataResult.Ok(new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve({ id: key });
-            });
+            try{
+                setTimeout(() => {
+                    resolve({ id: key });
+                });
+            }catch(err){
+                reject(err);
+            }
         }));
     }
 
     @odata.POST
     insert(@odata.body body:any){
         return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                body.id = 1;
-                resolve(body);
-            });
+            try{
+                setTimeout(() => {
+                    body.id = 1;
+                    resolve(body);
+                });
+            }catch(err){
+                reject(err);
+            }
         });
     }
 }
@@ -166,7 +175,7 @@ class BoundOperationController extends ODataController{
 
     @Edm.Function(Edm.String)
     Function(@Edm.Int16 value:number){
-        return "foobar";
+        return `foobar:${value}`;
     }
 
     @Edm.Function(Edm.String)
@@ -190,7 +199,7 @@ let globalReadableImgStrBuffer = new streamBuffers.ReadableStreamBuffer();
 @odata.type(Image)
 class ImagesController extends ODataController {
     @odata.GET
-    entitySet( @odata.query query: Token, @odata.context context: any, @odata.result result: any, @odata.stream stream: ODataProcessor) {
+    entitySet( @odata.query _: Token, @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
         let image = new Image();
         image.Id = 1;
         image.Filename = "tmp.png";
@@ -206,13 +215,13 @@ class ImagesController extends ODataController {
     }
 
     @odata.GET("Data")
-    getData( @odata.key id: number, @odata.context context: ODataHttpContext) {
+    getData( @odata.key _: number, @odata.context context: ODataHttpContext) {
         globalReadableImgStrBuffer.put(globalWritableImgStrBuffer.getContents());
         return globalReadableImgStrBuffer.pipe(context.response);
     }
 
     @odata.POST("Data")
-    postData( @odata.key id: number, @odata.body data: any) {
+    postData( @odata.key _: number, @odata.body data: any) {
         return data.pipe(globalWritableImgStrBuffer);
     }
 }
@@ -222,7 +231,7 @@ let globalReadableMediaStrBuffer = new streamBuffers.ReadableStreamBuffer();
 @odata.type(Music)
 class MusicController extends ODataController {
     @odata.GET
-    findAll( @odata.context context: ODataHttpContext) {
+    findAll( @odata.context _: ODataHttpContext) {
         let music = new Music();
         music.Id = 1;
         music.Artist = "Dream Theater";
@@ -231,7 +240,7 @@ class MusicController extends ODataController {
     }
 
     @odata.GET
-    findOne( @odata.key() key: number, @odata.context context: ODataHttpContext) {
+    findOne( @odata.key() _: number, @odata.context __: ODataHttpContext) {
         let music = new Music();
         music.Id = 1;
         music.Artist = "Dream Theater";
@@ -240,13 +249,13 @@ class MusicController extends ODataController {
     }
 
     @odata.GET.$value
-    mp3( @odata.key key: number, @odata.context context: ODataHttpContext) {
+    mp3( @odata.key _: number, @odata.context context: ODataHttpContext) {
         globalReadableMediaStrBuffer.put(globalWritableMediaStrBuffer.getContents());
         return globalReadableMediaStrBuffer.pipe(context.response);
     }
 
     @odata.POST.$value
-    post( @odata.key key: number, @odata.body upload: Readable) {
+    post( @odata.key _: number, @odata.body upload: Readable) {
         return upload.pipe(globalWritableMediaStrBuffer);
     }
 }
@@ -278,10 +287,9 @@ class CategoriesController extends ODataController{
 
     @odata.GET
     @odata.parameters({
-        key: odata.key,
-        result: odata.result
+        key: odata.key
     })
-    findOne(key:string, result:any):Category{
+    findOne(key:string):Category{
         return categories.filter(category => category._id.toString() == key)[0] || null;
     }
 }
@@ -321,7 +329,7 @@ class UsersController extends ODataController{
 
     @odata.GET
     findOne(@odata.key key:number){
-        return new User(1, new Location("Budapest", "Virág utca"));
+        return new User(key, new Location("Budapest", "Virág utca"));
     }
 
     @odata.namespace("Session")
@@ -507,7 +515,7 @@ describe("ODataServer", () => {
                 "@odata.context": "http://localhost/$metadata#EntitySet(1)/foo",
                 value: "bar"
             },
-            elementType: Foobar,
+            elementType: "Edm.String",
             contentType: "application/json"
         });
 
@@ -607,7 +615,7 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Edm.String",
-                value: "foobar"
+                value: "foobar:42"
             },
             elementType: "Edm.String",
             contentType: "application/json"
@@ -647,7 +655,7 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Edm.String",
-                value: "foobar"
+                value: "foobar:42"
             },
             elementType: "Edm.String",
             contentType: "application/json"

@@ -1,4 +1,3 @@
-import * as extend from "extend";
 import { Readable, Writable } from "stream";
 
 export class ODataStream{
@@ -18,7 +17,7 @@ export class ODataStream{
         this.contentType = this.contentType || "application/octet-stream";
     }
 
-    pipe(destination:Writable):Promise<Readable>{
+    pipe(destination:Writable):Promise<Readable | ODataStream>{
         return new Promise((resolve, reject) => {
             this.stream.on("open", () => {
                 if (typeof this.stream.close == "function"){
@@ -31,7 +30,7 @@ export class ODataStream{
         });
     }
 
-    write(source:Readable):Promise<Writable>{
+    write(source:Readable):Promise<Writable | ODataStream>{
         return new Promise((resolve, reject) => {
             this.stream.on("open", () => {
                 if (typeof this.stream.close == "function"){
@@ -46,18 +45,19 @@ export class ODataStream{
     }
 }
 
-export interface IODataResult{
+export interface IODataResult<T = {}>{
     "@odata.context"?:string
     "@odata.count"?:number
-    value?:any
+    value?:T[]
     [x: string]:any
 }
 
-export class ODataResult{
+export class ODataResult<T = {}>{
     statusCode:number
-    body:IODataResult
+    body:IODataResult<T> & T
     elementType:Function
     contentType:string
+    stream?:any
 
     constructor(statusCode:number, contentType?:string, result?:any){
         this.statusCode = statusCode;
@@ -74,9 +74,7 @@ export class ODataResult{
                 return new ODataResult(201, contentType, result);
             });
         }else{
-            return new Promise((resolve, reject) => {
-                resolve(new ODataResult(201, contentType, result));
-            });
+            return Promise.resolve(new ODataResult(201, contentType, result));
         }
     }
 
@@ -99,33 +97,27 @@ export class ODataResult{
                 return new ODataResult(200, contentType, result);
             });
         }else{
-            return new Promise((resolve, reject) => {
-                if (result && Array.isArray(result)){
-                    if (result && (<any>result).inlinecount && typeof (<any>result).inlinecount == "number"){
-                        inlinecount = (<any>result).inlinecount;
-                        delete (<any>result).inlinecount;
-                    }
-                    result = { value: result };
-                    if (typeof inlinecount == "number") result["@odata.count"] = inlinecount;
-                }else{
-                    if (typeof result == "object" && result && typeof inlinecount == "number"){
-                        result["@odata.count"] = inlinecount;
-                    }
+            if (result && Array.isArray(result)){
+                if (result && (<any>result).inlinecount && typeof (<any>result).inlinecount == "number"){
+                    inlinecount = (<any>result).inlinecount;
+                    delete (<any>result).inlinecount;
                 }
-                resolve(new ODataResult(200, contentType, result));
-            });
+                result = { value: result };
+                if (typeof inlinecount == "number") result["@odata.count"] = inlinecount;
+            }else{
+                if (typeof result == "object" && result && typeof inlinecount == "number"){
+                    result["@odata.count"] = inlinecount;
+                }
+            }
+            return Promise.resolve(new ODataResult(200, contentType, result));
         }
     };
 
     static NoContent = function NoContent(result?:any, contentType?:string):Promise<ODataResult>{
         if (result && typeof result.then == 'function'){
-            return result.then((result) => {
-                return new ODataResult(204, contentType);
-            });
+            return result.then(_ => new ODataResult(204, contentType));
         }else{
-            return new Promise((resolve, reject) => {
-                resolve(new ODataResult(204, contentType));
-            });
+            return Promise.resolve(new ODataResult(204, contentType));
         }
     }
 }

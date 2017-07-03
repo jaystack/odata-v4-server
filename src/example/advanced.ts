@@ -1,7 +1,6 @@
-import { MongoClient, ObjectID, Collection, Db } from "mongodb";
-import { createFilter, createQuery } from "odata-v4-mongodb";
-import * as extend from "extend";
-import { Edm, odata, ODataController, ODataServer, ODataQuery, ODataErrorHandler, ResourceNotFoundError, createODataServer } from "../lib/index";
+import { MongoClient, ObjectID, Db } from "mongodb";
+import { createQuery } from "odata-v4-mongodb";
+import { Edm, odata, ODataController, ODataServer, ODataQuery, createODataServer } from "../lib/index";
 import { Category, Product } from "./model";
 import { Writable } from "stream";
 let categories = require("./categories");
@@ -69,7 +68,7 @@ export class NorthwindODataServer extends ODataServer{
     @Edm.EntityType(Category)
     @Edm.FunctionImport
     *GetCategoryById(@Edm.String id:string){
-        return yield categories.filter((category) => category._id.toString() == id)[0];
+        return yield categories.filter((category: any) => category._id.toString() == id)[0];
     }
 
     @Edm.ActionImport

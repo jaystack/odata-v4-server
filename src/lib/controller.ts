@@ -1,9 +1,11 @@
 import * as odata from "./odata";
+import { ODataBase } from "./odata";
 import { getFunctionParameters } from "./utils";
 
-export class ODataController{
+export class ODataControllerBase{
     entitySetName:string
     elementType:Function
+    static containerName:string
 
     static on(method:string, fn:Function | string, ...keys:string[]){
         let fnName = <string>((<any>fn).name || fn);
@@ -28,3 +30,4 @@ export class ODataController{
         odata.filter(this.prototype, fnName, parameterNames.indexOf(param || parameterNames[0]));
     }
 }
+export class ODataController extends ODataBase<ODataControllerBase, typeof ODataControllerBase>(ODataControllerBase){}

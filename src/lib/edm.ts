@@ -1,6 +1,8 @@
 /** ?????????? */ // TODO: check & replace this pattern
 import "reflect-metadata";
+import * as util from "util";
 import { ODataController } from "./controller";
+import { ODataServer } from "./server";
 import { getFunctionParameters, Decorator } from "./utils";
 
 const EdmProperties:string = "edm:properties";
@@ -14,6 +16,9 @@ const EdmType:string = "edm:type";
 const EdmElementType:string = "edm:elementtype";
 const EdmComplexType:string = "edm:complextype";
 const EdmEntityType:string = "edm:entitytype";
+const EdmEnumType:string = "edm:enumtype";
+const EdmTypeDefinition:string = "edm:typedefinition";
+const EdmFlags:string = "edm:flags";
 const EdmOperations:string = "edm:operations";
 const EdmAction:string = "edm:action";
 const EdmFunction:string = "edm:function";
@@ -21,6 +26,10 @@ const EdmReturnType:string = "edm:returntype";
 const EdmParameters:string = "edm:parameters";
 const EdmAnnotations:string = "edm:annotations";
 const EdmConverter:string = "edm:converter";
+const EdmSerializer:string = "edm:serializer";
+const EdmDeserializer:string = "edm:deserializer";
+const EdmURLSerializer:string = "edm:urlserializer";
+const EdmURLDeserializer:string = "edm:urldeserializer";
 const EdmMediaEntity:string = "edm:mediaentity";
 const EdmOpenType:string = "emd:opentype";
 const EdmChildren:string = "edm:children";
@@ -71,7 +80,7 @@ function typeDecoratorFactory(type:string):any{
         }
     };
 
-    return function(...args:any[]){
+    return function(this:any, ...args:any[]){
         if (arguments.length == 0) return decorator;
         else return decorator.apply(this, args);
     };
@@ -107,7 +116,7 @@ export const Single = typeDecoratorFactory("Edm.Single");
 /** Edm.Stream primitive type property decorator */
 export function Stream(contentType?:string);
 export function Stream(target?:any, targetKey?:string);
-export function Stream(target?:any, targetKey?:string){
+export function Stream(this:any, target?:any){
     if (typeof target == "string"){
         const contentType = target;
         return function(target, targetKey){
@@ -234,17 +243,27 @@ export function Collection(elementType:Function):Decorator{
     };
 }
 /** ?????????? */
-export function getTypeName(target:Function, propertyKey:string):string{
+export function getTypeName(target:Function, propertyKey:string, container?: ContainerBase):string{
     let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey) || Reflect.getMetadata(EdmType, target.prototype);
     let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey) || Reflect.getMetadata(EdmElementType, target.prototype);
+    type = (type && type["@odata.type"]) || type;
+    if (container && container instanceof ContainerBase){
+        let containerType = container.resolve(type);
+        if (containerType){
+            let namespace = (<any>(Object.getPrototypeOf(container).constructor || target)).namespace || "Default";
+            type = namespace + "." + containerType;
+        }
+    }
     if (typeof type == "string" && type != "Collection" && type.indexOf(".") < 0){
-        for (let i = 0; i < EdmContainer.length; i++){
-            let containerType = EdmContainer[i];
-            let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
-            let containerTypeName = (<any>containerType).name;
-            if (containerTypeName == type){
-                type = namespace + "." + type;
-                break;
+        if (typeof type == "string" && type != "Collection" && type.indexOf(".") < 0){
+            for (let i = 0; i < EdmContainer.length; i++){
+                let containerType = EdmContainer[i];
+                let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
+                let containerTypeName = (<any>containerType).name;
+                if (containerTypeName == type){
+                    type = namespace + "." + type;
+                    break;
+                }
             }
         }
     }else if (typeof type == "function"){
@@ -253,13 +272,15 @@ export function getTypeName(target:Function, propertyKey:string):string{
         }else type = ((<any>type).namespace || (<any>target).namespace || "Default") + "." + (<any>type).name;
     }
     if (typeof elementType == "string" && elementType != "Collection" && elementType.indexOf(".") < 0){
-        for (let i = 0; i < EdmContainer.length; i++){
-            let containerType = EdmContainer[i];
-            let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
-            let containerTypeName = (<any>containerType).name;
-            if (containerTypeName == elementType){
-                elementType = namespace + "." + elementType;
-                break;
+        if (typeof elementType == "string" && elementType != "Collection" && elementType.indexOf(".") < 0){
+            for (let i = 0; i < EdmContainer.length; i++){
+                let containerType = EdmContainer[i];
+                let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
+                let containerTypeName = (<any>containerType).name;
+                if (containerTypeName == elementType){
+                    elementType = namespace + "." + elementType;
+                    break;
+                }
             }
         }
     }else if (typeof elementType == "function"){
@@ -268,7 +289,7 @@ export function getTypeName(target:Function, propertyKey:string):string{
     return elementType ? type + "(" + elementType + ")" : type;
 }
 /** ?????????? */
-export function getType(target:Function, propertyKey:string):Function | string{
+export function getType(target:Function, propertyKey:string, container?: ContainerBase):Function | string{
     let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey);
     let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);
     let hasEntityType = isEntityType(target, propertyKey);
@@ -280,6 +301,14 @@ export function getType(target:Function, propertyKey:string):Function | string{
         if (typeof type == "string" && type.indexOf(".") < 0) type = ((<any>target).namespace || "Default") + "." + type;
     }
     if (typeof elementType == "string"){
+        if (container && container instanceof ContainerBase){
+            let containerType = container.resolve(type);
+            if (containerType){
+                let namespace = (<any>containerType).namespace || Object.getPrototypeOf(container).constructor.namespace || (<any>target).namespace || "Default";
+                let containerTypeName = (<any>containerType).name;
+                type = namespace + "." + containerTypeName;
+            }
+        }
         for (let i = 0; i < EdmContainer.length; i++){
             let containerType = EdmContainer[i];
             let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
@@ -337,7 +366,8 @@ export function getKeyProperties(target:Function):string[]{
  * @param type  OData type of the provided value
  * @return      Escaped string
  */
-export function escape(value:any, type:any){
+export async function escape(value:any, type:any, serializer?:Function){
+    if (typeof serializer == "function") return await serializer(value);
     if (typeof value == "undefined" || value == null) return value;
     switch (type){
         case "Edm.Binary":
@@ -354,6 +384,8 @@ export function escape(value:any, type:any){
         case "Edm.Single":
             return value.toString();
         case "Edm.String": return "'" + ("" + value).replace(/'/g, "''") + "'";
+        default:
+            return `'${value.toString()}'`;
     }
 }
 
@@ -465,7 +497,7 @@ export function FunctionImport(returnType?:any);
 /** Edm.FunctionImport decorator for describing unbound actions callable from the service root */
 export function FunctionImport(target?:any, targetKey?:string);
 export function FunctionImport(target?:any, targetKey?:string){
-    if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
+    if (arguments.length > 1) return operationDecoratorFactory(EdmFunction)(target, targetKey);
     else return operationDecoratorFactory(EdmFunction, target);
 }
 /** ?????????? */
@@ -478,7 +510,7 @@ export function Function(returnType?:any);
 /** Edm.Function decorator for describing actions */
 export function Function(target?:any, targetKey?:string);
 export function Function(target?:any, targetKey?:string){
-    if (arguments.length > 1) operationDecoratorFactory(EdmFunction)(target, targetKey);
+    if (arguments.length > 1) return operationDecoratorFactory(EdmFunction)(target, targetKey);
     else return operationDecoratorFactory(EdmFunction, target);
 }
 /** ?????????? */
@@ -487,14 +519,19 @@ export function getOperations(target:Function):string[]{
 }
 
 /** ?????????? */
-export function getReturnTypeName(target:Function, propertyKey:string):string{
+export function getReturnTypeName(target:Function, propertyKey:string, container?:ContainerBase):string{
     let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
-    return getTypeName(returnType, EdmReturnType) || getTypeName(target, propertyKey);
+    return getTypeName(returnType, EdmReturnType, container) || getTypeName(target, propertyKey, container);
 }
 /** ?????????? */
-export function getReturnType(target:Function, propertyKey:string):Function | string{
+export function getReturnType(target:Function, propertyKey:string, container?:ContainerBase):Function | string{
     let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
-    return getType(returnType, EdmReturnType) || getType(target, propertyKey);
+    return getType(returnType, EdmReturnType, container) || getType(target, propertyKey, container);
+}
+/** ?????????? */
+export function isReturnTypeDefinition(target:Function, propertyKey:string):boolean{
+    let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
+    return isTypeDefinition(returnType, EdmReturnType);
 }
 
 /** Returns true if property is a statically callable action (decorated by Edm.ActionImport) */
@@ -588,6 +625,100 @@ export function isEntityType(target:Function, propertyKey?:string):boolean{
     return Reflect.hasMetadata(EdmEntityType, target.prototype, propertyKey);
 }
 
+export function Flags(target, targetKey){
+    Reflect.defineMetadata(EdmFlags, true, target, targetKey);
+}
+export function isFlags(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmFlags, target.prototype, propertyKey);
+}
+export function EnumType(type){
+    return function(target, targetKey?, parameterIndex?){
+        let baseType = Object.getPrototypeOf(target).constructor;
+        if (baseType != Object && getProperties(baseType.prototype).length > 0){
+            EntityType()(baseType.prototype);
+            let children = Reflect.getOwnMetadata(EdmChildren, baseType) || [];
+            if (children.indexOf(target.constructor) < 0){
+                children.unshift(target.constructor);
+            }
+            Reflect.defineMetadata(EdmChildren, children, baseType);
+        }
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.type = type;
+            }else{
+                existingParameters.push({
+                    name: paramName,
+                    type: type
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            let desc = Object.getOwnPropertyDescriptor(target, targetKey);
+            if (targetKey && targetKey != EdmType && ((desc && typeof desc.value != "function") || (!desc && typeof target[targetKey] != "function"))) {
+                let properties:string[] = Reflect.getOwnMetadata(EdmProperties, target) || [];
+                if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
+                Reflect.defineMetadata(EdmProperties, properties, target);
+            }
+            Reflect.defineMetadata(EdmEnumType, true, target, targetKey);
+            Reflect.defineMetadata(EdmType, type, target, targetKey);
+        }
+    }
+}
+export function isEnumType(target, propertyKey){
+    return Reflect.hasMetadata(EdmEnumType, target.prototype, propertyKey);
+}
+
+export function TypeDefinition(type){
+    return function(target, targetKey?, parameterIndex?){
+        let baseType = Object.getPrototypeOf(target).constructor;
+        if (baseType != Object && getProperties(baseType.prototype).length > 0){
+            EntityType()(baseType.prototype);
+            let children = Reflect.getOwnMetadata(EdmChildren, baseType) || [];
+            if (children.indexOf(target.constructor) < 0){
+                children.unshift(target.constructor);
+            }
+            Reflect.defineMetadata(EdmChildren, children, baseType);
+        }
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.type = type;
+            }else{
+                existingParameters.push({
+                    name: paramName,
+                    type: type
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            let desc = Object.getOwnPropertyDescriptor(target, targetKey);
+            if (targetKey && targetKey != EdmType && ((desc && typeof desc.value != "function") || (!desc && typeof target[targetKey] != "function"))) {
+                let properties:string[] = Reflect.getOwnMetadata(EdmProperties, target) || [];
+                if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
+                Reflect.defineMetadata(EdmProperties, properties, target);
+            }
+            Reflect.defineMetadata(EdmTypeDefinition, true, target, targetKey);
+            Reflect.defineMetadata(EdmType, type, target, targetKey);
+        }
+    };
+}
+export function isTypeDefinition(target, propertyKey){
+    return Reflect.hasMetadata(EdmTypeDefinition, target.prototype, propertyKey);
+}
+
 /** ?????????? */
 export function register(type:Function){
     if (EdmContainer.indexOf(type) < 0) EdmContainer.push(type);
@@ -605,6 +736,66 @@ export function Convert(converter:Function){
 /** ?????????? */
 export function getConverter(target:Function, propertyKey:string):Function{
     return Reflect.getMetadata(EdmConverter, target.prototype, propertyKey);
+}
+
+/** ?????????? */
+export function Serialize(converter:Function){
+    return function(target, targetKey){
+        if (typeof target == "function"){
+            register(target);
+        }
+        Reflect.defineMetadata(EdmSerializer, converter, target, targetKey);
+    };
+}
+/** ?????????? */
+export function getSerializer(target:Function, propertyKey:string, type?: any, container?: ContainerBase):Function{
+    return Reflect.getMetadata(EdmSerializer, target.prototype, propertyKey) ||
+        (type && container && Reflect.getMetadata(EdmSerializer, Object.getPrototypeOf(container), container.resolve(type)));
+}
+
+/** ?????????? */
+export function Deserialize(converter:Function){
+    return function(target, targetKey){
+        if (typeof target == "function"){
+            register(target);
+        }
+        Reflect.defineMetadata(EdmDeserializer, converter, target, targetKey);
+    };
+}
+/** ?????????? */
+export function getDeserializer(target:Function, propertyKey:string, type?: any, container?: ContainerBase):Function{
+    return Reflect.getMetadata(EdmDeserializer, target.prototype, propertyKey) ||
+        (type && container && Reflect.getMetadata(EdmDeserializer, Object.getPrototypeOf(container), container.resolve(type)));
+}
+
+/** ?????????? */
+export function URLSerialize(converter:Function){
+    return function(target, targetKey){
+        if (typeof target == "function"){
+            register(target);
+        }
+        Reflect.defineMetadata(EdmURLSerializer, converter, target, targetKey);
+    };
+}
+/** ?????????? */
+export function getURLSerializer(target:Function, propertyKey:string, type?: any, container?: ContainerBase):Function{
+    return Reflect.getMetadata(EdmURLSerializer, target.prototype, propertyKey) ||
+        (type && container && Reflect.getMetadata(EdmURLSerializer, Object.getPrototypeOf(container), container.resolve(type)));
+}
+
+/** ?????????? */
+export function URLDeserialize(converter:Function){
+    return function(target, targetKey){
+        if (typeof target == "function"){
+            register(target);
+        }
+        Reflect.defineMetadata(EdmURLDeserializer, converter, target, targetKey);
+    };
+}
+/** ?????????? */
+export function getURLDeserializer(target:Function, propertyKey:string, type?: any, container?: ContainerBase):Function{
+    return Reflect.getMetadata(EdmURLDeserializer, target.prototype, propertyKey) ||
+        (type && container && Reflect.getMetadata(EdmURLDeserializer, Object.getPrototypeOf(container), container.resolve(type)));
 }
 
 /** ?????????? */
@@ -669,3 +860,28 @@ export function ForwardRef(forwardRefFn:Function){
     (<any>fwd).__forward__ref__ = true;
     return fwd;
 }
+
+export interface IEdmContainerInstance{
+    resolve(type);
+}
+export interface IEdmContainer{
+    new(server?:typeof ODataServer):IEdmContainerInstance
+}
+export function Container(type:IEdmContainer){
+    return function(server:typeof ODataServer){
+        if (!(type.prototype instanceof ContainerBase)){
+            util.inherits(type, ContainerBase);
+        }
+        server.container = new type(server);
+    };
+}
+export const EdmContainerClass = <IEdmContainer>class{
+    constructor(_?:typeof ODataServer){}
+    resolve(type):string{
+        for (let prop in this){
+            if (this[prop] == type) return prop;
+        }
+        return null;
+    }
+}
+export class ContainerBase extends EdmContainerClass{}
