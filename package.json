@@ -15,7 +15,7 @@
     "lint": "tslint src/lib/**/*.ts -t verbose --force > .tslint",
     "pretest": "rimraf report && rimraf coverage",
     "test": "nyc mocha --reporter mochawesome --reporter-options reportDir=report,reportName=odata-v4-server,reportTitle=\"OData V4 Server\" src/test/**/*.spec.ts",
-    "prepublish": "npm run cover && npm run build",
+    "prepublish": "npm test && npm run build",
     "typedoc": "rimraf docs && typedoc --name \"JayStack OData v4 Server\" --exclude \"**/?(utils|index).ts\" --excludeExternals --excludeNotExported --hideGenerator --excludePrivate --out docs src/lib/*.ts"
   },
   "watch": {
@@ -120,6 +120,7 @@
     "typedoc": "^0.5.10",
     "typedoc-default-themes": "^0.4.0",
     "typedoc-plugin-external-module-name": "^1.0.5",
-    "typescript": "^2.4.1"
+    "typescript": "^2.4.1",
+    "xml-beautifier": "^0.3.0"
   }
 }

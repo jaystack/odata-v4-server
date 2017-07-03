@@ -1,10 +1,10 @@
 /// <reference types="mocha" />
-let expect = require("chai").expect;
 import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
 import { Product, Category } from "../example/model";
 import { Readable, PassThrough } from "stream";
+const { expect } = require("chai");
 let categories = require("../example/categories");
 let products = require("../example/products");
 let streamBuffers = require("stream-buffers");
@@ -68,7 +68,7 @@ class Music extends PassThrough{
     @Edm.String
     Title:string
 }
-
+let foobarObj = { id: 1, foo: 'bar' };
 @odata.type(Foobar)
 class SyncTestController extends ODataController{
     @odata.GET
@@ -77,7 +77,8 @@ class SyncTestController extends ODataController{
     }
 
     @odata.GET()
-    entity(@odata.key() key:number){
+    entity( @odata.key() key: number) {
+        if (key === 1) return ODataResult.Ok(foobarObj);
         return ODataResult.Ok({ id: key, foo: "bar" });
     }
 
@@ -96,6 +97,24 @@ class SyncTestController extends ODataController{
             id: key,
             foo: "bar"
         }, delta);
+    }
+
+    @odata.PUT('foo')
+    putProperty( @odata.body body: any, @odata.result _: Foobar) {
+        foobarObj.foo = body.foo;
+        // result.foo = body.foo;
+    }
+
+    @odata.PATCH('foo')
+    patchProperty( @odata.body body: any, @odata.result _: Foobar) {
+        foobarObj.foo = body.foo;
+        // result.foo = body.foo;
+    }
+
+    @odata.DELETE('foo')
+    deleteProperty( @odata.result _: Foobar) {
+        // if (result.foo) delete result.foo;
+        if (foobarObj.foo) foobarObj.foo = null;
     }
 
     @odata.method(ODataMethodType.DELETE)
@@ -540,6 +559,79 @@ describe("ODataServer", () => {
             },
             elementType: Foobar,
             contentType: "application/json"
+        });
+
+        it("should update foobar's foo property ", () => {
+            return TestServer.execute("/EntitySet(1)/foo", "PUT", {
+                foo: "PUT"
+            }).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+
+                return TestServer.execute("/EntitySet(1)", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: {
+                            "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
+                            "@odata.id": "http://localhost/EntitySet(1)",
+                            "@odata.editLink": "http://localhost/EntitySet(1)",
+                            id: 1,
+                            foo: "PUT"
+                        },
+                        elementType: Foobar,
+                        contentType: "application/json"
+                    });
+                });
+            });
+        });
+
+        it("should delta update foobar's foo property ", () => {
+            return TestServer.execute("/EntitySet(1)/foo", "PATCH", {
+                foo: "PATCH"
+            }).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+
+                return TestServer.execute("/EntitySet(1)", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: {
+                            "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
+                            "@odata.id": "http://localhost/EntitySet(1)",
+                            "@odata.editLink": "http://localhost/EntitySet(1)",
+                            id: 1,
+                            foo: "PATCH"
+                        },
+                        elementType: Foobar,
+                        contentType: "application/json"
+                    });
+                });
+            });
+        });
+
+        it("should delete foobar's foo property ", () => {
+            return TestServer.execute("/EntitySet(1)/foo", "DELETE").then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+
+                return TestServer.execute("/EntitySet(1)", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: {
+                            "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
+                            "@odata.id": "http://localhost/EntitySet(1)",
+                            "@odata.editLink": "http://localhost/EntitySet(1)",
+                            id: 1,
+                            foo: null
+                        },
+                        elementType: Foobar,
+                        contentType: "application/json"
+                    });
+                });
+            });
         });
 
         createTest("should call action import", TestServer, "POST /ActionImport", {
