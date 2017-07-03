@@ -1,7 +1,6 @@
 import { ServiceMetadata } from "odata-v4-service-metadata";
 import { ServiceDocument } from "odata-v4-service-document";
 import { Edm as Metadata } from "odata-v4-metadata";
-import * as extend from "extend";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
@@ -138,7 +137,7 @@ export class ODataServerBase extends Transform{
     static execute(url:string | any, method:string | any, body?:any):Promise<ODataResult>{
         let context:any = {};
         if (typeof url == "object"){
-            context = extend(context, url);
+            context = Object.assign(context, url);
             if (typeof method == "object"){
                 body = method;
             }
@@ -160,7 +159,7 @@ export class ODataServerBase extends Transform{
     }
 
     constructor(opts?:TransformOptions){
-        super(extend(<TransformOptions>{
+        super(Object.assign(<TransformOptions>{
             objectMode: true
         }, opts));
         this.serverType = Object.getPrototypeOf(this).constructor;

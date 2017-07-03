@@ -1,6 +1,5 @@
 /// <reference types="mocha" />
 let expect = require("chai").expect;
-import * as extend from "extend";
 import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
@@ -93,7 +92,7 @@ class SyncTestController extends ODataController{
     }
 
     patch(@odata.key key:number, @odata.body delta:any){
-        return extend({
+        return Object.assign({
             id: key,
             foo: "bar"
         }, delta);
@@ -265,7 +264,7 @@ class MusicController extends ODataController {
 class ProductsController extends ODataController{
     @odata.GET
     find(@odata.filter filter:Token):Product[]{
-        if (filter) return products.map((product) => extend(extend({}, product), { _id: product._id.toString(), CategoryId: product.CategoryId.toString() })).filter(createFilter(filter));
+        if (filter) return products.map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId.toString() })).filter(createFilter(filter));
         return products;
     }
 
@@ -281,7 +280,7 @@ class ProductsController extends ODataController{
 class CategoriesController extends ODataController{
     @odata.GET
     find(@odata.filter filter:Token):Category[]{
-        if (filter) return categories.map((category) => extend(extend({}, category), { _id: category._id.toString() })).filter(createFilter(filter));
+        if (filter) return categories.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
         return categories;
     }
 
@@ -695,7 +694,7 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af289')/Products",
-                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289").map(product => extend({
+                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289").map(product => Object.assign({
                     "@odata.id": `http://localhost/Products('${product._id}')`
                 }, product))
             },
@@ -707,7 +706,7 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af289')/Products",
-                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289" && product.Name == "Chai").map(product => extend({
+                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289" && product.Name == "Chai").map(product => Object.assign({
                     "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')"
                 }, product))
             },
@@ -717,7 +716,7 @@ describe("ODataServer", () => {
 
         createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products('578f2b8c12eaebabec4af23c')", {
             statusCode: 200,
-            body: extend({
+            body: Object.assign({
                 "@odata.context": "http://localhost/$metadata#Products/$entity",
                 "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')"
             }, products.filter(product => product._id.toString() == "578f2b8c12eaebabec4af23c")[0]),
@@ -727,7 +726,7 @@ describe("ODataServer", () => {
 
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
             statusCode: 200,
-            body: extend({
+            body: Object.assign({
                 "@odata.context": "http://localhost/$metadata#Categories/$entity",
                 "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af289')",
             }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af289")[0]),
@@ -739,7 +738,7 @@ describe("ODataServer", () => {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Users",
-                value: [extend(new User(1, new Location("Budapest", "Virág utca")), {
+                value: [Object.assign(new User(1, new Location("Budapest", "Virág utca")), {
                     "@odata.id": "http://localhost/Users(1)"
                 })]
             },
@@ -747,7 +746,6 @@ describe("ODataServer", () => {
             contentType: "application/json"
         });
 
-        console.log(new Object());
         createTest("should return complex type property", AuthenticationServer, "GET /Users(1)/Location", {
             statusCode: 200,
             body: {

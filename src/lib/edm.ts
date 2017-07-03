@@ -1,4 +1,3 @@
-/** ?????????? */ // TODO: check & replace this pattern
 import "reflect-metadata";
 import * as util from "util";
 import { ODataController } from "./controller";
@@ -490,29 +489,24 @@ export const Action = operationDecoratorFactory(EdmAction);
 /** ?????????? */
 /** Edm.FunctionImport decorator for describing unbound actions callable from the service root */
 export function FunctionImport();
-/** ?????????? */
-/** Edm.FunctionImport decorator for describing unbound actions callable from the service root */
 export function FunctionImport(returnType?:any);
-/** ?????????? */
-/** Edm.FunctionImport decorator for describing unbound actions callable from the service root */
 export function FunctionImport(target?:any, targetKey?:string);
 export function FunctionImport(target?:any, targetKey?:string){
     if (arguments.length > 1) return operationDecoratorFactory(EdmFunction)(target, targetKey);
     else return operationDecoratorFactory(EdmFunction, target);
 }
+
 /** ?????????? */
 /** Edm.Function decorator for describing actions */
-export function Function();
-/** ?????????? */
-/** Edm.Function decorator for describing actions */
-export function Function(returnType?:any);
-/** ?????????? */
-/** Edm.Function decorator for describing actions */
-export function Function(target?:any, targetKey?:string);
-export function Function(target?:any, targetKey?:string){
+export function _Function();
+export function _Function(returnType?:any);
+export function _Function(target?:any, targetKey?:string);
+export function _Function(target?:any, targetKey?:string){
     if (arguments.length > 1) return operationDecoratorFactory(EdmFunction)(target, targetKey);
     else return operationDecoratorFactory(EdmFunction, target);
 }
+export const Function = _Function;
+
 /** ?????????? */
 export function getOperations(target:Function):string[]{
     return Reflect.getOwnMetadata(EdmOperations, target.prototype) || [];

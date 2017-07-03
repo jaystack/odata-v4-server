@@ -1,6 +1,5 @@
 import { Token, TokenType } from "odata-v4-parser/lib/lexer";
 import * as ODataParser from "odata-v4-parser";
-import * as extend from "extend";
 import * as url from "url";
 import * as qs from "qs";
 import * as util from "util";
@@ -824,7 +823,7 @@ export class ODataProcessor extends Transform{
                     this.odataContext += "/$entity";
                 case "put":
                 case "patch":
-                    let body = data ? extend(this.body, data.foreignKeys) : this.body;
+                    let body = data ? Object.assign(this.body || {}, data.foreignKeys) : this.body;
                     let bodyParam = odata.getBodyParameter(ctrl, fn.name);
                     let typeParam = odata.getTypeParameter(ctrl, fn.name);
                     if (typeParam){
@@ -937,7 +936,7 @@ export class ODataProcessor extends Transform{
                         schemas.some(schema => schema.entityContainer.some(container => container.actionImports.some(actionImport => actionImport.name == part.name)))
                     ){
                         isAction = true;
-                        part.params = extend(part.params, this.body);
+                        part.params = Object.assign(part.params || {}, this.body || {});
                     }
                     this.__applyParams(this.serverType, part.name, part.params);
                     let result = fnCaller.call(data, fn, part.params);
@@ -996,7 +995,7 @@ export class ODataProcessor extends Transform{
                                     parameter.name == "bindingParameter" && parameter.type == ((<any>elementType).namespace + "." + (<any>elementType).name))))
                     ){
                         isAction = true;
-                        part.params = extend(part.params, this.body);
+                        part.params = Object.assign(part.params || {}, this.body || {});
                     }
                     this.__applyParams(elementType, boundOpName, part.params, null, result);
                 }else if (ctrlBoundOp){
@@ -1009,7 +1008,7 @@ export class ODataProcessor extends Transform{
                                     parameter.name == "bindingParameter" && parameter.type == "Collection(" + ((<any>elementType).namespace + "." + (<any>elementType).name) + ")")))
                     ){
                         isAction = true;
-                        part.params = extend(part.params, this.body);
+                        part.params = Object.assign(part.params || {}, this.body || {});
                     }
                     this.__applyParams(this.ctrl, boundOpName, part.params, null, result);
                 }else if (expOp){
@@ -1208,7 +1207,7 @@ export class ODataProcessor extends Transform{
     }
 
     private async __convertEntity(context, result, elementType, includes?){
-        if (elementType === Object || this.options.disableEntityConversion) return extend(context, result);
+        if (elementType === Object || this.options.disableEntityConversion) return Object.assign(context, result || {});
         let resultType = Object.getPrototypeOf(result).constructor;
         if (resultType != Object && resultType != this.ctrl.prototype.elementType){
             elementType = resultType;
@@ -1245,7 +1244,7 @@ export class ODataProcessor extends Transform{
         resolveBaseType(elementType);
         let entityType = function(){};
         util.inherits(entityType, elementType);
-        result = Object.assign(new entityType(), result);
+        result = Object.assign(new entityType(), result || {});
         if (props.length > 0){
             let metadata = {};
             await Promise.all(props.map(prop => (async prop => {

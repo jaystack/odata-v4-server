@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { ODataServer } from "./server";
 import { ODataController } from "./controller";
-import * as Edm from "./edm";
+import { EntityType } from "./edm";
 import { getFunctionParameters, getAllPropertyNames, PropertyDecorator } from "./utils";
 
 export class ODataMethodType {
@@ -100,7 +100,7 @@ export function controller(controller: typeof ODataController, entitySetName?: s
         if (!controller.prototype.elementType) {
             controller.prototype.elementType = Object;
         }
-        Edm.EntityType(controller.prototype.elementType)(server.prototype, (<any>controller).name);
+        EntityType(controller.prototype.elementType)(server.prototype, (<any>controller).name);
     };
 }
 /** Gives the public controllers of the given server

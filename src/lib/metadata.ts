@@ -1,4 +1,3 @@
-import * as extend from "extend";
 import { ODataController } from "./controller";
 import { ODataServer } from "./server";
 import * as Edm from "./edm";
@@ -19,7 +18,7 @@ export function createMetadataJSON(server:typeof ODataServer){
         let ret = {};
         ops.forEach(op => ret[op] = target);
         target = Object.getPrototypeOf(target.prototype);
-        if (target instanceof ODataController) ret = extend(getAllOperations(target.constructor), ret);
+        if (target instanceof ODataController) ret = Object.assign(getAllOperations(target.constructor), ret);
         return ret;
     };
     let propNames = getAllPropertyNames(server.prototype).filter(it => it != "constructor");
