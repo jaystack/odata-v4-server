@@ -3,7 +3,7 @@ import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { Readable, PassThrough } from "stream";
+import { Readable, PassThrough, Writable } from "stream";
 import { ObjectID } from "mongodb";
 const { expect } = require("chai");
 const extend = require("extend");
@@ -55,6 +55,9 @@ class Image {
 
     @Edm.Stream("image/png")
     Data: ODataStream
+
+    @Edm.Stream("image/png")
+    Data2: ODataStream
 }
 
 @Edm.MediaEntity("audio/mp3")
@@ -243,6 +246,14 @@ class ImagesController extends ODataController {
     @odata.POST("Data")
     postData( @odata.key _: number, @odata.body data: any) {
         return data.pipe(globalWritableImgStrBuffer);
+    }
+
+    @odata.GET("Data2")
+    getData2( @odata.key _: number, @odata.stream stream: Writable, @odata.context context:ODataHttpContext) {
+        stream.write({ value: 0 });
+        new ODataStream(stream).pipe(globalWritableImgStrBuffer);
+        new ODataStream(stream).write(globalReadableImgStrBuffer);
+        stream.end();
     }
 }
 
@@ -963,6 +974,8 @@ describe("ODataServer", () => {
                         "Filename": "tmp.png",
                         "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
                         "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                        "Data2@odata.mediaContentType": "image/png",
+                        "Data2@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data2",
                         "Data@odata.mediaContentType": "image/png"
                     }
                 ]
@@ -980,6 +993,8 @@ describe("ODataServer", () => {
                 "Filename": "tmp.png",
                 "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
                 "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                "Data2@odata.mediaContentType": "image/png",
+                "Data2@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data2",
                 "Data@odata.mediaContentType": "image/png"
             },
             elementType: Image,
@@ -994,6 +1009,20 @@ describe("ODataServer", () => {
                     statusCode: 204
                 });
             });
+        });
+
+        createTest("stream property write and pipe", TestServer, "GET /ImagesControllerEntitySet(1)/Data2", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet(1)/Data2",
+                value: [
+                    {
+                        value: 0
+                    }
+                ]
+            },
+            elementType: "Edm.Stream",
+            contentType: "application/json"
         });
     });
 
