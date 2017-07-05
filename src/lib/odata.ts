@@ -28,8 +28,8 @@ const ODataTypeParameter: string = "odata:typeparameter";
 /** Set element type
  * @param elementType The type of element
  */
-export function type(elementType: Function);
-export function type(target:Function, targetKey:string, parameterIndex:number);
+export function type(elementType:any);
+export function type(target:any, targetKey:string, parameterIndex:number);
 export function type(elementType: Function, targetKey?, parameterIndex?):Function | void {
     if (typeof parameterIndex == "number"){
         let target = elementType;

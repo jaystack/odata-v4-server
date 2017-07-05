@@ -70,6 +70,12 @@ export class InheritanceController extends ODataController{
     one(@odata.key _: number, @odata.key __: number){
         return new SubcategoryDetails("Games", "Diablo 3", "RPG game");
     }
+
+    @odata.POST
+    insert(@odata.body data:any, @odata.type type:string){
+        console.log('@odata.type', type, data);
+        return data;
+    }
 }
 
 @odata.controller(InheritanceController, true)
