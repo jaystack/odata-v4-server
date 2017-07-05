@@ -202,7 +202,7 @@ const expCalls = {
             }
         }
     },
-    $ref: function(this:any, processor){
+    $ref: async function(this:any, processor){
         let prevPart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
         let routePart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 3];
 
@@ -221,7 +221,7 @@ const expCalls = {
             linkUrl = decodeURIComponent(linkUrl);
             processor.emit("header", { "OData-EntityId": linkUrl });
             linkAst = ODataParser.odataUri(linkUrl, { metadata: processor.serverType.$metadata().edmx });
-            linkPath = new ResourcePathVisitor(processor.serverType, processor.entitySets).Visit(linkAst);
+            linkPath = await new ResourcePathVisitor(processor.serverType, processor.entitySets).Visit(linkAst);
             linkPart = linkPath.navigation[linkPath.navigation.length - 1];
         }else linkPart = prevPart;
 
@@ -895,13 +895,15 @@ export class ODataProcessor extends Transform{
 
     private async __deserialize(obj, type){
         for (let prop in obj) {
-            let propType = Edm.getType(type, prop, this.serverType.container);
-            let fn = Edm.getDeserializer(type, prop, propType, this.serverType.container);
-            if (typeof fn == "function"){
-                obj[prop] = await fn(obj[prop], prop, propType);
-            }else if (typeof obj[prop] == "object"){
-                await this.__deserialize(obj[prop], propType);
-            }
+            try{
+                let propType = Edm.getType(type, prop, this.serverType.container);
+                let fn = Edm.getDeserializer(type, prop, propType, this.serverType.container);
+                if (typeof fn == "function"){
+                    obj[prop] = await fn(obj[prop], prop, propType);
+                }else if (typeof obj[prop] == "object"){
+                    await this.__deserialize(obj[prop], propType);
+                }
+            }catch(err){}
         }
     }
 
