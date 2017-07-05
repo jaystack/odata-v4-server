@@ -3,8 +3,10 @@ import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { Readable, PassThrough } from "stream";
+import { Readable, PassThrough, Writable } from "stream";
+import { ObjectID } from "mongodb";
 const { expect } = require("chai");
+const extend = require("extend");
 let categories = require("../example/categories");
 let products = require("../example/products");
 let streamBuffers = require("stream-buffers");
@@ -53,6 +55,9 @@ class Image {
 
     @Edm.Stream("image/png")
     Data: ODataStream
+
+    @Edm.Stream("image/png")
+    Data2: ODataStream
 }
 
 @Edm.MediaEntity("audio/mp3")
@@ -242,6 +247,14 @@ class ImagesController extends ODataController {
     postData( @odata.key _: number, @odata.body data: any) {
         return data.pipe(globalWritableImgStrBuffer);
     }
+
+    @odata.GET("Data2")
+    getData2( @odata.key _: number, @odata.stream stream: Writable, @odata.context context:ODataHttpContext) {
+        stream.write({ value: 0 });
+        new ODataStream(stream).pipe(globalWritableImgStrBuffer);
+        new ODataStream(stream).write(globalReadableImgStrBuffer);
+        stream.end();
+    }
 }
 
 let globalWritableMediaStrBuffer = new streamBuffers.WritableStreamBuffer();
@@ -309,6 +322,30 @@ class CategoriesController extends ODataController{
     })
     findOne(key:string):Category{
         return categories.filter(category => category._id.toString() == key)[0] || null;
+    }
+
+    @odata.POST("Products").$ref
+    @odata.PUT("Products").$ref
+    @odata.PATCH("Products").$ref
+    async setCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
+        return products.filter(product => {
+            if (product._id.toString() === link) {
+                product.CategoryId = new ObjectID(key);
+                return product;
+            }
+            return null;
+        });
+    }
+
+    @odata.DELETE("Products").$ref
+    async unsetCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
+        return products.filter(product => {
+            if (product._id.toString() === link) {
+                product.CategoryId = null;
+                return product;
+            }
+            return null;
+        });
     }
 }
 
@@ -816,6 +853,82 @@ describe("ODataServer", () => {
             contentType: "application/json"
         });
 
+        it("should create product reference on category", () => {
+            return TestServer.execute("/Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", "POST").then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af242')/Category", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: extend({
+                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
+                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28e").map(category => extend({
+                            "@odata.id": `http://localhost/Categories('${category._id}')`
+                        }, category))[0]
+                        ),
+                        elementType: Category,
+                        contentType: "application/json"
+                    })
+                });
+            });
+        });
+
+        it("should update product reference on category", () => {
+            return TestServer.execute("/Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", "PUT").then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af242')/Category", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: extend({
+                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
+                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28e").map(category => extend({
+                            "@odata.id": `http://localhost/Categories('${category._id}')`
+                        }, category))[0]
+                        ),
+                        elementType: Category,
+                        contentType: "application/json"
+                    })
+                });
+            });
+        });
+
+        it("should delta update product reference on category", () => {
+            return TestServer.execute("/Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", "PATCH").then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af242')/Category", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: extend({
+                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
+                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28e").map(category => extend({
+                            "@odata.id": `http://localhost/Categories('${category._id}')`
+                        }, category))[0]
+                        ),
+                        elementType: Category,
+                        contentType: "application/json"
+                    })
+                });
+            });
+        });
+
+        it("should delete product reference on category", () => {
+            return TestServer.execute("/Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", "DELETE").then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af242')/Category", "GET").then((result) => {
+                    throw new Error("Category reference should be deleted.");
+                }, (err) => {
+                    expect(err.name).to.equal("ResourceNotFoundError");
+                });;
+            });
+        });
+
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
             statusCode: 200,
             body: Object.assign({
@@ -861,6 +974,8 @@ describe("ODataServer", () => {
                         "Filename": "tmp.png",
                         "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
                         "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                        "Data2@odata.mediaContentType": "image/png",
+                        "Data2@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data2",
                         "Data@odata.mediaContentType": "image/png"
                     }
                 ]
@@ -878,6 +993,8 @@ describe("ODataServer", () => {
                 "Filename": "tmp.png",
                 "Data@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
                 "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
+                "Data2@odata.mediaContentType": "image/png",
+                "Data2@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data2",
                 "Data@odata.mediaContentType": "image/png"
             },
             elementType: Image,
@@ -892,6 +1009,20 @@ describe("ODataServer", () => {
                     statusCode: 204
                 });
             });
+        });
+
+        createTest("stream property write and pipe", TestServer, "GET /ImagesControllerEntitySet(1)/Data2", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet(1)/Data2",
+                value: [
+                    {
+                        value: 0
+                    }
+                ]
+            },
+            elementType: "Edm.Stream",
+            contentType: "application/json"
         });
     });
 
