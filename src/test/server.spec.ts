@@ -305,6 +305,29 @@ class ProductsController extends ODataController{
     findOne(key:string):Product{
         return products.filter(product => product._id.toString() == key)[0] || null;
     }
+
+    @odata.createRef("Category")
+    @odata.updateRef("Category")
+    async setCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
+        return products.filter(product => {
+            if (product._id.toString() === key) {
+                product.CategoryId = new ObjectID(link);
+                return product;
+            }
+            return null;
+        });
+    }
+
+    @odata.deleteRef("Category")
+    async unsetCategoryId( @odata.key key: string, @odata.link link: string): Promise<number> {
+        return products.filter(product => {
+            if (product._id.toString() === key) {
+                product.CategoryId = null;
+                return product;
+            }
+            return null;
+        });
+    }
 }
 
 @odata.type(Category)
@@ -929,6 +952,82 @@ describe("ODataServer", () => {
             });
         });
 
+        it("should delete product reference on category by ref id", () => {
+            return TestServer.execute("/Categories('578f2baa12eaebabec4af289')/Products/$ref?$id=http://localhost/Products('578f2b8c12eaebabec4af27e')", "DELETE").then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af27e')/Category", "GET").then((result) => {
+                    throw new Error("Category reference should be deleted.");
+                }, (err) => {
+                    expect(err.name).to.equal("ResourceNotFoundError");
+                });
+            });
+        });
+
+        it("should create category reference on product", () => {
+            return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "POST", {
+					"@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28c')"
+				}).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: extend({
+                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
+                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28c").map(category => extend({
+                            "@odata.id": `http://localhost/Categories('${category._id}')`
+                        }, category))[0]
+                        ),
+                        elementType: Category,
+                        contentType: "application/json"
+                    })
+                });
+            });
+        });
+
+        it("should update category reference on product", () => {
+            return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "PUT", {
+					"@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28c')"
+				}).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: extend({
+                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
+                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28c").map(category => extend({
+                            "@odata.id": `http://localhost/Categories('${category._id}')`
+                        }, category))[0]
+                        ),
+                        elementType: Category,
+                        contentType: "application/json"
+                    })
+                });
+            });
+        });
+
+        it("should delete category reference on product", () => {
+            return TestServer.execute("/Products('578f2b8c12eaebabec4af288')/Category/$ref", "DELETE", {
+					"@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28e')"
+				}).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af288')/Category", "GET").then((result) => {
+                    throw new Error("Category reference should be deleted.");
+                }, (err) => {
+                    expect(err.name).to.equal("ResourceNotFoundError");
+                });
+            });
+        });
+            
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
             statusCode: 200,
             body: Object.assign({
