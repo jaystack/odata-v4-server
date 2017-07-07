@@ -1,4 +1,5 @@
 /// <reference types="mocha" />
+import { TestServer, Foobar, NoServer, AuthenticationServer, Image, User, Location, Music } from './test.model';
 import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
@@ -11,449 +12,7 @@ let categories = require("../example/categories");
 let products = require("../example/products");
 let streamBuffers = require("stream-buffers");
 
-class Foobar{
-    @Edm.Key
-    @Edm.Computed
-    @Edm.Int32
-    id:number
-
-    @Edm.Int16
-    a:number
-
-    @Edm.String
-    foo:string
-
-    @Edm.Action
-    Foo(){}
-
-    @Edm.Function(Edm.String)
-    Bar(){
-        return "foobar";
-    }
-
-    @odata.namespace("Echo")
-    @Edm.Function(Edm.String)
-    echo(@Edm.String message){
-        return message;
-    }
-
-    @odata.namespace("Echo")
-    @Edm.Function(Edm.Collection(Edm.String))
-    echoMany(@Edm.String message){
-        return [message];
-    }
-}
-
-class Image {
-    @Edm.Key
-    @Edm.Computed
-    @Edm.Int32
-    Id: number
-
-    @Edm.String
-    Filename: string
-
-    @Edm.Stream("image/png")
-    Data: ODataStream
-
-    @Edm.Stream("image/png")
-    Data2: ODataStream
-}
-
-@Edm.MediaEntity("audio/mp3")
-class Music extends PassThrough{
-    @Edm.Key
-    @Edm.Computed
-    @Edm.Int32
-    Id:number
-
-    @Edm.String
-    Artist:string
-
-    @Edm.String
-    Title:string
-}
-let foobarObj = { id: 1, foo: 'bar' };
-@odata.type(Foobar)
-class SyncTestController extends ODataController{
-    @odata.GET
-    entitySet(/*@odata.query query:Token, @odata.context context:any, @odata.result result:any, @odata.stream stream:ODataProcessor*/){
-        return [{ id: 1,  a: 1 }];
-    }
-
-    @odata.GET()
-    entity( @odata.key() key: number) {
-        if (key === 1) return ODataResult.Ok(foobarObj);
-        return ODataResult.Ok({ id: key, foo: "bar" });
-    }
-
-    @odata.method("POST")
-    insert(@odata.body body:any){
-        body.id = 1;
-        return body;
-    }
-
-    put(@odata.body body:any){
-        body.id = 1;
-    }
-
-    patch(@odata.key key:number, @odata.body delta:any){
-        return Object.assign({
-            id: key,
-            foo: "bar"
-        }, delta);
-    }
-
-    @odata.PUT('foo')
-    putProperty( @odata.body body: any, @odata.result _: Foobar) {
-        foobarObj.foo = body.foo;
-        // result.foo = body.foo;
-    }
-
-    @odata.PATCH('foo')
-    patchProperty( @odata.body body: any, @odata.result _: Foobar) {
-        foobarObj.foo = body.foo;
-        // result.foo = body.foo;
-    }
-
-    @odata.DELETE('foo')
-    deleteProperty( @odata.result _: Foobar) {
-        // if (result.foo) delete result.foo;
-        if (foobarObj.foo) foobarObj.foo = null;
-    }
-
-    @odata.method(ODataMethodType.DELETE)
-    remove(){}
-}
-
-@odata.type(Foobar)
-class GeneratorTestController extends ODataController{
-    @odata.GET
-    *entitySet(){
-        return [{ id: 1, a: 1 }];
-    }
-}
-
-@odata.type(Foobar)
-class AsyncTestController extends ODataController{
-    @odata.GET
-    entitySet(){
-        return new Promise((resolve, reject) => {
-            try{
-                setTimeout(() => {
-                    resolve([{ id: 1, a: 1 }]);
-                });
-            }catch(err){
-                reject(err);
-            }
-        });
-    }
-
-    @odata.GET
-    entity(@odata.key key:number){
-        return ODataResult.Ok(new Promise((resolve, reject) => {
-            try{
-                setTimeout(() => {
-                    resolve({ id: key });
-                });
-            }catch(err){
-                reject(err);
-            }
-        }));
-    }
-
-    @odata.POST
-    insert(@odata.body body:any){
-        return new Promise((resolve, reject) => {
-            try{
-                setTimeout(() => {
-                    body.id = 1;
-                    resolve(body);
-                });
-            }catch(err){
-                reject(err);
-            }
-        });
-    }
-}
-
-@odata.type(Foobar)
-class InlineCountController extends ODataController{
-    @odata.GET
-    entitySet(){
-        let result = [{ id: 1, a: 1 }];
-        (<any>result).inlinecount = 1;
-        return result;
-    }
-}
-
-@odata.type(Foobar)
-class BoundOperationController extends ODataController{
-    @Edm.Action
-    Action(){
-        return new Promise((resolve) => {
-            setTimeout(resolve);
-        });
-    }
-
-    @Edm.Function(Edm.String)
-    Function(@Edm.Int16 value:number){
-        return `foobar:${value}`;
-    }
-
-    @Edm.Function(Edm.String)
-    FunctionMore(@Edm.String message:string, @Edm.Int64 value:number){
-        return `The number is ${value} and your message was ${message}.`;
-    }
-
-    @odata.GET
-    entitySet(){
-        return [{ id: 1, a: 1 }];
-    }
-
-    @odata.GET
-    entity(@odata.key key:number){
-        return { id: key, a: 1 };
-    }
-}
-
-let globalWritableImgStrBuffer = new streamBuffers.WritableStreamBuffer();
-let globalReadableImgStrBuffer = new streamBuffers.ReadableStreamBuffer();
-@odata.type(Image)
-class ImagesController extends ODataController {
-    @odata.GET
-    entitySet( @odata.query _: Token, @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
-        let image = new Image();
-        image.Id = 1;
-        image.Filename = "tmp.png";
-        return [image];
-    }
-
-    @odata.GET()
-    entity( @odata.key() key: number) {
-        let image = new Image();
-        image.Id = key;
-        image.Filename = "tmp.png";
-        return image;
-    }
-
-    @odata.GET("Data")
-    getData( @odata.key _: number, @odata.context context: ODataHttpContext) {
-        globalReadableImgStrBuffer.put(globalWritableImgStrBuffer.getContents());
-        return globalReadableImgStrBuffer.pipe(context.response);
-    }
-
-    @odata.POST("Data")
-    postData( @odata.key _: number, @odata.body data: any) {
-        return data.pipe(globalWritableImgStrBuffer);
-    }
-
-    @odata.GET("Data2")
-    getData2( @odata.key _: number, @odata.stream stream: Writable, @odata.context context:ODataHttpContext) {
-        stream.write({ value: 0 });
-        new ODataStream(stream).pipe(globalWritableImgStrBuffer);
-        new ODataStream(stream).write(globalReadableImgStrBuffer);
-        stream.end();
-    }
-}
-
-let globalWritableMediaStrBuffer = new streamBuffers.WritableStreamBuffer();
-let globalReadableMediaStrBuffer = new streamBuffers.ReadableStreamBuffer();
-@odata.type(Music)
-class MusicController extends ODataController {
-    @odata.GET
-    findAll( @odata.context _: ODataHttpContext) {
-        let music = new Music();
-        music.Id = 1;
-        music.Artist = "Dream Theater";
-        music.Title = "Six degrees of inner turbulence";
-        return [music];
-    }
-
-    @odata.GET
-    findOne( @odata.key() _: number, @odata.context __: ODataHttpContext) {
-        let music = new Music();
-        music.Id = 1;
-        music.Artist = "Dream Theater";
-        music.Title = "Six degrees of inner turbulence";
-        return music;
-    }
-
-    @odata.GET.$value
-    mp3( @odata.key _: number, @odata.context context: ODataHttpContext) {
-        globalReadableMediaStrBuffer.put(globalWritableMediaStrBuffer.getContents());
-        return globalReadableMediaStrBuffer.pipe(context.response);
-    }
-
-    @odata.POST.$value
-    post( @odata.key _: number, @odata.body upload: Readable) {
-        return upload.pipe(globalWritableMediaStrBuffer);
-    }
-}
-
-@odata.type(Product)
-@Edm.EntitySet("Products")
-class ProductsController extends ODataController{
-    @odata.GET
-    find(@odata.filter filter:Token):Product[]{
-        if (filter) return products.map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId.toString() })).filter(createFilter(filter));
-        return products;
-    }
-
-    @odata.GET
-    @odata.parameter("key", odata.key)
-    findOne(key:string):Product{
-        return products.filter(product => product._id.toString() == key)[0] || null;
-    }
-}
-
-@odata.type(Category)
-@Edm.EntitySet("Categories")
-class CategoriesController extends ODataController{
-    @odata.GET
-    find(@odata.filter filter:Token):Category[]{
-        if (filter) return categories.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
-        return categories;
-    }
-
-    @odata.GET
-    @odata.parameters({
-        key: odata.key
-    })
-    findOne(key:string):Category{
-        return categories.filter(category => category._id.toString() == key)[0] || null;
-    }
-
-    @odata.POST("Products").$ref
-    @odata.PUT("Products").$ref
-    @odata.PATCH("Products").$ref
-    async setCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
-        return products.filter(product => {
-            if (product._id.toString() === link) {
-                product.CategoryId = new ObjectID(key);
-                return product;
-            }
-            return null;
-        });
-    }
-
-    @odata.DELETE("Products").$ref
-    async unsetCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
-        return products.filter(product => {
-            if (product._id.toString() === link) {
-                product.CategoryId = null;
-                return product;
-            }
-            return null;
-        });
-    }
-}
-
-class Location{
-    @Edm.String
-    City:string
-
-    @Edm.String
-    Address:string
-
-    constructor(city, address){
-        this.City = city;
-        this.Address = address;
-    }
-}
-
-class User{
-    @Edm.Key
-    @Edm.Int32
-    Id:number
-
-    @Edm.ComplexType(Location)
-    Location:Location
-
-    constructor(id, location){
-        this.Id = id;
-        this.Location = location;
-    }
-}
-
-class UsersController extends ODataController{
-    @odata.GET
-    find(){
-        return [new User(1, new Location("Budapest", "Virág utca"))];
-    }
-
-    @odata.GET
-    findOne(@odata.key key:number){
-        return new User(key, new Location("Budapest", "Virág utca"));
-    }
-
-    @odata.namespace("Session")
-    @Edm.Action
-    logout(){}
-}
-
-class HiddenController extends ODataController{}
-
-@odata.cors
-@odata.controller(SyncTestController, "EntitySet")
-@odata.controller(GeneratorTestController, "GeneratorEntitySet")
-@odata.controller(AsyncTestController, "AsyncEntitySet")
-@odata.controller(InlineCountController, "InlineCountEntitySet")
-@odata.controller(BoundOperationController, "BoundOperationEntitySet")
-@odata.controller(ImagesController, "ImagesControllerEntitySet")
-@odata.controller(MusicController, "MusicControllerEntitySet")
-@odata.controller(ProductsController, true)
-@odata.controller(CategoriesController, true)
-@odata.controller(UsersController, true, User)
-@odata.controller(HiddenController)
-@odata.container("TestContainer")
-class TestServer extends ODataServer{
-    @Edm.ActionImport
-    ActionImport(){
-        return new Promise((resolve) => {
-            setTimeout(resolve);
-        });
-    }
-
-    @Edm.ActionImport
-    ActionImportParams(@Edm.Int32 value:number){
-        if (typeof value != "number") throw new Error("value is not a number!");
-    }
-
-    @Edm.FunctionImport(Edm.String)
-    FunctionImport(@Edm.Int64 value:number){
-        return `The number is ${value}.`;
-    }
-
-    @Edm.FunctionImport(Edm.String)
-    FunctionImportMore(@Edm.String message:string, @Edm.Int64 value:number){
-        return `The number is ${value} and your message was ${message}.`;
-    }
-}
-TestServer.$metadata();
-
-@odata.namespace("Authentication")
-@odata.controller(UsersController, true)
-class AuthenticationServer extends ODataServer{
-    @odata.namespace("Echo")
-    @Edm.FunctionImport(Edm.String)
-    echo(@Edm.String message:string):string{
-        return message;
-    }
-}
-
-class NoServer extends ODataServer{}
-
-function createTest(testcase:string, server:typeof ODataServer, command:string, compare:any, body?:any){
-    it(`${testcase} (${command})`, () => {
-        let test = command.split(" ");
-        return server.execute(test.slice(1).join(" "), test[0], body).then((result) => {
-            expect(result).to.deep.equal(compare);
-        });
-    });
-}
-
-describe("ODataServer", () => {
+export function testFactory(createTest: Function) {
     describe("OData CRUD", () => {
         createTest("should return entity set result", TestServer, "GET /EntitySet", {
             statusCode: 200,
@@ -538,20 +97,20 @@ describe("ODataServer", () => {
             elementType: Foobar,
             contentType: "application/json"
         }, {
-            foo: "bar"
-        });
+                foo: "bar"
+            });
 
         createTest("should update entity", TestServer, "PUT /EntitySet(1)", {
             statusCode: 204
         }, {
-            foo: "foobar"
-        });
+                foo: "foobar"
+            });
 
         createTest("should update entity using delta", TestServer, "PATCH /EntitySet(1)", {
             statusCode: 204
         }, {
-            bar: "foo"
-        });
+                bar: "foo"
+            });
 
         createTest("should delete entity", TestServer, "DELETE /EntitySet(1)", {
             statusCode: 204
@@ -678,8 +237,8 @@ describe("ODataServer", () => {
         createTest("should call action import with parameters", TestServer, "POST /ActionImportParams", {
             statusCode: 204
         }, {
-            value: 42
-        });
+                value: 42
+            });
 
         createTest("should call function import", TestServer, "GET /FunctionImport(value=42)", {
             statusCode: 200,
@@ -929,6 +488,82 @@ describe("ODataServer", () => {
             });
         });
 
+        it("should delete product reference on category by ref id", () => {
+            return TestServer.execute("/Categories('578f2baa12eaebabec4af289')/Products/$ref?$id=http://localhost/Products('578f2b8c12eaebabec4af27e')", "DELETE").then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af27e')/Category", "GET").then((result) => {
+                    throw new Error("Category reference should be deleted.");
+                }, (err) => {
+                    expect(err.name).to.equal("ResourceNotFoundError");
+                });
+            });
+        });
+
+        it("should create category reference on product", () => {
+            return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "POST", {
+                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28c')"
+            }).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: extend({
+                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
+                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28c").map(category => extend({
+                            "@odata.id": `http://localhost/Categories('${category._id}')`
+                        }, category))[0]
+                        ),
+                        elementType: Category,
+                        contentType: "application/json"
+                    })
+                });
+            });
+        });
+
+        it("should update category reference on product", () => {
+            return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "PUT", {
+                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28c')"
+            }).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category", "GET").then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: extend({
+                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
+                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28c").map(category => extend({
+                            "@odata.id": `http://localhost/Categories('${category._id}')`
+                        }, category))[0]
+                        ),
+                        elementType: Category,
+                        contentType: "application/json"
+                    })
+                });
+            });
+        });
+
+        it("should delete category reference on product", () => {
+            return TestServer.execute("/Products('578f2b8c12eaebabec4af288')/Category/$ref", "DELETE", {
+                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28e')"
+            }).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+
+                return TestServer.execute("/Products('578f2b8c12eaebabec4af288')/Category", "GET").then((result) => {
+                    throw new Error("Category reference should be deleted.");
+                }, (err) => {
+                    expect(err.name).to.equal("ResourceNotFoundError");
+                });
+            });
+        });
+
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
             statusCode: 200,
             body: Object.assign({
@@ -1073,27 +708,4 @@ describe("ODataServer", () => {
             });
         });
     });
-
-    describe("Code coverage", () => {
-        it("should return empty object when no public controllers on server", () => {
-            expect(odata.getPublicControllers(NoServer)).to.deep.equal({});
-        });
-
-        it("should not allow non-OData methods", () => {
-            try{
-                NoServer.execute("/dev/null", "MERGE");
-                throw new Error("MERGE should not be allowed");
-            }catch(err){
-                expect(err.message).to.equal("Method not allowed.");
-            }
-        });
-
-        it("should throw resource not found error", () => {
-            return AuthenticationServer.execute("/Users", "DELETE").then(() => {
-                throw new Error("should throw error");
-            }, (err) => {
-                expect(err.message).to.equal("Resource not found.");
-            });
-        });
-    })
-});
+}

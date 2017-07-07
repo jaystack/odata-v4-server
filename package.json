@@ -112,6 +112,7 @@
     "odata-v4-inmemory": "^0.1.7",
     "odata-v4-mongodb": "^0.1.5",
     "remap-istanbul": "^0.9.5",
+    "request": "^2.81.0",
     "rimraf": "^2.5.4",
     "source-map-support": "^0.4.15",
     "stream-buffers": "^3.0.1",
