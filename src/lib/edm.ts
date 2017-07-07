@@ -254,15 +254,13 @@ export function getTypeName(target:Function, propertyKey:string, container?: Con
         }
     }
     if (typeof type == "string" && type != "Collection" && type.indexOf(".") < 0){
-        if (typeof type == "string" && type != "Collection" && type.indexOf(".") < 0){
-            for (let i = 0; i < EdmContainer.length; i++){
-                let containerType = EdmContainer[i];
-                let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
-                let containerTypeName = (<any>containerType).name;
-                if (containerTypeName == type){
-                    type = namespace + "." + type;
-                    break;
-                }
+        for (let i = 0; i < EdmContainer.length; i++) {
+            let containerType = EdmContainer[i];
+            let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
+            let containerTypeName = (<any>containerType).name;
+            if (containerTypeName == type) {
+                type = namespace + "." + type;
+                break;
             }
         }
     }else if (typeof type == "function"){
@@ -270,19 +268,17 @@ export function getTypeName(target:Function, propertyKey:string, container?: Con
             type = ((<any>type).namespace || (<any>target).namespace || "Default") + "." + (<any>type)().name;
         }else type = ((<any>type).namespace || (<any>target).namespace || "Default") + "." + (<any>type).name;
     }
-    if (typeof elementType == "string" && elementType != "Collection" && elementType.indexOf(".") < 0){
-        if (typeof elementType == "string" && elementType != "Collection" && elementType.indexOf(".") < 0){
-            for (let i = 0; i < EdmContainer.length; i++){
-                let containerType = EdmContainer[i];
-                let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
-                let containerTypeName = (<any>containerType).name;
-                if (containerTypeName == elementType){
-                    elementType = namespace + "." + elementType;
-                    break;
-                }
+    if (typeof elementType == "string" && elementType != "Collection" && elementType.indexOf(".") < 0) {
+        for (let i = 0; i < EdmContainer.length; i++) {
+            let containerType = EdmContainer[i];
+            let namespace = (<any>containerType).namespace || (<any>target).namespace || "Default";
+            let containerTypeName = (<any>containerType).name;
+            if (containerTypeName == elementType) {
+                elementType = namespace + "." + elementType;
+                break;
             }
         }
-    }else if (typeof elementType == "function"){
+    } else if (typeof elementType == "function") {
         elementType = ((<any>elementType).namespace || (<any>target).namespace || "Default") + "." + (<any>elementType).name;
     }
     return elementType ? type + "(" + elementType + ")" : type;
