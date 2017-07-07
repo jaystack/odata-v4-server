@@ -151,6 +151,17 @@ class NorthwindTypes extends Edm.ContainerBase{
 @odata.container("Media")
 class MusicController extends ODataController{
     @odata.GET
+    find(){
+        let music = new Music();
+        music.Id = new ObjectID;
+        music.Artist = "Dream Theater";
+        music.Title = "Six degrees of inner turbulence";
+        music.Genre = Genre.Metal;
+        music.uid = new ObjectID();
+        return [music];
+    }
+
+    @odata.GET
     findOne(@odata.key() _:number){
         let music = new Music();
         music.Id = new ObjectID;

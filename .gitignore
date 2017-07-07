@@ -6,3 +6,4 @@ report
 build
 docs
 .nyc_output
+tmp.*
