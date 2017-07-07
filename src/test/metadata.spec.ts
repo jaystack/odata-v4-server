@@ -22,33 +22,43 @@ class Media extends PassThrough {
     Meta: Meta
 }
 
-// class BaseComplex {
-//     @Edm.Decimal
-//     @Edm.Key
-//     bc0: any
+class CompoundKey {
+    @Edm.Decimal
+    @Edm.Key
+    bc0: number
 
-//     @Edm.Binary
-//     @Edm.Key
-//     bc1: any
+    @Edm.Binary
+    @Edm.Key
+    bc1: number
 
-//     @Edm.Boolean
-//     @Edm.Key
-//     bc2: any
+    @Edm.Boolean
+    @Edm.Key
+    bc2: boolean
 
-//     @Edm.Byte
-//     @Edm.Key
-//     bc3: any
+    @Edm.Byte
+    @Edm.Key
+    bc3: number
 
-//     @Edm.Guid
-//     @Edm.Key
-//     bc4: any
+    @Edm.Guid
+    @Edm.Key
+    bc4: string
 
-//     @Edm.Double
-//     @Edm.Key
-//     bc5: any
-// }
+    @Edm.Double
+    @Edm.Key
+    bc5: number
+}
 
-class Complex {
+class BaseComplex {
+    @Edm.String
+    bc0: string
+}
+
+class SubComplex extends BaseComplex {
+    @Edm.String
+    sc0: string
+}
+
+class Complex extends SubComplex {
     @Edm.String
     c0: string
 }
@@ -188,109 +198,109 @@ class Meta extends BaseMeta {
 
     @Edm.Collection(Edm.Binary)
     @Edm.Nullable
-    p33: number
+    p33: number[]
 
     @Edm.Collection(Edm.Boolean)
-    p34: boolean
+    p34: boolean[]
 
     @Edm.Collection(Edm.Byte)
-    p35: number
+    p35: number[]
 
     @Edm.Collection(Edm.Date)
-    p36: Date
+    p36: Date[]
 
     @Edm.Collection(Edm.DateTimeOffset)
-    p37: number
+    p37: number[]
 
     @Edm.Collection(Edm.Decimal)
-    p38: number
+    p38: number[]
 
     @Edm.Collection(Edm.Double)
-    p39: number
+    p39: number[]
 
     @Edm.Collection(Edm.Duration)
-    p40: number
+    p40: number[]
 
     @Edm.Collection(Edm.Guid)
-    p41: string
+    p41: string[]
 
     @Edm.Collection(Edm.Int16)
-    p42: number
+    p42: number[]
 
     @Edm.Collection(Edm.Int32)
-    p43: number
+    p43: number[]
 
     @Edm.Collection(Edm.Int64)
-    p44: number
+    p44: number[]
 
     @Edm.Collection(Edm.SByte)
-    p45: number
+    p45: number[]
 
     @Edm.Collection(Edm.Single)
-    p46: number
+    p46: number[]
 
     @Edm.Collection(Edm.Stream("test"))
-    p47: ODataStream
+    p47: ODataStream[]
 
     @Edm.Collection(Edm.String)
-    p48: string
+    p48: string[]
 
     @Edm.Collection(Edm.TimeOfDay)
-    p49: number
+    p49: number[]
 
     @Edm.Collection(Edm.Geography)
-    p50: any
+    p50: any[]
 
     @Edm.Collection(Edm.GeographyPoint)
-    p51: any
+    p51: any[]
 
     @Edm.Collection(Edm.GeographyLineString)
-    p52: any
+    p52: any[]
 
     @Edm.Collection(Edm.GeographyPolygon)
-    p53: any
+    p53: any[]
 
     @Edm.Collection(Edm.GeographyMultiPoint)
-    p54: any
+    p54: any[]
 
     @Edm.Collection(Edm.GeographyMultiLineString)
-    p55: any
+    p55: any[]
 
     @Edm.Collection(Edm.GeographyMultiPolygon)
-    p56: any
+    p56: any[]
 
     @Edm.Collection(Edm.GeographyCollection)
-    p57: any
+    p57: any[]
 
     @Edm.Collection(Edm.Geometry)
-    p58: any
+    p58: any[]
 
     @Edm.Collection(Edm.GeometryPoint)
-    p59: any
+    p59: any[]
 
     @Edm.Collection(Edm.GeometryLineString)
-    p60: any
+    p60: any[]
 
     @Edm.Collection(Edm.GeometryPolygon)
-    p61: any
+    p61: any[]
 
     @Edm.Collection(Edm.GeometryMultiPoint)
-    p62: any
+    p62: any[]
 
     @Edm.Collection(Edm.GeometryMultiLineString)
-    p63: any
+    p63: any[]
 
     @Edm.Collection(Edm.GeometryMultiPolygon)
-    p64: any
+    p64: any[]
 
     @Edm.Collection(Edm.GeometryCollection)
-    p65: any
+    p65: any[]
 
     @Edm.Stream
     p66: ODataStream
 
     @Edm.Collection(Edm.Collection(Edm.String))
-    p67: any
+    p67: string[][]
     
     @Edm.ComplexType(Edm.ForwardRef(() => Complex))
     Complex: Complex
@@ -388,11 +398,40 @@ class MediaController extends ODataController {
     }
 }
 
+@odata.namespace("Controller")
+@odata.type(CompoundKey)
+class CompoundKeyController extends ODataController {
+    @odata.GET
+    findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+        let ck = new CompoundKey();
+        ck.bc0 = 1;
+        ck.bc1 = 2;
+        ck.bc2 = true;
+        ck.bc3 = 4;
+        ck.bc4 = '5';
+        ck.bc5 = 6;
+        return [ck];
+    }
+
+    @odata.method("GET")
+    findOneByKeys( @odata.key('bc0') key1: number, @odata.key('bc1') key2: number, @odata.key('bc2') key3: boolean, @odata.key('bc3') key4: number, @odata.key('bc4') key5: string, @odata.key('bc5') key6: number) {
+        let ck = new CompoundKey();
+        ck.bc0 = key1;
+        ck.bc1 = key2;
+        ck.bc2 = key3;
+        ck.bc3 = key4;
+        ck.bc4 = key5;
+        ck.bc5 = key6;
+        return ck;
+    }
+}
+
 @odata.namespace("Server")
 @odata.container("MetadataContainer")
 @odata.cors
 @odata.controller(MetaController, "Meta")
 @odata.controller(MediaController, "Media")
+@odata.controller(CompoundKeyController, 'CompoundKey')
 class TestServer extends ODataServer {
 
     @odata.container("ActionImportContainer")
@@ -424,8 +463,8 @@ class TestServer extends ODataServer {
     @Edm.String
     FunctionImport2(
         @Edm.String
-        @Edm.Required
         @Edm.Nullable
+        @Edm.Required
         message: string) {
         return `Server FunctionImport ${message}`;
     }
@@ -445,7 +484,7 @@ createODataServer(TestServer, "/test", 3003);
 describe("Metadata test", () => {
     it("should return metadata xml", () => {
         expect(beautify(TestServer.$metadata().document())).to.equal(
-            beautify(`<?xml version="1.0" encoding="UTF-8"?><edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0"><edmx:DataServices><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Controller"></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Functions"><Function Name="f0" IsBound="true"><Parameter Name="bindingParameter" Type="Meta.Meta"/><ReturnType Type="Edm.String"/></Function><Function Name="f2" IsBound="true"><Parameter Name="bindingParameter" Type="Meta.Meta"/><Parameter Name="message" Type="Edm.String"/><ReturnType Type="Edm.String"/></Function><Function Name="ControllerFunction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Media.Media)"/><ReturnType Type="Edm.String"/></Function><Function Name="ControllerFunction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Meta.BaseMeta)"/><Parameter Name="str" Type="Edm.String"/><ReturnType Type="Edm.String"/></Function><Function Name="FunctionImport" IsBound="false"><Parameter Name="value" Type="Collection(Edm.Int32)" Nullable="true"/><Parameter Name="message" Type="Edm.String" Nullable="false"/><ReturnType Type="Edm.String"/></Function><Function Name="FunctionImport2" IsBound="false"><Parameter Name="message" Type="Edm.String" Nullable="false"/><ReturnType Type="Edm.String"/></Function><EntityContainer Name="Default"><FunctionImport Name="FunctionImport" Function="Functions.FunctionImport"/><FunctionImport Name="FunctionImport2" Function="Functions.FunctionImport2"/></EntityContainer></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Media"><EntityType Name="Media" HasStream="true"><Key><PropertyRef Name="Id"/></Key><Property Name="Id" Type="Edm.Int32" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/></Property><NavigationProperty Name="Meta" Type="Media.Meta" Partner="Media"/><Annotation Term="UI.DisplayName" String="Media"/></EntityType><Action Name="ControllerAction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Media.Media)"/><Parameter Name="value" Type="Edm.Int32"/></Action></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Meta"><EntityType Name="BaseMeta"><Key><PropertyRef Name="MongoId"/></Key><Property Name="MongoId" Type="Meta.MongoId" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/></Property><Property Name="b0" Type="Edm.String"/></EntityType><EntityType Name="Collection"></EntityType><EntityType Name="Meta" BaseType="Server.BaseMeta"><Key><PropertyRef Name="Id"/></Key><Property Name="Id" Type="Edm.Int32" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/><Annotation Term="UI.DisplayName" String="Identifier"/><Annotation Term="UI.ControlHint" String="ReadOnly"/></Property><Property Name="p0" Type="Edm.Binary" Nullable="true"/><Property Name="p1" Type="Edm.Boolean"/><Property Name="p2" Type="Edm.Byte"/><Property Name="p3" Type="Edm.Date"/><Property Name="p4" Type="Edm.DateTimeOffset"/><Property Name="p5" Type="Edm.Decimal"/><Property Name="p6" Type="Edm.Double"/><Property Name="p7" Type="Edm.Duration"/><Property Name="p8" Type="Edm.Guid"/><Property Name="p9" Type="Edm.Int16" Nullable="false"/><Property Name="p10" Type="Edm.Int32" Nullable="false"/><Property Name="p11" Type="Edm.Int64"/><Property Name="p12" Type="Edm.SByte"/><Property Name="p13" Type="Edm.Single"/><Property Name="p14" Type="Edm.Stream"/><Property Name="p15" Type="Edm.String"/><Property Name="p16" Type="Edm.TimeOfDay"/><Property Name="p17" Type="Edm.Geography"/><Property Name="p18" Type="Edm.GeographyPoint"/><Property Name="p19" Type="Edm.GeographyLineString"/><Property Name="p20" Type="Edm.GeographyPolygon"/><Property Name="p21" Type="Edm.GeographyMultiPoint"/><Property Name="p22" Type="Edm.GeographyMultiLineString"/><Property Name="p23" Type="Edm.GeographyMultiPolygon"/><Property Name="p24" Type="Edm.GeographyCollection"/><Property Name="p25" Type="Edm.Geometry"/><Property Name="p26" Type="Edm.GeometryPoint"/><Property Name="p27" Type="Edm.GeometryLineString"/><Property Name="p28" Type="Edm.GeometryPolygon"/><Property Name="p29" Type="Edm.GeometryMultiPoint"/><Property Name="p30" Type="Edm.GeometryMultiLineString"/><Property Name="p31" Type="Edm.GeometryMultiPolygon"/><Property Name="p32" Type="Edm.GeometryCollection"/><Property Name="p33" Type="Collection(Edm.Binary)" Nullable="true"/><Property Name="p34" Type="Collection(Edm.Boolean)"/><Property Name="p35" Type="Collection(Edm.Byte)"/><Property Name="p36" Type="Collection(Edm.Date)"/><Property Name="p37" Type="Collection(Edm.DateTimeOffset)"/><Property Name="p38" Type="Collection(Edm.Decimal)"/><Property Name="p39" Type="Collection(Edm.Double)"/><Property Name="p40" Type="Collection(Edm.Duration)"/><Property Name="p41" Type="Collection(Edm.Guid)"/><Property Name="p42" Type="Collection(Edm.Int16)"/><Property Name="p43" Type="Collection(Edm.Int32)"/><Property Name="p44" Type="Collection(Edm.Int64)"/><Property Name="p45" Type="Collection(Edm.SByte)"/><Property Name="p46" Type="Collection(Edm.Single)"/><Property Name="p47" Type="Collection(Edm.Stream)"/><Property Name="p48" Type="Collection(Edm.String)"/><Property Name="p49" Type="Collection(Edm.TimeOfDay)"/><Property Name="p50" Type="Collection(Edm.Geography)"/><Property Name="p51" Type="Collection(Edm.GeographyPoint)"/><Property Name="p52" Type="Collection(Edm.GeographyLineString)"/><Property Name="p53" Type="Collection(Edm.GeographyPolygon)"/><Property Name="p54" Type="Collection(Edm.GeographyMultiPoint)"/><Property Name="p55" Type="Collection(Edm.GeographyMultiLineString)"/><Property Name="p56" Type="Collection(Edm.GeographyMultiPolygon)"/><Property Name="p57" Type="Collection(Edm.GeographyCollection)"/><Property Name="p58" Type="Collection(Edm.Geometry)"/><Property Name="p59" Type="Collection(Edm.GeometryPoint)"/><Property Name="p60" Type="Collection(Edm.GeometryLineString)"/><Property Name="p61" Type="Collection(Edm.GeometryPolygon)"/><Property Name="p62" Type="Collection(Edm.GeometryMultiPoint)"/><Property Name="p63" Type="Collection(Edm.GeometryMultiLineString)"/><Property Name="p64" Type="Collection(Edm.GeometryMultiPolygon)"/><Property Name="p65" Type="Collection(Edm.GeometryCollection)"/><Property Name="p66" Type="Edm.Stream"/><Property Name="Complex" Type="Meta.Complex"/><Property Name="ComplexList" Type="Collection(Meta.fwd)"/><Property Name="MediaList" Type="Collection(Media.Media)"/><NavigationProperty Name="p67" Type="Collection(Collection)"/></EntityType><ComplexType Name="Complex"></ComplexType><ComplexType Name="fwd"></ComplexType><Action Name="a0" IsBound="true"><Parameter Name="bindingParameter" Type="Meta.Meta"/></Action><Action Name="ControllerAction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Meta.BaseMeta)"/></Action></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Server"><EntityType Name="ObjectID"></EntityType><Action Name="ActionImport" IsBound="false"/><Action Name="ActionImportParams" IsBound="false"><Parameter Name="value" Type="Collection(Edm.Int32)"/></Action><Function Name="objid" IsBound="false"><Parameter Name="v" Type="undefined.null"/><ReturnType Type="Server.ObjectID"/></Function><EntityContainer Name="ActionImportContainer"><ActionImport Name="ActionImport" Action="Server.ActionImport"/></EntityContainer><EntityContainer Name="Default"><EntitySet Name="Media" EntityType="Media.Media"/><EntitySet Name="Meta" EntityType="Meta.BaseMeta"/><ActionImport Name="ActionImportParams" Action="Server.ActionImportParams"/><FunctionImport Name="objid" Function="Server.objid"/></EntityContainer></Schema></edmx:DataServices></edmx:Edmx>`)
+            beautify(`<?xml version="1.0" encoding="UTF-8"?><edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0"><edmx:DataServices><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Controller"></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Functions"><Function Name="f0" IsBound="true"><Parameter Name="bindingParameter" Type="Meta.Meta"/><ReturnType Type="Edm.String"/></Function><Function Name="f2" IsBound="true"><Parameter Name="bindingParameter" Type="Meta.Meta"/><Parameter Name="message" Type="Edm.String"/><ReturnType Type="Edm.String"/></Function><Function Name="ControllerFunction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Media.Media)"/><ReturnType Type="Edm.String"/></Function><Function Name="ControllerFunction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Meta.BaseMeta)"/><Parameter Name="str" Type="Edm.String"/><ReturnType Type="Edm.String"/></Function><Function Name="FunctionImport" IsBound="false"><Parameter Name="value" Type="Collection(Edm.Int32)" Nullable="true"/><Parameter Name="message" Type="Edm.String" Nullable="false"/><ReturnType Type="Edm.String"/></Function><Function Name="FunctionImport2" IsBound="false"><Parameter Name="message" Type="Edm.String" Nullable="true"/><ReturnType Type="Edm.String"/></Function><EntityContainer Name="Default"><FunctionImport Name="FunctionImport" Function="Functions.FunctionImport"/><FunctionImport Name="FunctionImport2" Function="Functions.FunctionImport2"/></EntityContainer></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Media"><EntityType Name="Media" HasStream="true"><Key><PropertyRef Name="Id"/></Key><Property Name="Id" Type="Edm.Int32" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/></Property><NavigationProperty Name="Meta" Type="Media.Meta" Partner="Media"/><Annotation Term="UI.DisplayName" String="Media"/></EntityType><Action Name="ControllerAction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Media.Media)"/><Parameter Name="value" Type="Edm.Int32"/></Action></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Meta"><EntityType Name="BaseMeta"><Key><PropertyRef Name="MongoId"/></Key><Property Name="MongoId" Type="Meta.MongoId" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/></Property><Property Name="b0" Type="Edm.String"/></EntityType><EntityType Name="Collection"></EntityType><EntityType Name="Meta" BaseType="Server.BaseMeta"><Key><PropertyRef Name="Id"/></Key><Property Name="Id" Type="Edm.Int32" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/><Annotation Term="UI.DisplayName" String="Identifier"/><Annotation Term="UI.ControlHint" String="ReadOnly"/></Property><Property Name="p0" Type="Edm.Binary" Nullable="true"/><Property Name="p1" Type="Edm.Boolean"/><Property Name="p2" Type="Edm.Byte"/><Property Name="p3" Type="Edm.Date"/><Property Name="p4" Type="Edm.DateTimeOffset"/><Property Name="p5" Type="Edm.Decimal"/><Property Name="p6" Type="Edm.Double"/><Property Name="p7" Type="Edm.Duration"/><Property Name="p8" Type="Edm.Guid"/><Property Name="p9" Type="Edm.Int16" Nullable="false"/><Property Name="p10" Type="Edm.Int32" Nullable="false"/><Property Name="p11" Type="Edm.Int64"/><Property Name="p12" Type="Edm.SByte"/><Property Name="p13" Type="Edm.Single"/><Property Name="p14" Type="Edm.Stream"/><Property Name="p15" Type="Edm.String"/><Property Name="p16" Type="Edm.TimeOfDay"/><Property Name="p17" Type="Edm.Geography"/><Property Name="p18" Type="Edm.GeographyPoint"/><Property Name="p19" Type="Edm.GeographyLineString"/><Property Name="p20" Type="Edm.GeographyPolygon"/><Property Name="p21" Type="Edm.GeographyMultiPoint"/><Property Name="p22" Type="Edm.GeographyMultiLineString"/><Property Name="p23" Type="Edm.GeographyMultiPolygon"/><Property Name="p24" Type="Edm.GeographyCollection"/><Property Name="p25" Type="Edm.Geometry"/><Property Name="p26" Type="Edm.GeometryPoint"/><Property Name="p27" Type="Edm.GeometryLineString"/><Property Name="p28" Type="Edm.GeometryPolygon"/><Property Name="p29" Type="Edm.GeometryMultiPoint"/><Property Name="p30" Type="Edm.GeometryMultiLineString"/><Property Name="p31" Type="Edm.GeometryMultiPolygon"/><Property Name="p32" Type="Edm.GeometryCollection"/><Property Name="p33" Type="Collection(Edm.Binary)" Nullable="true"/><Property Name="p34" Type="Collection(Edm.Boolean)"/><Property Name="p35" Type="Collection(Edm.Byte)"/><Property Name="p36" Type="Collection(Edm.Date)"/><Property Name="p37" Type="Collection(Edm.DateTimeOffset)"/><Property Name="p38" Type="Collection(Edm.Decimal)"/><Property Name="p39" Type="Collection(Edm.Double)"/><Property Name="p40" Type="Collection(Edm.Duration)"/><Property Name="p41" Type="Collection(Edm.Guid)"/><Property Name="p42" Type="Collection(Edm.Int16)"/><Property Name="p43" Type="Collection(Edm.Int32)"/><Property Name="p44" Type="Collection(Edm.Int64)"/><Property Name="p45" Type="Collection(Edm.SByte)"/><Property Name="p46" Type="Collection(Edm.Single)"/><Property Name="p47" Type="Collection(Edm.Stream)"/><Property Name="p48" Type="Collection(Edm.String)"/><Property Name="p49" Type="Collection(Edm.TimeOfDay)"/><Property Name="p50" Type="Collection(Edm.Geography)"/><Property Name="p51" Type="Collection(Edm.GeographyPoint)"/><Property Name="p52" Type="Collection(Edm.GeographyLineString)"/><Property Name="p53" Type="Collection(Edm.GeographyPolygon)"/><Property Name="p54" Type="Collection(Edm.GeographyMultiPoint)"/><Property Name="p55" Type="Collection(Edm.GeographyMultiLineString)"/><Property Name="p56" Type="Collection(Edm.GeographyMultiPolygon)"/><Property Name="p57" Type="Collection(Edm.GeographyCollection)"/><Property Name="p58" Type="Collection(Edm.Geometry)"/><Property Name="p59" Type="Collection(Edm.GeometryPoint)"/><Property Name="p60" Type="Collection(Edm.GeometryLineString)"/><Property Name="p61" Type="Collection(Edm.GeometryPolygon)"/><Property Name="p62" Type="Collection(Edm.GeometryMultiPoint)"/><Property Name="p63" Type="Collection(Edm.GeometryMultiLineString)"/><Property Name="p64" Type="Collection(Edm.GeometryMultiPolygon)"/><Property Name="p65" Type="Collection(Edm.GeometryCollection)"/><Property Name="p66" Type="Edm.Stream"/><Property Name="Complex" Type="Meta.Complex"/><Property Name="ComplexList" Type="Collection(Meta.fwd)"/><Property Name="MediaList" Type="Collection(Media.Media)"/><NavigationProperty Name="p67" Type="Collection(Collection)"/></EntityType><ComplexType Name="Complex"></ComplexType><ComplexType Name="fwd"></ComplexType><Action Name="a0" IsBound="true"><Parameter Name="bindingParameter" Type="Meta.Meta"/></Action><Action Name="ControllerAction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Meta.BaseMeta)"/></Action></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Server"><EntityType Name="CompoundKey"><Key><PropertyRef Name="bc0"/></Key><Property Name="bc0" Type="Edm.Decimal" Nullable="false"/><Property Name="bc1" Type="Edm.Binary" Nullable="false"/><Property Name="bc2" Type="Edm.Boolean" Nullable="false"/><Property Name="bc3" Type="Edm.Byte" Nullable="false"/><Property Name="bc4" Type="Edm.Guid" Nullable="false"/><Property Name="bc5" Type="Edm.Double" Nullable="false"/></EntityType><EntityType Name="ObjectID"></EntityType><Action Name="ActionImport" IsBound="false"/><Action Name="ActionImportParams" IsBound="false"><Parameter Name="value" Type="Collection(Edm.Int32)"/></Action><Function Name="objid" IsBound="false"><Parameter Name="v" Type="undefined.null"/><ReturnType Type="Server.ObjectID"/></Function><EntityContainer Name="ActionImportContainer"><ActionImport Name="ActionImport" Action="Server.ActionImport"/></EntityContainer><EntityContainer Name="Default"><EntitySet Name="CompoundKey" EntityType="Server.CompoundKey"/><EntitySet Name="Media" EntityType="Media.Media"/><EntitySet Name="Meta" EntityType="Meta.BaseMeta"/><ActionImport Name="ActionImportParams" Action="Server.ActionImportParams"/><FunctionImport Name="objid" Function="Server.objid"/></EntityContainer></Schema></edmx:DataServices></edmx:Edmx>`)
         );
     });
 })
@@ -456,6 +495,11 @@ describe("Root", () => {
             // "@odata.context": "http://localhost:3001/$metadata",
             "@odata.context": undefined,
             "value": [
+                {
+                    "name": "CompoundKey",
+                    "kind": "EntitySet",
+                    "url": "CompoundKey"
+                },
                 {
                     "name": "Media",
                     "kind": "EntitySet",
@@ -511,6 +555,48 @@ describe("Navigation property", () => {
 })
 
 describe("Compound key", () => {
+    it("should return CompoundKey result", () => {
+        return TestServer.execute("/CompoundKey", "GET").then((result) => {
+            expect(result).to.deep.equal({
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#CompoundKey",
+                    "value": [
+                        {
+                            "bc0": 1,
+                            "bc1": 2,
+                            "bc2": true,
+                            "bc3": 4,
+                            "bc4": "5",
+                            "bc5": 6
+                        }
+                    ]
+                },
+                elementType: CompoundKey,
+                contentType: "application/json"
+            });
+        });
+    });
+
+    it("should return CompoundKey result by keys", () => {
+        return TestServer.execute("/CompoundKey(bc0=11,bc1=22,bc2=true,bc3=44,bc4='55',bc5=66)", "GET").then((result) => {
+            expect(result).to.deep.equal({
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#CompoundKey/$entity",
+                    "bc0": 11,
+                    "bc1": 22,
+                    "bc2": true,
+                    "bc3": 44,
+                    "bc4": "55",
+                    "bc5": 66,
+                },
+                elementType: CompoundKey,
+                contentType: "application/json"
+            });
+        });
+    });
+
     it("should return Meta result by keys", () => {
         return TestServer.execute("/Meta(Id=1,MongoId='578f2b8c12eaebabec4af242',p9=9,p10=10)", "GET").then((result) => {
             expect(result).to.deep.equal({
