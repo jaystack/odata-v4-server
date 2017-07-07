@@ -1,11 +1,7 @@
 /// <reference types="mocha" />
-import { TestServer, Foobar, NoServer, AuthenticationServer, Image, User, Location, Music } from './test.model';
-import { Token } from "odata-v4-parser/lib/lexer";
-import { createFilter } from "odata-v4-inmemory";
-import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
+import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music } from './test.model';
+import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { Readable, PassThrough, Writable } from "stream";
-import { ObjectID } from "mongodb";
 const { expect } = require("chai");
 const extend = require("extend");
 let categories = require("../example/categories");
@@ -79,7 +75,7 @@ export function testFactory(createTest: Function) {
                 "@odata.id": "http://localhost/EntitySet(1)",
                 "@odata.editLink": "http://localhost/EntitySet(1)",
                 id: 1,
-                foo: "bar"
+                "foo": "bar"
             },
             elementType: Foobar,
             contentType: "application/json"
@@ -155,79 +151,6 @@ export function testFactory(createTest: Function) {
             },
             elementType: Foobar,
             contentType: "application/json"
-        });
-
-        it("should update foobar's foo property ", () => {
-            return TestServer.execute("/EntitySet(1)/foo", "PUT", {
-                foo: "PUT"
-            }).then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-
-                return TestServer.execute("/EntitySet(1)", "GET").then((result) => {
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: {
-                            "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
-                            "@odata.id": "http://localhost/EntitySet(1)",
-                            "@odata.editLink": "http://localhost/EntitySet(1)",
-                            id: 1,
-                            foo: "PUT"
-                        },
-                        elementType: Foobar,
-                        contentType: "application/json"
-                    });
-                });
-            });
-        });
-
-        it("should delta update foobar's foo property ", () => {
-            return TestServer.execute("/EntitySet(1)/foo", "PATCH", {
-                foo: "PATCH"
-            }).then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-
-                return TestServer.execute("/EntitySet(1)", "GET").then((result) => {
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: {
-                            "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
-                            "@odata.id": "http://localhost/EntitySet(1)",
-                            "@odata.editLink": "http://localhost/EntitySet(1)",
-                            id: 1,
-                            foo: "PATCH"
-                        },
-                        elementType: Foobar,
-                        contentType: "application/json"
-                    });
-                });
-            });
-        });
-
-        it("should delete foobar's foo property ", () => {
-            return TestServer.execute("/EntitySet(1)/foo", "DELETE").then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-
-                return TestServer.execute("/EntitySet(1)", "GET").then((result) => {
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: {
-                            "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
-                            "@odata.id": "http://localhost/EntitySet(1)",
-                            "@odata.editLink": "http://localhost/EntitySet(1)",
-                            id: 1,
-                            foo: null
-                        },
-                        elementType: Foobar,
-                        contentType: "application/json"
-                    });
-                });
-            });
         });
 
         createTest("should call action import", TestServer, "POST /ActionImport", {
@@ -378,29 +301,29 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
-        createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products", {
-            statusCode: 200,
-            body: {
-                "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af289')/Products",
-                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289").map(product => Object.assign({
-                    "@odata.id": `http://localhost/Products('${product._id}')`
-                }, product))
-            },
-            elementType: Product,
-            contentType: "application/json"
-        });
+        // createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af290')/Products", {
+        //     statusCode: 200,
+        //     body: {
+        //         "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af290')/Products",
+        //         value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af290").map(product => Object.assign({
+        //             "@odata.id": `http://localhost/Products('${product._id}')`
+        //         }, product))
+        //     },
+        //     elementType: Product,
+        //     contentType: "application/json"
+        // });
 
-        createTest("should return entity collection navigation property result with filter", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products?$filter=Name eq 'Chai'", {
-            statusCode: 200,
-            body: {
-                "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af289')/Products",
-                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af289" && product.Name == "Chai").map(product => Object.assign({
-                    "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')"
-                }, product))
-            },
-            elementType: Product,
-            contentType: "application/json"
-        });
+        // createTest("should return entity collection navigation property result with filter", TestServer, "GET /Categories('578f2baa12eaebabec4af290')/Products?$filter=Name eq 'Pavlova'", {
+        //     statusCode: 200,
+        //     body: {
+        //         "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af290')/Products",
+        //         value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af290" && product.Name == "Pavlova").map(product => Object.assign({
+        //             "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af248')"
+        //         }, product))
+        //     },
+        //     elementType: Product,
+        //     contentType: "application/json"
+        // });
 
         createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products('578f2b8c12eaebabec4af23c')", {
             statusCode: 200,
@@ -410,158 +333,6 @@ export function testFactory(createTest: Function) {
             }, products.filter(product => product._id.toString() == "578f2b8c12eaebabec4af23c")[0]),
             elementType: Product,
             contentType: "application/json"
-        });
-
-        it("should create product reference on category", () => {
-            return TestServer.execute("/Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", "POST").then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-                return TestServer.execute("/Products('578f2b8c12eaebabec4af242')/Category", "GET").then((result) => {
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: extend({
-                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
-                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28e").map(category => extend({
-                            "@odata.id": `http://localhost/Categories('${category._id}')`
-                        }, category))[0]
-                        ),
-                        elementType: Category,
-                        contentType: "application/json"
-                    })
-                });
-            });
-        });
-
-        it("should update product reference on category", () => {
-            return TestServer.execute("/Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", "PUT").then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-                return TestServer.execute("/Products('578f2b8c12eaebabec4af242')/Category", "GET").then((result) => {
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: extend({
-                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
-                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28e").map(category => extend({
-                            "@odata.id": `http://localhost/Categories('${category._id}')`
-                        }, category))[0]
-                        ),
-                        elementType: Category,
-                        contentType: "application/json"
-                    })
-                });
-            });
-        });
-
-        it("should delta update product reference on category", () => {
-            return TestServer.execute("/Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", "PATCH").then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-                return TestServer.execute("/Products('578f2b8c12eaebabec4af242')/Category", "GET").then((result) => {
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: extend({
-                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
-                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28e").map(category => extend({
-                            "@odata.id": `http://localhost/Categories('${category._id}')`
-                        }, category))[0]
-                        ),
-                        elementType: Category,
-                        contentType: "application/json"
-                    })
-                });
-            });
-        });
-
-        it("should delete product reference on category", () => {
-            return TestServer.execute("/Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", "DELETE").then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-                return TestServer.execute("/Products('578f2b8c12eaebabec4af242')/Category", "GET").then((result) => {
-                    throw new Error("Category reference should be deleted.");
-                }, (err) => {
-                    expect(err.name).to.equal("ResourceNotFoundError");
-                });;
-            });
-        });
-
-        it("should delete product reference on category by ref id", () => {
-            return TestServer.execute("/Categories('578f2baa12eaebabec4af289')/Products/$ref?$id=http://localhost/Products('578f2b8c12eaebabec4af27e')", "DELETE").then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-
-                return TestServer.execute("/Products('578f2b8c12eaebabec4af27e')/Category", "GET").then((result) => {
-                    throw new Error("Category reference should be deleted.");
-                }, (err) => {
-                    expect(err.name).to.equal("ResourceNotFoundError");
-                });
-            });
-        });
-
-        it("should create category reference on product", () => {
-            return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "POST", {
-                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28c')"
-            }).then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-                return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category", "GET").then((result) => {
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: extend({
-                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
-                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28c").map(category => extend({
-                            "@odata.id": `http://localhost/Categories('${category._id}')`
-                        }, category))[0]
-                        ),
-                        elementType: Category,
-                        contentType: "application/json"
-                    })
-                });
-            });
-        });
-
-        it("should update category reference on product", () => {
-            return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "PUT", {
-                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28c')"
-            }).then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-                return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category", "GET").then((result) => {
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: extend({
-                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
-                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28c").map(category => extend({
-                            "@odata.id": `http://localhost/Categories('${category._id}')`
-                        }, category))[0]
-                        ),
-                        elementType: Category,
-                        contentType: "application/json"
-                    })
-                });
-            });
-        });
-
-        it("should delete category reference on product", () => {
-            return TestServer.execute("/Products('578f2b8c12eaebabec4af288')/Category/$ref", "DELETE", {
-                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28e')"
-            }).then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-
-                return TestServer.execute("/Products('578f2b8c12eaebabec4af288')/Category", "GET").then((result) => {
-                    throw new Error("Category reference should be deleted.");
-                }, (err) => {
-                    expect(err.name).to.equal("ResourceNotFoundError");
-                });
-            });
         });
 
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
@@ -636,16 +407,6 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
-        it("stream property POST", () => {
-            let readableStrBuffer = new streamBuffers.ReadableStreamBuffer();
-            readableStrBuffer.put('tmp.png');
-            return TestServer.execute("/ImagesControllerEntitySet(1)/Data", "POST", readableStrBuffer).then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-            });
-        });
-
         createTest("stream property write and pipe", TestServer, "GET /ImagesControllerEntitySet(1)/Data2", {
             statusCode: 200,
             body: {
@@ -696,16 +457,6 @@ export function testFactory(createTest: Function) {
             },
             elementType: Music,
             contentType: "application/json"
-        });
-
-        it("media entity POST", () => {
-            let readableStrBuffer = new streamBuffers.ReadableStreamBuffer();
-            readableStrBuffer.put('tmp.mp3');
-            return TestServer.execute("/MusicControllerEntitySet(1)/$value", "POST", readableStrBuffer).then((result) => {
-                expect(result).to.deep.equal({
-                    statusCode: 204
-                });
-            });
         });
     });
 }
