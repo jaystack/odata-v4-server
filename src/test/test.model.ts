@@ -5,9 +5,7 @@ import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataRes
 import { Product, Category } from "../example/model";
 import { Readable, PassThrough, Writable } from "stream";
 import { ObjectID } from "mongodb";
-const { expect } = require("chai");
 const extend = require("extend");
-const request = require('request')
 let categories = require("../example/categories");
 let products = require("../example/products");
 let streamBuffers = require("stream-buffers");
@@ -455,6 +453,7 @@ export class TestServer extends ODataServer {
     }
 }
 TestServer.$metadata();
+// TestServer.create(3003)
 
 @odata.namespace("Authentication")
 @odata.controller(UsersController, true)
