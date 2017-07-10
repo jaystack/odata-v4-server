@@ -99,7 +99,8 @@ export class SyncTestController extends ODataController {
     patch( @odata.key key: number, @odata.body delta: any) {
         return Object.assign({
             id: key,
-            foo: "bar"
+            foo: "bar",
+            bar: 'foo'
         }, delta);
     }
 
