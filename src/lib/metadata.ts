@@ -7,7 +7,7 @@ import { getAllPropertyNames } from "./utils";
 export function createMetadataJSON(server:typeof ODataServer){
     if (!server.namespace) server.namespace = "Default";
     let containerType = Object.getPrototypeOf(server.container).constructor;
-    if (!containerType.namespace) containerType.namespace = server.namespace;
+    if (containerType != Edm.ContainerBase && !containerType.namespace) containerType.namespace = server.namespace;
 
     let definition:any = {
         version: "4.0",
@@ -75,7 +75,7 @@ export function createMetadataJSON(server:typeof ODataServer){
         if (resolvingTypes.indexOf(elementType) >= 0) return null;
         resolvingTypes.push(elementType);
 
-        if (!elementType.namespace) elementType.namespace = server.container.resolve(elementType) ? (Object.getPrototypeOf(server.container).constructor.namespace || parent.namespace) : parent.namespace;
+        if (!elementType.namespace) elementType.namespace = server.container.resolve(elementType) ? (containerType.namespace || parent.namespace) : parent.namespace;
 
         let typeName = Edm.getTypeName(parent, prop, server.container) || elementType.name;
         if (typeName.indexOf('Collection') == 0) typeName = elementType.name;
@@ -136,7 +136,6 @@ export function createMetadataJSON(server:typeof ODataServer){
             }else if (Edm.isEnumType(elementType, prop)){
                 let enumType = Edm.getType(elementType, prop, server.container);
                 let enumName = Edm.getTypeName(elementType, prop, server.container);
-                let containerType = Object.getPrototypeOf(server.container).constructor;
                 let enumNamespace = containerType.namespace || namespace;
                 let enumDefinition;
 
@@ -243,8 +242,8 @@ export function createMetadataJSON(server:typeof ODataServer){
                 let parameters = Edm.getParameters(operations[operation], operation).map(p => {
                     let param = Object.assign({}, p);
                     if (typeof param.type != "string"){
-                        let containerType = server.container.resolve(param.type);
-                        param.type = `${(<any>server.container.constructor).namespace}.${containerType}`;
+                        let resolvedContainerType = server.container.resolve(param.type);
+                        param.type = `${containerType.namespace}.${resolvedContainerType}`;
                     }
                     return param;
                 });
@@ -264,8 +263,8 @@ export function createMetadataJSON(server:typeof ODataServer){
                 let parameters = Edm.getParameters(operations[operation], operation).map(p => {
                     let param = Object.assign({}, p);
                     if (typeof param.type != "string"){
-                        let containerType = server.container.resolve(param.type);
-                        param.type = `${(<any>server.container.constructor).namespace}.${containerType}`;
+                        let resolvedContainerType = server.container.resolve(param.type);
+                        param.type = `${containerType.namespace}.${resolvedContainerType}`;
                     }
                     return param;
                 });
@@ -308,14 +307,15 @@ export function createMetadataJSON(server:typeof ODataServer){
             //let containerSchema = definition.dataServices.schema.filter((schema) => schema.namespace == server.namespace)[0];
             if (server.prototype[i].prototype instanceof ODataController){
                 let ctrl = server.prototype[i];
-                if (!ctrl.constructor.namespace) ctrl.constructor.namespace = server.namespace;
+                if (!ctrl.namespace) ctrl.namespace = server.namespace;
                 let elementType = ctrl.prototype.elementType;
                 let containerName = ctrl.containerName || "Default";
-                let ctrlSchema = definition.dataServices.schema.find((schema) => schema.namespace == ctrl.constructor.namespace);
+                let ctrlSchema = definition.dataServices.schema.find((schema) => schema.namespace == ctrl.namespace);
 
+                // TODO: don't insert empty schema
                 if (!ctrlSchema){
                     ctrlSchema = {
-                        namespace: ctrl.constructor.namespace,
+                        namespace: ctrl.namespace,
                         typeDefinition: [],
                         enumType: [],
                         entityType: [],
@@ -389,8 +389,8 @@ export function createMetadataJSON(server:typeof ODataServer){
                         let parameters = Edm.getParameters(operations[operation], operation).map(p => {
                             let param = Object.assign({}, p);
                             if (typeof param.type != "string"){
-                                let containerType = server.container.resolve(param.type);
-                                param.type = `${(<any>server.container.constructor).namespace}.${containerType}`;
+                                let resolvedContainerType = server.container.resolve(param.type);
+                                param.type = `${containerType.namespace}.${resolvedContainerType}`;
                             }
                             return param;
                         });;
@@ -409,8 +409,8 @@ export function createMetadataJSON(server:typeof ODataServer){
                         let parameters = Edm.getParameters(operations[operation], operation).map(p => {
                             let param = Object.assign({}, p);
                             if (typeof param.type != "string"){
-                                let containerType = server.container.resolve(param.type);
-                                param.type = `${(<any>server.container.constructor).namespace}.${containerType}`;
+                                let resolvedContainerType = server.container.resolve(param.type);
+                                param.type = `${containerType.namespace}.${resolvedContainerType}`;
                             }
                             return param;
                         });
@@ -450,8 +450,8 @@ export function createMetadataJSON(server:typeof ODataServer){
                 let parameters = Edm.getParameters(server, i).map(p => {
                     let param = Object.assign({}, p);
                     if (typeof param.type != "string"){
-                        let containerType = server.container.resolve(param.type);
-                        param.type = `${(<any>server.container.constructor).namespace}.${containerType}`;
+                        let resolvedContainerType = server.container.resolve(param.type);
+                        param.type = `${containerType.namespace}.${resolvedContainerType}`;
                     }
                     return param;
                 });
@@ -498,8 +498,8 @@ export function createMetadataJSON(server:typeof ODataServer){
                 let parameters = Edm.getParameters(server, i).map(p => {
                     let param = Object.assign({}, p);
                     if (typeof param.type != "string"){
-                        let containerType = server.container.resolve(param.type);
-                        param.type = `${(<any>server.container.constructor).namespace}.${containerType}`;
+                        let resolvedContainerType = server.container.resolve(param.type);
+                        param.type = `${containerType.namespace}.${resolvedContainerType}`;
                     }
                     return param;
                 });
