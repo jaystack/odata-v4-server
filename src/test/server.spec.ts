@@ -237,8 +237,8 @@ export function testFactory(createTest: Function) {
         createTest("should call action import with parameters", TestServer, "POST /ActionImportParams", {
             statusCode: 204
         }, {
-                value: 42
-            });
+            value: 42
+        });
 
         createTest("should call function import", TestServer, "GET /FunctionImport(value=42)", {
             statusCode: 200,

@@ -209,6 +209,7 @@ class ImageMember{
     value:string
 }
 
+@Edm.OpenType
 class Image{
     @Edm.Key
     @Edm.Computed
@@ -236,6 +237,7 @@ class ImagesController extends ODataController{
         let image = new Image();
         image.Id = id;
         image.Filename = "tmp.png";
+        (<any>image).mm = [[1,2],[3,4]];
         return image;
     }
 

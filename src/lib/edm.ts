@@ -278,8 +278,12 @@ export function getTypeName(target:Function, propertyKey:string, container?: Con
                 break;
             }
         }
+    } else if (typeof elementType == "string" && elementType == "Collection") {
+        console.log(type, elementType);
     } else if (typeof elementType == "function") {
-        elementType = ((<any>elementType).namespace || (<any>target).namespace || "Default") + "." + (<any>elementType).name;
+        if (elementType.__forward__ref__){
+            elementType = ((<any>elementType).namespace || (<any>target).namespace || "Default") + "." + (<any>elementType)().name;
+        }else elementType = ((<any>elementType).namespace || (<any>target).namespace || "Default") + "." + (<any>elementType).name;
     }
     return elementType ? type + "(" + elementType + ")" : type;
 }
@@ -855,6 +859,7 @@ export interface IEdmContainerInstance{
     resolve(type);
 }
 export interface IEdmContainer{
+    namespace:string
     new(server?:typeof ODataServer):IEdmContainerInstance
 }
 export function Container(type:IEdmContainer){

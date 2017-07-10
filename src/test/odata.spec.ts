@@ -44,4 +44,4 @@ describe("Code coverage", () => {
             expect(err.message).to.equal("Resource not found.");
         });
     });
-})
+});

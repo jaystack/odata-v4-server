@@ -11,13 +11,13 @@ import { ResourcePathVisitor, NavigationPart } from "./visitor";
 import * as Edm from "./edm";
 import * as odata from "./odata";
 import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
-import { ODataServer } from "./server";
+import { ODataServer, ODataHttpContext } from "./server";
 
-const getODataRoot = function(context){
+const getODataRoot = function(context: ODataHttpContext){
     return (context.protocol || "http") + "://" + (context.host || "localhost") + (context.base || "");
 }
 
-const createODataContext = function(context, entitySets, server:typeof ODataServer, resourcePath, processor){
+const createODataContext = function(context: ODataHttpContext, entitySets, server:typeof ODataServer, resourcePath, processor){
     let odataContextBase = getODataRoot(context) + "/$metadata#";
     let odataContext = "";
     let prevResource = null;
@@ -419,7 +419,7 @@ export class ODataProcessor extends Transform{
     private instance:ODataController
     private resourcePath:ResourcePathVisitor
     private workflow:any[]
-    private context:any
+    private context:ODataHttpContext
     private method:string
     private url:any
     private query:any

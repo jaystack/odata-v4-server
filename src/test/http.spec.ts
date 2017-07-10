@@ -6,8 +6,8 @@ import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataRes
 import { Product, Category } from "../example/model";
 import { Readable, PassThrough, Writable } from "stream";
 import { ObjectID } from "mongodb";
-import { testFactory } from './server.spec'
-import * as request  from 'request'
+import { testFactory } from './server.spec';
+import * as request from 'request';
 const { expect } = require("chai");
 const extend = require("extend");
 let categories = require("../example/categories");
@@ -21,13 +21,13 @@ function createTest(testcase: string, server: typeof ODataServer, command: strin
         let path = test.slice(1).join(" ");
         let port = 3000;
         server.create(port);
-        request[method](`http://localhost:${port}${path}`, body, (err, response, result) => {
+        request[method](`http://localhost:${port}${path}`, { json: body }, (err, response, result) => {
             if (err) { console.log(err); }
             expect(result).to.deep.equal(compare);
-        })
+        });
     });
 }
 
-describe("Odata http", () =>{
+describe("OData HTTP", () => {
     testFactory(createTest);
-})
+});

@@ -6,6 +6,8 @@ import { getAllPropertyNames } from "./utils";
 
 export function createMetadataJSON(server:typeof ODataServer){
     if (!server.namespace) server.namespace = "Default";
+    let containerType = Object.getPrototypeOf(server.container).constructor;
+    if (!containerType.namespace) containerType.namespace = server.namespace;
 
     let definition:any = {
         version: "4.0",
@@ -26,7 +28,6 @@ export function createMetadataJSON(server:typeof ODataServer){
     let resolveTypeDefinition = (elementType, prop, namespace) => {
         let defType = Edm.getType(elementType, prop, server.container);
         let defName = server.container.resolve(defType);
-        let containerType = Object.getPrototypeOf(server.container).constructor;
         let defNamespace = containerType.namespace || namespace;
         let defDefinition;
 

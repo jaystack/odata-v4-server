@@ -97,6 +97,7 @@
     "@types/mongodb": "^2.1.33",
     "@types/node": "^7.0.18",
     "@types/node-uuid": "^0.0.28",
+    "@types/request": "0.0.45",
     "JSONStream": "^1.2.1",
     "benchmark": "^2.1.1",
     "chai": "^3.5.0",
