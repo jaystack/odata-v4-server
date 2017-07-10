@@ -2,6 +2,8 @@
 import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music } from './test.model';
 import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
+import { Meta, Media, TestEntity, MetaTestServer, CompoundKey } from './metadata.spec';
+import { ObjectID } from "mongodb";
 const { expect } = require("chai");
 const extend = require("extend");
 let categories = require("../example/categories");
@@ -301,29 +303,29 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
-        // createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af290')/Products", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af290')/Products",
-        //         value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af290").map(product => Object.assign({
-        //             "@odata.id": `http://localhost/Products('${product._id}')`
-        //         }, product))
-        //     },
-        //     elementType: Product,
-        //     contentType: "application/json"
-        // });
+        createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af290')/Products", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af290')/Products",
+                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af290").map(product => Object.assign({
+                    "@odata.id": `http://localhost/Products('${product._id}')`
+                }, product))
+            },
+            elementType: Product,
+            contentType: "application/json"
+        });
 
-        // createTest("should return entity collection navigation property result with filter", TestServer, "GET /Categories('578f2baa12eaebabec4af290')/Products?$filter=Name eq 'Pavlova'", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af290')/Products",
-        //         value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af290" && product.Name == "Pavlova").map(product => Object.assign({
-        //             "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af248')"
-        //         }, product))
-        //     },
-        //     elementType: Product,
-        //     contentType: "application/json"
-        // });
+        createTest("should return entity collection navigation property result with filter", TestServer, "GET /Categories('578f2baa12eaebabec4af290')/Products?$filter=Name eq 'Pavlova'", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af290')/Products",
+                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af290" && product.Name == "Pavlova").map(product => Object.assign({
+                    "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af248')"
+                }, product))
+            },
+            elementType: Product,
+            contentType: "application/json"
+        });
 
         createTest("should return entity collection navigation property result", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products('578f2b8c12eaebabec4af23c')", {
             statusCode: 200,
@@ -459,4 +461,164 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
     });
+
+    describe("Navigation property", () => {
+        createTest("should return navigation property result", MetaTestServer, "GET /Meta(1)/MediaList", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Meta(1)/MediaList",
+                "value": [
+                    {
+                        "@odata.id": "http://localhost/Media(1)",
+                        "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                        "@odata.mediaContentType": "audio/mp3",
+                        "Id": 1
+                    }
+                ]
+            },
+            elementType: Media,
+            contentType: "application/json"
+        });
+
+        createTest("should return navigation property result by key", MetaTestServer, "GET /Meta(1)/MediaList(1)", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Media/$entity",
+                "@odata.id": "http://localhost/Media(1)",
+                "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                "@odata.mediaContentType": "audio/mp3",
+                "Id": 1
+            },
+            elementType: Media,
+            contentType: "application/json"
+        });
+    });
+
+    describe("Compound key", () => {
+        createTest("should return CompoundKey result", MetaTestServer, "GET /CompoundKey", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#CompoundKey",
+                "value": [
+                    {
+                        "bc0": 1,
+                        "bc1": 2,
+                        "bc2": true,
+                        "bc3": 4,
+                        "bc4": "5",
+                        "bc5": 6
+                    }
+                ]
+            },
+            elementType: CompoundKey,
+            contentType: "application/json"
+        });
+
+        createTest("should return CompoundKey result by keys", MetaTestServer, "GET /CompoundKey(bc0=11,bc1=22,bc2=true,bc3=44,bc4='55',bc5=66)", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#CompoundKey/$entity",
+                "bc0": 11,
+                "bc1": 22,
+                "bc2": true,
+                "bc3": 44,
+                "bc4": "55",
+                "bc5": 66,
+            },
+            elementType: CompoundKey,
+            contentType: "application/json"
+        });
+
+        createTest("should return Meta result by keys", MetaTestServer, "GET /Meta(Id=1,MongoId='578f2b8c12eaebabec4af242',p9=9,p10=10)", {
+            statusCode: 200,
+            body: {
+                "@odata.type": "#Meta.Meta",
+                "@odata.context": "http://localhost/$metadata#Meta/$entity",
+                "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
+                "b0": "b0",
+                "Id": 1,
+                "p9": 9,
+                "p10": 10,
+                "p14@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p14",
+                "p14@odata.mediaContentType": "test",
+                "p47@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p47",
+                "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
+                MongoId: new ObjectID("578f2b8c12eaebabec4af242")
+            },
+            elementType: Meta,
+            contentType: "application/json"
+        });
+    });
+
+    describe("Expand", () => {
+        createTest("should return expanded Meta result with media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Media", {
+            statusCode: 200,
+            body: {
+                "@odata.type": "#Meta.Meta",
+                "@odata.context": "http://localhost/$metadata#Meta/$entity",
+                "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
+                "b0": "b0",
+                "Id": 1,
+                "p9": 9,
+                "p10": 10,
+                "p14@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p14",
+                "p14@odata.mediaContentType": "test",
+                "p47@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p47",
+                "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
+                MongoId: new ObjectID("578f2b8c12eaebabec4af242")
+            },
+            elementType: Meta,
+            contentType: "application/json"
+        });
+        createTest("should return expanded Meta result with the filtered media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Media($filter=Id eq 1)", {
+            statusCode: 200,
+            body: {
+                "@odata.type": "#Meta.Meta",
+                "@odata.context": "http://localhost/$metadata#Meta/$entity",
+                "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
+                "b0": "b0",
+                "Id": 1,
+                "p9": 9,
+                "p10": 10,
+                "p14@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p14",
+                "p14@odata.mediaContentType": "test",
+                "p47@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p47",
+                "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
+                MongoId: new ObjectID("578f2b8c12eaebabec4af242")
+            },
+            elementType: Meta,
+            contentType: "application/json"
+        });
+    });
+
+    describe("Test entity", () => {
+        createTest("should return test entity result", MetaTestServer, "GET /TestEntity", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#TestEntity",
+                "value": [
+                    {
+                        "@odata.id": "http://localhost/TestEntity(1)",
+                        "Genre": "Server.Genre2'0'",
+                        "test": 1
+                    }
+                ]
+            },
+            elementType: TestEntity,
+            contentType: "application/json"
+        });
+
+        createTest("should return test entity result by keys", MetaTestServer, "GET /TestEntity(5)", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#TestEntity/$entity",
+                "@odata.id": "http://localhost/TestEntity(5)",
+                "Genre": "Server.Genre2'0'",
+                "test": 5
+            },
+            elementType: TestEntity,
+            contentType: "application/json"
+        });
+    });
+
 }

@@ -99,7 +99,8 @@ export class SyncTestController extends ODataController {
     patch( @odata.key key: number, @odata.body delta: any) {
         return Object.assign({
             id: key,
-            foo: "bar"
+            foo: "bar",
+            bar: 'foo'
         }, delta);
     }
 
@@ -452,8 +453,6 @@ export class TestServer extends ODataServer {
         return `The number is ${value} and your message was ${message}.`;
     }
 }
-TestServer.$metadata();
-// TestServer.create(3003)
 
 @odata.namespace("Authentication")
 @odata.controller(UsersController, true)

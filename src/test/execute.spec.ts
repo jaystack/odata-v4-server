@@ -9,7 +9,7 @@ let categories = require("../example/categories");
 let products = require("../example/products");
 let streamBuffers = require("stream-buffers");
 
-function createTest(testcase:string, server:typeof ODataServer, command:string, compare:any, body?:any){
+function createTest(testcase: string, server: typeof ODataServer, command: string, compare: any, body?: any) {
     it(`${testcase} (${command})`, () => {
         let test = command.split(" ");
         return server.execute(test.slice(1).join(" "), test[0], body).then((result) => {
@@ -18,7 +18,7 @@ function createTest(testcase:string, server:typeof ODataServer, command:string, 
     });
 }
 
-describe("Odata execute", () =>{
+describe("Odata execute", () => {
     testFactory(createTest);
 
     it("should update foobar's foo property ", () => {
@@ -245,6 +245,7 @@ describe("Odata execute", () =>{
             });
         });
     });
+
     describe("Stream properties", () => {
         it("stream property POST", () => {
             let readableStrBuffer = new streamBuffers.ReadableStreamBuffer();
