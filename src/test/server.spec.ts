@@ -162,8 +162,8 @@ export function testFactory(createTest: Function) {
         createTest("should call action import with parameters", TestServer, "POST /ActionImportParams", {
             statusCode: 204
         }, {
-            value: 42
-        });
+                value: 42
+            });
 
         createTest("should call function import", TestServer, "GET /FunctionImport(value=42)", {
             statusCode: 200,
@@ -551,12 +551,13 @@ export function testFactory(createTest: Function) {
     });
 
     describe("Expand", () => {
-        createTest("should return expanded Meta result with media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Media", {
+        createTest("should return expanded Meta result with media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=MediaList", {
             statusCode: 200,
             body: {
-                "@odata.type": "#Meta.Meta",
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
+                "@odata.type": "#Meta.Meta",
+                "MongoId": new ObjectID("578f2b8c12eaebabec4af242"),
                 "b0": "b0",
                 "Id": 1,
                 "p9": 9,
@@ -565,17 +566,26 @@ export function testFactory(createTest: Function) {
                 "p14@odata.mediaContentType": "test",
                 "p47@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p47",
                 "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
-                MongoId: new ObjectID("578f2b8c12eaebabec4af242")
+                "MediaList": [
+                    {
+                        "@odata.id": "http://localhost/Media(1)",
+                        "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                        "@odata.mediaContentType": "audio/mp3",
+                        "Id": 1
+                    }
+                ]
             },
             elementType: Meta,
             contentType: "application/json"
         });
-        createTest("should return expanded Meta result with the filtered media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Media($filter=Id eq 1)", {
+
+        createTest("should return expanded Meta result with the filtered media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=MediaList($filter=Id eq 1)", {
             statusCode: 200,
             body: {
-                "@odata.type": "#Meta.Meta",
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
+                "@odata.type": "#Meta.Meta",
+                "MongoId": new ObjectID("578f2b8c12eaebabec4af242"),
                 "b0": "b0",
                 "Id": 1,
                 "p9": 9,
@@ -584,7 +594,42 @@ export function testFactory(createTest: Function) {
                 "p14@odata.mediaContentType": "test",
                 "p47@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p47",
                 "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
-                MongoId: new ObjectID("578f2b8c12eaebabec4af242")
+                "MediaList": [
+                    {
+                        "@odata.id": "http://localhost/Media(1)",
+                        "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                        "@odata.mediaContentType": "audio/mp3",
+                        "Id": 1
+                    }
+                ]
+            },
+            elementType: Meta,
+            contentType: "application/json"
+        });
+
+        createTest("should return expanded Meta result with the filtered media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=MediaList($top=1)", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Meta/$entity",
+                "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
+                "@odata.type": "#Meta.Meta",
+                "MongoId": new ObjectID("578f2b8c12eaebabec4af242"),
+                "b0": "b0",
+                "Id": 1,
+                "p9": 9,
+                "p10": 10,
+                "p14@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p14",
+                "p14@odata.mediaContentType": "test",
+                "p47@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p47",
+                "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
+                "MediaList": [
+                    {
+                        "@odata.id": "http://localhost/Media(1)",
+                        "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                        "@odata.mediaContentType": "audio/mp3",
+                        "Id": 1
+                    }
+                ]
             },
             elementType: Meta,
             contentType: "application/json"

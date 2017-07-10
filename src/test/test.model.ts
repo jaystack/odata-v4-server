@@ -107,23 +107,27 @@ export class SyncTestController extends ODataController {
     @odata.PUT('foo')
     putProperty( @odata.body body: any, @odata.result _: Foobar) {
         foobarObj.foo = body.foo;
-        // result.foo = body.foo;
     }
 
     @odata.PATCH('foo')
     patchProperty( @odata.body body: any, @odata.result _: Foobar) {
         foobarObj.foo = body.foo;
-        // result.foo = body.foo;
     }
 
     @odata.DELETE('foo')
     deleteProperty( @odata.result _: Foobar) {
-        // if (result.foo) delete result.foo;
+        // let fooObj = this.getFoo();
+        // if (fooObj.foo) foobarObj.foo = null;
         if (foobarObj.foo) foobarObj.foo = null;
     }
 
     @odata.method(ODataMethodType.DELETE)
     remove() { }
+
+    @Edm.Function(Edm.EntityType(Foobar))
+    getFoo() {
+        return foobarObj;
+    }
 }
 
 @odata.type(Foobar)
