@@ -469,3 +469,7 @@ export class AuthenticationServer extends ODataServer {
 }
 
 export class NoServer extends ODataServer { }
+
+process.on("warning", warning => {
+    console.log(warning.stack);
+});
