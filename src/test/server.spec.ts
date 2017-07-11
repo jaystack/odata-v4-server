@@ -463,7 +463,7 @@ export function testFactory(createTest: Function) {
     });
 
     describe("Navigation property", () => {
-        createTest("should return navigation property result", MetaTestServer, "GET /Meta(1)/MediaList", {
+        createTest("should return navigation property result", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Meta(1)/MediaList",
@@ -480,7 +480,7 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
-        createTest("should return navigation property result by key", MetaTestServer, "GET /Meta(1)/MediaList(1)", {
+        createTest("should return navigation property result by key", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList(1)", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Media/$entity",

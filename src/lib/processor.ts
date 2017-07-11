@@ -1393,7 +1393,7 @@ export class ODataProcessor extends Transform{
                 context[`${prop}@odata.navigationLink`] = `${context["@odata.id"]}/${prop}`;
             }
             if (isCollection && navigationResult.body.value && Array.isArray(navigationResult.body.value)){
-                context[prop + "@odata.count"] = navigationResult.body["@odata.count"];
+                if (typeof navigationResult.body["@odata.count"] == "number") context[prop + "@odata.count"] = navigationResult.body["@odata.count"];
                 context[prop] = navigationResult.body.value;
             }else if (navigationResult.body && Object.keys(navigationResult.body).length > 0){
                 context[prop] = navigationResult.body;
