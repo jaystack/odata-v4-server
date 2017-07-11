@@ -37,7 +37,7 @@ const createODataContext = function(context: ODataHttpContext, entitySets, serve
             odataContext += selectContextPart;
             if (baseResource.key && resourcePath.navigation.indexOf(baseResource) == resourcePath.navigation.length - 1) return odataContext += "/$entity";
             if (baseResource.key){
-                return odataContext += "(" + baseResource.key.map((key) => key.raw).join(",") + ")";
+                return odataContext += "(" + baseResource.key.map((key) => decodeURIComponent(key.raw)).join(",") + ")";
             }
         }else if (getResourcePartFunction(baseResource.type) && !(baseResource.name in expCalls)){
             odataContext = "";
@@ -95,7 +95,7 @@ const createODataContext = function(context: ODataHttpContext, entitySets, serve
             odataContext += selectContextPart;
             if (baseResource.key && resourcePath.navigation.indexOf(baseResource) == resourcePath.navigation.length - 1) return odataContext += "/$entity";
             if (baseResource.key){
-                return odataContext += "(" + baseResource.key.map((key) => key.raw).join(",") + ")";
+                return odataContext += "(" + baseResource.key.map((key) => decodeURIComponent(key.raw)).join(",") + ")";
             }
             return odataContext;
         }

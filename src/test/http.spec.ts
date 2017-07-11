@@ -30,14 +30,12 @@ function createTest(testcase: string, server: typeof ODataServer, command: strin
         }
         return request[method](`http://localhost:${port}${path}`, { json: body }, (err, response, result) => {
             if (err) {
-                console.log(err);
                 throw err;
             }
             if (result) {
                 if (typeof result == "object") {
                     result = JSON.stringify(result);
                 }
-                result = decodeURIComponent(result);
                 try { result = result.replace(new RegExp(`http:\\/\\/localhost:${port}\\/`, 'gi'), 'http://localhost/'); } catch (err) { }
                 try { result = JSON.parse(result); } catch (err) { }
             }
@@ -166,11 +164,9 @@ describe("OData HTTP", () => {
             return request.get(`http://localhost:3002/Products('578f2b8c12eaebabec4af242')/Category`, (err, req, result) => {
                 if (err) return expect(err.name).to.equal("ResourceNotFoundError");
             }).catch(ex => {
-                console.log('ex', ex.statusCode)
                 if (ex) return expect(ex.statusCode).to.equal(404);
             });
         });
-
     });
 
     it("should delete product reference on category by ref id", () => {
@@ -180,7 +176,6 @@ describe("OData HTTP", () => {
             return request.get(`http://localhost:3002/Products('578f2b8c12eaebabec4af284')/Category`, (err, req, result) => {
                 if (err) return expect(err.name).to.equal("ResourceNotFoundError");
             }).catch(ex => {
-                console.log('ex', ex.statusCode)
                 if (ex) return expect(ex.statusCode).to.equal(404);
             });
         });
@@ -240,7 +235,6 @@ describe("OData HTTP", () => {
                 done(err);
             });
             req.on('complete', (resp, body) => {
-                console.log(body);
                 expect(resp.statusCode).to.equal(204);
                 done();
             });
@@ -257,7 +251,6 @@ describe("OData HTTP", () => {
                 done(err);
             });
             req.on('complete', (resp, body) => {
-                console.log(body);
                 expect(resp.statusCode).to.equal(204);
                 done();
             });

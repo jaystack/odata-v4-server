@@ -398,7 +398,7 @@ export class MetaController extends ODataController {
 
     @Edm.Action
     ControllerAction() {
-        console.log('ControllerAction');
+        // console.log('ControllerAction');
     }
 
     @odata.namespace("Functions")
@@ -497,12 +497,12 @@ export class MetaTestServer extends ODataServer {
     @odata.container("ActionImportContainer")
     @Edm.ActionImport
     ActionImport() {
-        console.log('Server ActionImport')
+        // console.log('Server ActionImport')
     }
 
     @Edm.ActionImport
     ActionImportParams( @Edm.Collection(Edm.Int32) value: number[]) {
-        console.log(`Server ActionImport ${value.length}`)
+        // console.log(`Server ActionImport ${value.length}`)
     }
     
     @odata.namespace("Functions")
