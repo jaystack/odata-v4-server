@@ -300,7 +300,7 @@ export class MusicController extends ODataController {
 export class ProductsController extends ODataController {
     @odata.GET
     find( @odata.filter filter: Token): Product[] {
-        if (filter) return products.map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId.toString() })).filter(createFilter(filter));
+        if (filter) return products.map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId && product.CategoryId.toString() })).filter(createFilter(filter));
         return products;
     }
 

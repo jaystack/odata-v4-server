@@ -307,7 +307,7 @@ export function testFactory(createTest: Function) {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af290')/Products",
-                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af290").map(product => Object.assign({
+                value: products.filter(product => product.CategoryId && product.CategoryId.toString() == "578f2baa12eaebabec4af290").map(product => Object.assign({
                     "@odata.id": `http://localhost/Products('${product._id}')`
                 }, product))
             },
@@ -319,7 +319,7 @@ export function testFactory(createTest: Function) {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af290')/Products",
-                value: products.filter(product => product.CategoryId.toString() == "578f2baa12eaebabec4af290" && product.Name == "Pavlova").map(product => Object.assign({
+                value: products.filter(product => product.CategoryId && product.CategoryId.toString() == "578f2baa12eaebabec4af290" && product.Name == "Pavlova").map(product => Object.assign({
                     "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af248')"
                 }, product))
             },
