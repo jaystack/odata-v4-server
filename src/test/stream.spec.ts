@@ -383,7 +383,56 @@ if (typeof describe == "function") {
                 let context: any = {};
                 context.url = `/Products('578f2b8c12eaebabec4af286')/Category/$ref`;
                 context.method = 'POST';
-                context.body = `http://localhost/Categories(categoryId='578f2baa12eaebabec4af28c')`
+                context.body = {
+                    "@odata.id": "http://localhost/Categories(categoryId='578f2baa12eaebabec4af28c')"
+                }
+                
+                testServer.write(context);
+                testServer.on("data", data => { resolve(data) })
+                testServer.on("error", err => { reject(err) })
+            })
+            .then(result => {
+                expect(result).to.deep.equal({ statusCode: 204 });
+
+                return new Promise((resolve, reject) => {
+                    let context: any = {};
+                    context.url = `/Products('578f2b8c12eaebabec4af286')/Category`;
+                    context.method = 'GET';
+
+                    testServer.write(context);
+                    testServer.on("data", data => { resolve(data) })
+                    testServer.on("error", err => { reject(err) })
+                })
+                .then(result => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: extend({
+                            "@odata.context": "http://localhost/$metadata#Categories/$entity"
+                        }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af28c").map(category => extend({
+                            "@odata.id": `http://localhost/Categories('${category._id}')`
+                        }, category))[0]
+                        ),
+                        elementType: Category,
+                        contentType: "application/json"
+                    });
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        })
+
+        it("should update category reference on product", () => {
+            return new Promise((resolve, reject) => {
+                let context: any = {};
+                context.url = `/Products('578f2b8c12eaebabec4af286')/Category/$ref`;
+                context.method = 'PUT';
+                context.body = {
+                    "@odata.id": "http://localhost/Categories(categoryId='578f2baa12eaebabec4af28c')"
+                }
                 
                 testServer.write(context);
                 testServer.on("data", data => { resolve(data) })
