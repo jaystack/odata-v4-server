@@ -2,7 +2,7 @@
 import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music } from './test.model';
 import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { Meta, Media, TestEntity, MetaTestServer, CompoundKey } from './metadata.spec';
+import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity } from './metadata.spec';
 import { ObjectID } from "mongodb";
 const { expect } = require("chai");
 const extend = require("extend");
@@ -337,6 +337,16 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
+        createTest("should return product reference on category", TestServer, "GET /Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#$ref",
+                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28e')/Products"
+            },
+            elementType: Product,
+            contentType: "application/json"
+        });
+
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
             statusCode: 200,
             body: Object.assign({
@@ -653,17 +663,40 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
-        createTest("should return test entity result by keys", MetaTestServer, "GET /TestEntity(5)", {
+        createTest("should return test entity result by id", MetaTestServer, "GET /TestEntity(15)", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#TestEntity/$entity",
-                "@odata.id": "http://localhost/TestEntity(5)",
-                "Genre": "Server.Genre2'0'",
-                "test": 5
+                "value": [
+                    {
+                        "@odata.id": "http://localhost/TestEntity(1)",
+                        "Genre": "Server.Genre2'0'",
+                        "test": 1
+                    }
+                ]
             },
             elementType: TestEntity,
             contentType: "application/json"
         });
+    });
+
+    describe("Empty entity", () => {
+        createTest("should return empty entity result count", MetaTestServer, "GET /EmptyEntity/$count", {
+            statusCode: 200,
+            body: 1,
+            elementType: Number,
+            contentType: "text/plain"
+        });
+
+        createTest("should return empty array count", MetaTestServer, "GET /EmptyEntity2/$count", {
+            statusCode: 200,
+            body: 0,
+            contentType: "text/plain"
+        });
+
+        // createTest("try to return string result count", MetaTestServer, "GET /EmptyEntity3/$count", {
+        //     statusCode: 404,
+        // });
     });
 
 }

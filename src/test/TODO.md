@@ -13,9 +13,9 @@
 * Entity and entity collection bound action with parameters
 * More enum types and type definitions
 * @odata.type as action/function parameter
-* Use @odata.method('methodname', 'navprop')
-* Use @odata.link('keyname')
-* Use @odata.id
+* ~~Use @odata.method('methodname', 'navprop')~~
+* ~~Use @odata.link('keyname')~~
+* ~~Use @odata.id~~
 * Use .define() to define models, controllers, server, see es6.js example
 * Create HTTP Accept headers tests
 * Throw NotImplementedError
@@ -37,12 +37,12 @@
 * Use $select OData query, expect @odata.context to be valid based on selection
 * Use resource path like Categories(1)/Products(1)
 * PUT handler in ODataController implement upsert, return entity if it was an insert, return null/undefined/void if it was an update
-* Use $count on empty result set
-* Use $count with bad result set
+* ~~Use $count on empty result set~~
+* ~~Use $count with bad result set~~
 * Use @odata.key aliases (different key and parameter name)
 * Use $value on primitive property
 * Use $value on stream property
-* Use @odata.GET.$ref
+* ~~Use @odata.GET.$ref~~
 * Use @odata.link aliases
 * Use generator function and Promise result in $ref handler
 * Use advanced generator functions returning Promise, stream or another generator function

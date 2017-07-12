@@ -182,7 +182,7 @@ describe("OData HTTP", () => {
     });
 
     it("should create category reference on product", () => {
-        return request.post(`http://localhost:3002/Products('578f2b8c12eaebabec4af286')/Category/$ref`, { json: { "@odata.id": "http://localhost:3002/Categories('578f2baa12eaebabec4af28c')" } }, (err, req, result) => {
+        return request.post(`http://localhost:3002/Products('578f2b8c12eaebabec4af286')/Category/$ref`, { json: { "@odata.id": "http://localhost:3002/Categories(categoryId='578f2baa12eaebabec4af28c')" } }, (err, req, result) => {
             expect(req.statusCode).to.equal(204);
         }).then(_ => {
             return request.get(`http://localhost:3002/Products('578f2b8c12eaebabec4af286')/Category`, (err, response, result) => {
@@ -198,7 +198,7 @@ describe("OData HTTP", () => {
     });
 
     it("should update category reference on product", () => {
-        return request.put(`http://localhost:3002/Products('578f2b8c12eaebabec4af286')/Category/$ref`, { json: { "@odata.id": "http://localhost:3002/Categories('578f2baa12eaebabec4af28c')" } }, (err, req, result) => {
+        return request.put(`http://localhost:3002/Products('578f2b8c12eaebabec4af286')/Category/$ref`, { json: { "@odata.id": "http://localhost:3002/Categories(categoryId='578f2baa12eaebabec4af28c')" } }, (err, req, result) => {
             expect(req.statusCode).to.equal(204);
         }).then(_ => {
             return request.get(`http://localhost:3002/Products('578f2b8c12eaebabec4af286')/Category`, (err, response, result) => {

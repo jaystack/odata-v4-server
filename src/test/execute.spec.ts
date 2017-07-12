@@ -15,6 +15,9 @@ function createTest(testcase: string, server: typeof ODataServer, command: strin
         return server.execute(test.slice(1).join(" "), test[0], body).then((result) => {
             expect(result).to.deep.equal(compare);
         });
+        // .catch(ex => {
+        //     if (ex) return expect(ex.statusCode).to.equal(404);
+        // });
     });
 }
 
@@ -186,7 +189,7 @@ describe("Odata execute", () => {
 
     it("should create category reference on product", () => {
         return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "POST", {
-            "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28c')"
+            "@odata.id": "http://localhost/Categories(categoryId='578f2baa12eaebabec4af28c')"
         }).then((result) => {
             expect(result).to.deep.equal({
                 statusCode: 204
@@ -209,7 +212,7 @@ describe("Odata execute", () => {
 
     it("should update category reference on product", () => {
         return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "PUT", {
-            "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28c')"
+            "@odata.id": "http://localhost/Categories(categoryId='578f2baa12eaebabec4af28c')"
         }).then((result) => {
             expect(result).to.deep.equal({
                 statusCode: 204
