@@ -61,7 +61,7 @@
 * Implement deserializer using @Edm.Deserializer to deserialize POST body
 * Include @odata field in POST body
 * Implement action/function with generator function and stream as result (like Fetch in stream.ts example)
-* Use $count after stream result set (Categories(1)/Products/$count)
+* ~~Use $count after stream result set (Categories(1)/Products/$count)~~
 * Use @odata.type as function pointer in inheritance result set
 * Use $expand with single entity
 * Use $expand with HTTP Accept header odata.metadata=full, expect @odata.associationLink and @odata.navigationLink in result

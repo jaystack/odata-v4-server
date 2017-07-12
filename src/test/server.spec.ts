@@ -466,6 +466,13 @@ export function testFactory(createTest: Function) {
             elementType: "Edm.Stream",
             contentType: "application/json"
         });
+
+        createTest("should return stream result set count", TestServer,"GET /Categories('578f2baa12eaebabec4af290')/Products/$count", {
+            statusCode: 200,
+            body: 13,
+            elementType: Number,
+            contentType: "text/plain"
+        });
     });
 
     describe("Media entity", () => {
