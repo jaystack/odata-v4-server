@@ -347,6 +347,40 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
+        createTest("should return product with only name and category property", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')?$select=Name,CategoryId", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Products(Name,CategoryId)/$entity",
+                "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')",
+                "Discontinued": false,
+                "Name": "Chai",
+                "QuantityPerUnit": "10 boxes x 20 bags",
+                "UnitPrice": 39,
+                "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
+                "CategoryId": new ObjectID("578f2baa12eaebabec4af289")
+            },
+            elementType: Product,
+            contentType: "application/json"
+        });
+
+        createTest("should return filtered product with only name and category property", TestServer, "GET /Products?$filter=_id eq '578f2b8c12eaebabec4af23c'&$select=Name,CategoryId", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Products(Name,CategoryId)",
+                "value": [{
+                    "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')",
+                    "Discontinued": false,
+                    "Name": "Chai",
+                    "QuantityPerUnit": "10 boxes x 20 bags",
+                    "UnitPrice": 39,
+                    "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
+                    "CategoryId": new ObjectID("578f2baa12eaebabec4af289")
+                }]
+            },
+            elementType: Product,
+            contentType: "application/json"
+        });
+
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
             statusCode: 200,
             body: Object.assign({

@@ -34,7 +34,7 @@
 * Try to use OData query parameters on service document, expect 500 Unsupported query error
 * Start server on specific hostname (localhost)
 * Set some HTTP headers and response status code in controller or action/function import
-* Use $select OData query, expect @odata.context to be valid based on selection
+* ~~Use $select OData query, expect @odata.context to be valid based on selection~~
 * Use resource path like Categories(1)/Products(1)
 * PUT handler in ODataController implement upsert, return entity if it was an insert, return null/undefined/void if it was an update
 * ~~Use $count on empty result set~~
