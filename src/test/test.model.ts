@@ -330,14 +330,16 @@ export class ProductsController extends ODataController {
     }
 
     @odata.deleteRef("Category")
-    async unsetCategoryId( @odata.key key: string, @odata.link link: string): Promise<number> {
-        return products.filter(product => {
-            if (product._id.toString() === key) {
-                product.CategoryId = null;
-                return product;
-            }
-            return null;
-        });
+    unsetCategoryId( @odata.key key: string, @odata.link link: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            products.filter(product => {
+                if (product._id.toString() === key) {
+                    product.CategoryId = null;
+                    return product;
+                }
+            });
+            resolve(products);
+        })
     }
 }
 
@@ -368,25 +370,26 @@ export class CategoriesController extends ODataController {
     @odata.POST("Products").$ref
     @odata.method("PUT", "Products").$ref
     @odata.PATCH("Products").$ref
-    async setCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
-        return products.filter(product => {
+    *setCategory( @odata.key key: string, @odata.link link: string) {
+        yield products.filter(product => {
             if (product._id.toString() === link) {
                 product.CategoryId = new ObjectID(key);
                 return product;
             }
-            return null;
         });
     }
 
     @odata.DELETE("Products").$ref
-    async unsetCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
-        return products.filter(product => {
-            if (product._id.toString() === link) {
-                product.CategoryId = null;
-                return product;
-            }
-            return null;
-        });
+    unsetCategory( @odata.key key: string, @odata.link link: string) {
+        return new Promise(resolve => {
+            products.filter(product => {
+                if (product._id.toString() === link) {
+                    product.CategoryId = null;
+                    return product;
+                }
+            });
+            resolve(products);
+        })
     }
 }
 

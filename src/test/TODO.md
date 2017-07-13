@@ -44,7 +44,7 @@
 * ~~Use $value on stream property~~
 * ~~Use @odata.GET.$ref~~
 * Use @odata.link aliases
-* Use generator function and Promise result in $ref handler
+* ~~Use generator function and Promise result in $ref handler~~
 * Use advanced generator functions returning Promise, stream or another generator function
 * Use stream result when using $expand
 * Try to access non-existent entity set
