@@ -310,6 +310,14 @@ export class ProductsController extends ODataController {
         return products.filter(product => product._id.toString() == key)[0] || null;
     }
 
+    @odata.GET('Name')
+    @odata.parameter("key", odata.key)
+    @odata.parameter("result", odata.result)
+    getName(key: string, result: Product): string {
+        console.log('NNAAAAMMMEEEEE', result.Name)
+        return result.Name;
+    }
+
     @odata.createRef("Category")
     @odata.updateRef("Category")
     async setCategory( @odata.key key: string, @odata.link('categoryId') link: string): Promise<number> {

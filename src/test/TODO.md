@@ -40,7 +40,7 @@
 * ~~Use $count on empty result set~~
 * ~~Use $count with bad result set~~
 * Use @odata.key aliases (different key and parameter name)
-* Use $value on primitive property
+* ~~Use $value on primitive property~~
 * ~~Use $value on stream property~~
 * ~~Use @odata.GET.$ref~~
 * Use @odata.link aliases

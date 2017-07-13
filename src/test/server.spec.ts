@@ -391,6 +391,23 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
+        createTest("should return product name property", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Name", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Products('578f2b8c12eaebabec4af23c')/Name",
+                "value": "Chai"
+            },
+            elementType: "Edm.String",
+            contentType: "application/json"
+        });
+
+        createTest("should return product name property value", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Name/$value", {
+            statusCode: 200,
+            body:  "Chai",
+            elementType: String,
+            contentType: "text/plain"
+        });
+
         createTest("should return result including complex type", AuthenticationServer, "GET /Users", {
             statusCode: 200,
             body: {
