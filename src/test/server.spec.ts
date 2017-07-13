@@ -559,10 +559,11 @@ export function testFactory(createTest: any) {
                 "@odata.context": "http://localhost/$metadata#Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/Meta.Meta/MediaList",
                 "value": [
                     {
-                        "@odata.id": "http://localhost/Media(1)",
-                        "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                        "@odata.id": "http://localhost/Media(Id=1,StringId='two')",
+                        "@odata.mediaReadLink": "http://localhost/Media(Id=1,StringId='two')/$value",
                         "@odata.mediaContentType": "audio/mp3",
-                        "Id": 1
+                        "Id": 1,
+                        "StringId": "two"
                     }
                 ]
             },
@@ -570,31 +571,29 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        createTest("should return navigation property result by key", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/Meta.Meta/MediaList(1)", {
+        createTest("should return navigation property result by key", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/Meta.Meta/MediaList(Id=1,StringId='two')", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/Meta.Meta/MediaList/$entity",
-                "@odata.id": "http://localhost/Media(1)",
-                "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                "@odata.id": "http://localhost/Media(Id=1,StringId='two')",
+                "@odata.mediaReadLink": "http://localhost/Media(Id=1,StringId='two')/$value",
                 "@odata.mediaContentType": "audio/mp3",
-                "Id": 1
+                "Id": 1,
+                "StringId": "two"
             },
             elementType: Media,
             contentType: "application/json"
         });
 
-        // createTest("should return navigation property result by key", MetaTestServer, "DELETE /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList(1)/$ref", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#Media/$entity",
-        //         "@odata.id": "http://localhost/Media(1)",
-        //         "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
-        //         "@odata.mediaContentType": "audio/mp3",
-        //         "Id": 1
-        //     },
-        //     elementType: Media,
-        //     contentType: "application/json"
-        // });
+        createTest("should return navigation property result by key", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/Meta.Meta/MediaList(Id=3,StringId='asd')/$ref", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#$ref",
+                "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList"
+            },
+            elementType: Meta,
+            contentType: "application/json"
+        });
     });
 
     describe("Compound key", () => {
@@ -671,10 +670,11 @@ export function testFactory(createTest: any) {
                 "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
                 "MediaList": [
                     {
-                        "@odata.id": "http://localhost/Media(1)",
-                        "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                        "@odata.id": "http://localhost/Media(Id=1,StringId='two')",
+                        "@odata.mediaReadLink": "http://localhost/Media(Id=1,StringId='two')/$value",
                         "@odata.mediaContentType": "audio/mp3",
-                        "Id": 1
+                        "Id": 1,
+                        "StringId": "two"
                     }
                 ]
             },
@@ -699,10 +699,11 @@ export function testFactory(createTest: any) {
                 "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
                 "MediaList": [
                     {
-                        "@odata.id": "http://localhost/Media(1)",
-                        "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                        "@odata.id": "http://localhost/Media(Id=1,StringId='two')",
+                        "@odata.mediaReadLink": "http://localhost/Media(Id=1,StringId='two')/$value",
                         "@odata.mediaContentType": "audio/mp3",
-                        "Id": 1
+                        "Id": 1,
+                        "StringId": "two"
                     }
                 ]
             },
@@ -727,10 +728,11 @@ export function testFactory(createTest: any) {
                 "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
                 "MediaList": [
                     {
-                        "@odata.id": "http://localhost/Media(1)",
-                        "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+                        "@odata.id": "http://localhost/Media(Id=1,StringId='two')",
+                        "@odata.mediaReadLink": "http://localhost/Media(Id=1,StringId='two')/$value",
                         "@odata.mediaContentType": "audio/mp3",
-                        "Id": 1
+                        "Id": 1,
+                        "StringId": "two"
                     }
                 ]
             },

@@ -43,7 +43,7 @@
 * ~~Use $value on primitive property~~
 * ~~Use $value on stream property~~
 * ~~Use @odata.GET.$ref~~
-* Use @odata.link aliases
+* ~~Use @odata.link aliases~~
 * ~~Use generator function and Promise result in $ref handler~~
 * Use advanced generator functions returning Promise, stream or another generator function
 * Use stream result when using $expand
@@ -51,7 +51,7 @@
 * Implement inline count for stream result with @odata.count or inlinecount
 * Use navigation property on stream result
 * Use HTTP Accept header including odata.metadata=full|none
-* Implement navigation property with @odata.GET('navprop')
+* ~~Implement navigation property with @odata.GET('navprop')~~
 * Implement navigation property POST (to insert into a navigation property set)
 * Implement unexposed controllers (without a public entity set, available on a navigation property)
 * Implement primitive property DELETE with PATCH handler
