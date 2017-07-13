@@ -467,6 +467,18 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
+        createTest("stream property value", TestServer, "GET /ImagesControllerEntitySet(1)/Data2/$value", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet(1)/Data2",
+                value: [
+                    {
+                        value: 0
+                    }
+                ]
+            }
+        });
+
         createTest("should return stream result set count", TestServer,"GET /Categories('578f2baa12eaebabec4af290')/Products/$count", {
             statusCode: 200,
             body: 13,
@@ -735,9 +747,30 @@ export function testFactory(createTest: Function) {
             contentType: "text/plain"
         });
 
-        // createTest("try to return string result count", MetaTestServer, "GET /EmptyEntity3/$count", {
-        //     statusCode: 404,
-        // });
+        createTest("try to return string result count", MetaTestServer, "GET /EmptyEntity3/$count", {
+            statusCode: 200,
+            body: 4,
+            elementType: Number,
+            contentType: "text/plain"
+        });
+
+        createTest("try to return empty string result count", MetaTestServer, "GET /EmptyEntity4/$count", {
+            statusCode: 200,
+            body: 0,
+            contentType: "text/plain"
+        });
+
+        createTest("try to return boolean result count", MetaTestServer, "GET /EmptyEntity5/$count", {
+            statusCode: 200,
+            body: 0,
+            contentType: "text/plain"
+        });
+
+        createTest("try to return number result count", MetaTestServer, "GET /EmptyEntity6/$count", {
+            statusCode: 200,
+            body: 0,
+            contentType: "text/plain"
+        });
     });
 
 }

@@ -428,6 +428,8 @@ export class MediaController extends ODataController {
         return media;
     }
 
+    //POST$ref   Meta key == link
+
     @Edm.Action
     ControllerAction( @Edm.Int32 value: number) {
         value += 1;
@@ -511,7 +513,34 @@ export class EmptyEntity2Controller extends ODataController {
 export class EmptyEntity3Controller extends ODataController {
     @odata.GET
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+        return 'test';
+    }
+}
+
+@odata.namespace("Controller")
+@odata.type(EmptyEntity)
+export class EmptyEntity4Controller extends ODataController {
+    @odata.GET
+    findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
         return '';
+    }
+}
+
+@odata.namespace("Controller")
+@odata.type(EmptyEntity)
+export class EmptyEntity5Controller extends ODataController {
+    @odata.GET
+    findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+        return true;
+    }
+}
+
+@odata.namespace("Controller")
+@odata.type(EmptyEntity)
+export class EmptyEntity6Controller extends ODataController {
+    @odata.GET
+    findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+        return 42;
     }
 }
 
@@ -526,6 +555,9 @@ export class EmptyEntity3Controller extends ODataController {
 @odata.controller(EmptyEntityController, 'EmptyEntity')
 @odata.controller(EmptyEntity2Controller, 'EmptyEntity2')
 @odata.controller(EmptyEntity3Controller, 'EmptyEntity3')
+@odata.controller(EmptyEntity4Controller, 'EmptyEntity4')
+@odata.controller(EmptyEntity5Controller, 'EmptyEntity5')
+@odata.controller(EmptyEntity6Controller, 'EmptyEntity6')
 export class MetaTestServer extends ODataServer {
 
     @odata.container("ActionImportContainer")
@@ -591,6 +623,21 @@ if (typeof describe == "function") {
                 // "@odata.context": "http://localhost:3001/$metadata",
                 "@odata.context": undefined,
                 "value": [
+                    {
+                        "name": "EmptyEntity6",
+                        "kind": "EntitySet",
+                        "url": "EmptyEntity6"
+                    },
+                    {
+                        "name": "EmptyEntity5",
+                        "kind": "EntitySet",
+                        "url": "EmptyEntity5"
+                    },
+                    {
+                        "name": "EmptyEntity4",
+                        "kind": "EntitySet",
+                        "url": "EmptyEntity4"
+                    },
                     {
                         "name": "EmptyEntity3",
                         "kind": "EntitySet",

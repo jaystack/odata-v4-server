@@ -26,7 +26,7 @@
 * Type definition on inherited entity type
 * Multi-level inheritance for Edm.Container
 * Use server .execute() with context object as first parameter
-* Use server as stream
+* ~~Use server as stream~~
 * Use server static .addController() like @odata.controller
 * Use metadata JSON for public $metadata definition, like in the bigdata.ts example
 * Use HTTP header OData-MaxVersion with less than 4.0
@@ -41,7 +41,7 @@
 * ~~Use $count with bad result set~~
 * Use @odata.key aliases (different key and parameter name)
 * Use $value on primitive property
-* Use $value on stream property
+* ~~Use $value on stream property~~
 * ~~Use @odata.GET.$ref~~
 * Use @odata.link aliases
 * Use generator function and Promise result in $ref handler
