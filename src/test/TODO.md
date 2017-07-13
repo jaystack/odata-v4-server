@@ -39,7 +39,7 @@
 * PUT handler in ODataController implement upsert, return entity if it was an insert, return null/undefined/void if it was an update
 * ~~Use $count on empty result set~~
 * ~~Use $count with bad result set~~
-* Use @odata.key aliases (different key and parameter name)
+* ~~Use @odata.key aliases (different key and parameter name)~~
 * ~~Use $value on primitive property~~
 * ~~Use $value on stream property~~
 * ~~Use @odata.GET.$ref~~

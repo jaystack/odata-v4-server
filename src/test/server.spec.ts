@@ -185,6 +185,16 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
+        createTest("should call function import using different key and parameter name", TestServer, "GET /FunctionImport(param=@test)?@test=42", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Edm.String",
+                value: "The number is undefined."
+            },
+            elementType: "Edm.String",
+            contentType: "application/json"
+        });
+
         createTest("should call function import with multiple parameters", TestServer, "GET /FunctionImportMore(value=42,message='hello world')", {
             statusCode: 200,
             body: {
@@ -572,6 +582,19 @@ export function testFactory(createTest: Function) {
             elementType: Media,
             contentType: "application/json"
         });
+
+        // createTest("should return navigation property result by key", MetaTestServer, "DELETE /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList(1)/$ref", {
+        //     statusCode: 200,
+        //     body: {
+        //         "@odata.context": "http://localhost/$metadata#Media/$entity",
+        //         "@odata.id": "http://localhost/Media(1)",
+        //         "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+        //         "@odata.mediaContentType": "audio/mp3",
+        //         "Id": 1
+        //     },
+        //     elementType: Media,
+        //     contentType: "application/json"
+        // });
     });
 
     describe("Compound key", () => {

@@ -314,7 +314,6 @@ export class ProductsController extends ODataController {
     @odata.parameter("key", odata.key)
     @odata.parameter("result", odata.result)
     getName(key: string, result: Product): string {
-        console.log('NNAAAAMMMEEEEE', result.Name)
         return result.Name;
     }
 
