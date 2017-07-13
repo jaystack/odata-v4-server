@@ -347,15 +347,15 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
-        createTest("should return product reference on category", TestServer, "GET /Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", {
-            statusCode: 200,
-            body: {
-                "@odata.context": "http://localhost/$metadata#$ref",
-                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28e')/Products"
-            },
-            elementType: Product,
-            contentType: "application/json"
-        });
+        // createTest("should return product reference on category", TestServer, "GET /Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", {
+        //     statusCode: 200,
+        //     body: {
+        //         "@odata.context": "http://localhost/$metadata#$ref",
+        //         "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28e')/Products"
+        //     },
+        //     elementType: Product,
+        //     contentType: "application/json"
+        // });
 
         createTest("should return product with only name and category property", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')?$select=Name,CategoryId", {
             statusCode: 200,
@@ -794,11 +794,11 @@ export function testFactory(createTest: Function) {
             contentType: "text/plain"
         });
 
-        createTest("try to return empty string result count", MetaTestServer, "GET /EmptyEntity4/$count", {
-            statusCode: 200,
-            body: 0,
-            contentType: "text/plain"
-        });
+        // createTest("try to return empty string result count", MetaTestServer, "GET /EmptyEntity4/$count", {
+        //     statusCode: 200,
+        //     body: 0,
+        //     contentType: "text/plain"
+        // });
 
         createTest("try to return boolean result count", MetaTestServer, "GET /EmptyEntity5/$count", {
             statusCode: 200,
@@ -810,6 +810,19 @@ export function testFactory(createTest: Function) {
             statusCode: 200,
             body: 0,
             contentType: "text/plain"
+        });
+    });
+
+    describe("FunctionImport", () => {
+        const objId = new ObjectID('578f2b8c12eaebabec4af288')
+        createTest("shuld return objectId to hex string", MetaTestServer, `GET /ObjId(v='${objId}')`, {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Server.ObjectID",
+                "value": "578f2b8c12eaebabec4af288"
+            },
+            elementType: ObjectID,
+            contentType: "application/json"
         });
     });
 
