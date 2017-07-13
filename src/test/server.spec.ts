@@ -2,7 +2,7 @@
 import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music } from './test.model';
 import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { Meta, Media, TestEntity, MetaTestServer, CompoundKey } from './metadata.spec';
+import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity } from './metadata.spec';
 import { ObjectID } from "mongodb";
 const { expect } = require("chai");
 const extend = require("extend");
@@ -185,6 +185,16 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
+        createTest("should call function import using different key and parameter name", TestServer, "GET /FunctionImport(param=@test)?@test=42", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Edm.String",
+                value: "The number is undefined."
+            },
+            elementType: "Edm.String",
+            contentType: "application/json"
+        });
+
         createTest("should call function import with multiple parameters", TestServer, "GET /FunctionImportMore(value=42,message='hello world')", {
             statusCode: 200,
             body: {
@@ -337,6 +347,50 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
+        // createTest("should return product reference on category", TestServer, "GET /Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", {
+        //     statusCode: 200,
+        //     body: {
+        //         "@odata.context": "http://localhost/$metadata#$ref",
+        //         "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af28e')/Products"
+        //     },
+        //     elementType: Product,
+        //     contentType: "application/json"
+        // });
+
+        createTest("should return product with only name and category property", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')?$select=Name,CategoryId", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Products(Name,CategoryId)/$entity",
+                "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')",
+                "Discontinued": false,
+                "Name": "Chai",
+                "QuantityPerUnit": "10 boxes x 20 bags",
+                "UnitPrice": 39,
+                "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
+                "CategoryId": new ObjectID("578f2baa12eaebabec4af289")
+            },
+            elementType: Product,
+            contentType: "application/json"
+        });
+
+        createTest("should return filtered product with only name and category property", TestServer, "GET /Products?$filter=_id eq '578f2b8c12eaebabec4af23c'&$select=Name,CategoryId", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Products(Name,CategoryId)",
+                "value": [{
+                    "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')",
+                    "Discontinued": false,
+                    "Name": "Chai",
+                    "QuantityPerUnit": "10 boxes x 20 bags",
+                    "UnitPrice": 39,
+                    "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
+                    "CategoryId": new ObjectID("578f2baa12eaebabec4af289")
+                }]
+            },
+            elementType: Product,
+            contentType: "application/json"
+        });
+
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
             statusCode: 200,
             body: Object.assign({
@@ -345,6 +399,23 @@ export function testFactory(createTest: any) {
             }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af289")[0]),
             elementType: Category,
             contentType: "application/json"
+        });
+
+        createTest("should return product name property", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Name", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Products('578f2b8c12eaebabec4af23c')/Name",
+                "value": "Chai"
+            },
+            elementType: "Edm.String",
+            contentType: "application/json"
+        });
+
+        createTest("should return product name property value", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Name/$value", {
+            statusCode: 200,
+            body:  "Chai",
+            elementType: String,
+            contentType: "text/plain"
         });
 
         createTest("should return result including complex type", AuthenticationServer, "GET /Users", {
@@ -422,6 +493,25 @@ export function testFactory(createTest: any) {
             elementType: "Edm.Stream",
             contentType: "application/json"
         });
+
+        createTest("stream property value", TestServer, "GET /ImagesControllerEntitySet(1)/Data2/$value", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet(1)/Data2",
+                value: [
+                    {
+                        value: 0
+                    }
+                ]
+            }
+        });
+
+        createTest("should return stream result set count", TestServer,"GET /Categories('578f2baa12eaebabec4af290')/Products/$count", {
+            statusCode: 200,
+            body: 13,
+            elementType: Number,
+            contentType: "text/plain"
+        });
     });
 
     describe("Media entity", () => {
@@ -492,6 +582,19 @@ export function testFactory(createTest: any) {
             elementType: Media,
             contentType: "application/json"
         });
+
+        // createTest("should return navigation property result by key", MetaTestServer, "DELETE /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList(1)/$ref", {
+        //     statusCode: 200,
+        //     body: {
+        //         "@odata.context": "http://localhost/$metadata#Media/$entity",
+        //         "@odata.id": "http://localhost/Media(1)",
+        //         "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
+        //         "@odata.mediaContentType": "audio/mp3",
+        //         "Id": 1
+        //     },
+        //     elementType: Media,
+        //     contentType: "application/json"
+        // });
     });
 
     describe("Compound key", () => {
@@ -653,15 +756,72 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        createTest("should return test entity result by keys", MetaTestServer, "GET /TestEntity(5)", {
+        createTest("should return test entity result by id", MetaTestServer, "GET /TestEntity(15)", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#TestEntity/$entity",
-                "@odata.id": "http://localhost/TestEntity(5)",
-                "Genre": "Server.Genre2'0'",
-                "test": 5
+                "value": [
+                    {
+                        "@odata.id": "http://localhost/TestEntity(1)",
+                        "Genre": "Server.Genre2'0'",
+                        "test": 1
+                    }
+                ]
             },
             elementType: TestEntity,
+            contentType: "application/json"
+        });
+    });
+
+    describe("Empty entity", () => {
+        createTest("should return empty entity result count", MetaTestServer, "GET /EmptyEntity/$count", {
+            statusCode: 200,
+            body: 1,
+            elementType: Number,
+            contentType: "text/plain"
+        });
+
+        createTest("should return empty array count", MetaTestServer, "GET /EmptyEntity2/$count", {
+            statusCode: 200,
+            body: 0,
+            contentType: "text/plain"
+        });
+
+        createTest("try to return string result count", MetaTestServer, "GET /EmptyEntity3/$count", {
+            statusCode: 200,
+            body: 4,
+            elementType: Number,
+            contentType: "text/plain"
+        });
+
+        // createTest("try to return empty string result count", MetaTestServer, "GET /EmptyEntity4/$count", {
+        //     statusCode: 200,
+        //     body: 0,
+        //     contentType: "text/plain"
+        // });
+
+        createTest("try to return boolean result count", MetaTestServer, "GET /EmptyEntity5/$count", {
+            statusCode: 200,
+            body: 0,
+            contentType: "text/plain"
+        });
+
+        createTest("try to return number result count", MetaTestServer, "GET /EmptyEntity6/$count", {
+            statusCode: 200,
+            body: 0,
+            contentType: "text/plain"
+        });
+    });
+
+    describe("FunctionImport", () => {
+        const objId = new ObjectID('578f2b8c12eaebabec4af288')
+        createTest("shuld return objectId to hex string", MetaTestServer, `GET /ObjId(v='${objId}')`, {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Server.ObjectID",
+                "value": "578f2b8c12eaebabec4af288"
+            },
+            elementType: ObjectID,
             contentType: "application/json"
         });
     });

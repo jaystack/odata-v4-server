@@ -13,9 +13,9 @@
 * Entity and entity collection bound action with parameters
 * More enum types and type definitions
 * @odata.type as action/function parameter
-* Use @odata.method('methodname', 'navprop')
-* Use @odata.link('keyname')
-* Use @odata.id
+* ~~Use @odata.method('methodname', 'navprop')~~
+* ~~Use @odata.link('keyname')~~
+* ~~Use @odata.id~~
 * Use .define() to define models, controllers, server, see es6.js example
 * Create HTTP Accept headers tests
 * Throw NotImplementedError
@@ -26,7 +26,7 @@
 * Type definition on inherited entity type
 * Multi-level inheritance for Edm.Container
 * Use server .execute() with context object as first parameter
-* Use server as stream
+* ~~Use server as stream~~
 * Use server static .addController() like @odata.controller
 * Use metadata JSON for public $metadata definition, like in the bigdata.ts example
 * Use HTTP header OData-MaxVersion with less than 4.0
@@ -34,17 +34,17 @@
 * Try to use OData query parameters on service document, expect 500 Unsupported query error
 * Start server on specific hostname (localhost)
 * Set some HTTP headers and response status code in controller or action/function import
-* Use $select OData query, expect @odata.context to be valid based on selection
+* ~~Use $select OData query, expect @odata.context to be valid based on selection~~
 * Use resource path like Categories(1)/Products(1)
 * PUT handler in ODataController implement upsert, return entity if it was an insert, return null/undefined/void if it was an update
-* Use $count on empty result set
-* Use $count with bad result set
-* Use @odata.key aliases (different key and parameter name)
-* Use $value on primitive property
-* Use $value on stream property
-* Use @odata.GET.$ref
+* ~~Use $count on empty result set~~
+* ~~Use $count with bad result set~~
+* ~~Use @odata.key aliases (different key and parameter name)~~
+* ~~Use $value on primitive property~~
+* ~~Use $value on stream property~~
+* ~~Use @odata.GET.$ref~~
 * Use @odata.link aliases
-* Use generator function and Promise result in $ref handler
+* ~~Use generator function and Promise result in $ref handler~~
 * Use advanced generator functions returning Promise, stream or another generator function
 * Use stream result when using $expand
 * Try to access non-existent entity set
@@ -61,7 +61,7 @@
 * Implement deserializer using @Edm.Deserializer to deserialize POST body
 * Include @odata field in POST body
 * Implement action/function with generator function and stream as result (like Fetch in stream.ts example)
-* Use $count after stream result set (Categories(1)/Products/$count)
+* ~~Use $count after stream result set (Categories(1)/Products/$count)~~
 * Use @odata.type as function pointer in inheritance result set
 * Use $expand with single entity
 * Use $expand with HTTP Accept header odata.metadata=full, expect @odata.associationLink and @odata.navigationLink in result

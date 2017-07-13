@@ -310,9 +310,16 @@ export class ProductsController extends ODataController {
         return products.filter(product => product._id.toString() == key)[0] || null;
     }
 
+    @odata.GET('Name')
+    @odata.parameter("key", odata.key)
+    @odata.parameter("result", odata.result)
+    getName(key: string, result: Product): string {
+        return result.Name;
+    }
+
     @odata.createRef("Category")
     @odata.updateRef("Category")
-    async setCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
+    async setCategory( @odata.key key: string, @odata.link('categoryId') link: string): Promise<number> {
         return products.filter(product => {
             if (product._id.toString() === key) {
                 product.CategoryId = new ObjectID(link);
@@ -323,14 +330,16 @@ export class ProductsController extends ODataController {
     }
 
     @odata.deleteRef("Category")
-    async unsetCategoryId( @odata.key key: string, @odata.link link: string): Promise<number> {
-        return products.filter(product => {
-            if (product._id.toString() === key) {
-                product.CategoryId = null;
-                return product;
-            }
-            return null;
-        });
+    unsetCategoryId( @odata.key key: string, @odata.link link: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            products.filter(product => {
+                if (product._id.toString() === key) {
+                    product.CategoryId = null;
+                    return product;
+                }
+            });
+            resolve(products);
+        })
     }
 }
 
@@ -351,28 +360,36 @@ export class CategoriesController extends ODataController {
         return categories.filter(category => category._id.toString() == key)[0] || null;
     }
 
+    @odata.GET("Products").$ref
+    @odata.parameter("key", odata.key)
+    @odata.parameter("link", odata.link)
+    findProduct(key: string, link: string): Product {
+        return products.filter(product => product._id.toString() === link);
+    }
+
     @odata.POST("Products").$ref
-    @odata.PUT("Products").$ref
+    @odata.method("PUT", "Products").$ref
     @odata.PATCH("Products").$ref
-    async setCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
-        return products.filter(product => {
+    *setCategory( @odata.key key: string, @odata.link link: string) {
+        yield products.filter(product => {
             if (product._id.toString() === link) {
                 product.CategoryId = new ObjectID(key);
                 return product;
             }
-            return null;
         });
     }
 
     @odata.DELETE("Products").$ref
-    async unsetCategory( @odata.key key: string, @odata.link link: string): Promise<number> {
-        return products.filter(product => {
-            if (product._id.toString() === link) {
-                product.CategoryId = null;
-                return product;
-            }
-            return null;
-        });
+    unsetCategory( @odata.key key: string, @odata.link link: string) {
+        return new Promise(resolve => {
+            products.filter(product => {
+                if (product._id.toString() === link) {
+                    product.CategoryId = null;
+                    return product;
+                }
+            });
+            resolve(products);
+        })
     }
 }
 
@@ -457,6 +474,8 @@ export class TestServer extends ODataServer {
         return `The number is ${value} and your message was ${message}.`;
     }
 }
+
+TestServer.create(5005);
 
 @odata.namespace("Authentication")
 @odata.controller(UsersController, true)
