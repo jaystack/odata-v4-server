@@ -419,6 +419,16 @@ export class MetaController extends ODataController {
         return media;
     }
 
+    @odata.GET("MediaList").$ref
+    getMediaRef( @odata.link('Id') link1: number, @odata.link('StringId') link2: number, @odata.key('MongoId') k1: string, @odata.key('p9') k2: number, @odata.key('p10') k3: number, @odata.key('Id') k4: number, @odata.result result: any) {
+        let meta = new Meta();
+        meta.Id = k4;
+        meta.p9 = k2;
+        meta.p10 = k3;
+        meta.MongoId = new ObjectID(k1);
+        return meta;
+    }
+
     @Edm.Action
     ControllerAction() {
         // console.log('ControllerAction');
