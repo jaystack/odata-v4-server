@@ -29,6 +29,6 @@ function createTest(testcase: string, server: typeof ODataServer, command: strin
     });
 }
 
-describe("Odata stream", () => {
+describe("OData stream", () => {
     testFactory(createTest);
 });

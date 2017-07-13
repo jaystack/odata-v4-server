@@ -283,8 +283,8 @@ export function createMetadataJSON(server:typeof ODataServer){
         let __proto__ = Object.getPrototypeOf(elementType.prototype);
         if (!baseType && __proto__) baseType = __proto__.constructor;
         if (baseType && baseType != Object && Edm.getProperties(baseType.prototype).length > 0){
-            typeDefinition.baseType = (baseType.namespace || server.namespace) + "." + baseType.name;
             let resolvedType = resolveType(baseType, elementType, prop);
+            typeDefinition.baseType = (baseType.namespace || server.namespace) + "." + baseType.name;
             if (resolvedType && !resolvedType.schema.entityType.filter(et => et.name == resolvedType.definition.name)[0]){
                 resolvedType.schema.entityType.push(resolvedType.definition);
             }

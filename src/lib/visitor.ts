@@ -83,6 +83,10 @@ export class ResourcePathVisitor{
                 case "EntityCollectionNavigationProperty":
                     visitor = this.VisitProperty;
                     break;
+                case "QualifiedEntityTypeName":
+                case "QualifiedComplexTypeName":
+                    visitor = this.VisitQualifiedTypeName;
+                    break;
                 default:
                     visitor = this[`Visit${node.type}`];
             }
@@ -95,7 +99,7 @@ export class ResourcePathVisitor{
 
     protected async VisitODataUri(node:Token, context:any){
         await this.Visit(node.value.resource, context);
-        await this.Visit(node.value.query, context);
+        await this.Visit(node.value.query, context, this.navigation[this.navigation.length - 1].node[ODATA_TYPE]);
         this.navigation.forEach(it => {
             if (it.params){
                 for (let prop in it.params){
@@ -107,11 +111,11 @@ export class ResourcePathVisitor{
         });
     }
 
-    protected async VisitQueryOptions(node:Token, context:any){
-        await Promise.all(node.value.options.map(async (option) => await this.Visit(option, Object.assign({}, context))));
+    protected async VisitQueryOptions(node:Token, context:any, type: any){
+        await Promise.all(node.value.options.map(async (option) => await this.Visit(option, Object.assign({}, context), type)));
     }
 
-    protected async VisitExpand(node: Token, context: any) {
+    protected async VisitExpand(node: Token, context: any, type: any) {
         await Promise.all(node.value.items.map(async (item) => {
             let expandPath = item.value.path.raw;
             let visitor = this.includes[expandPath];
@@ -119,23 +123,36 @@ export class ResourcePathVisitor{
                 visitor = new ResourcePathVisitor(node[ODATA_TYPE], this.entitySets);
                 this.includes[expandPath] = visitor;
             }
-            await visitor.Visit(item, Object.assign({}, context));
+            await visitor.Visit(item, Object.assign({}, context), type);
         }));
     }
 
-    protected async VisitExpandItem(node: Token, context: any) {
-        await this.Visit(node.value.path, context);
+    protected async VisitExpandItem(node: Token, context: any, type: any) {
+        await this.Visit(node.value.path, context, type);
+        type = this.navigation[this.navigation.length - 1].node[ODATA_TYPE] || type;
         if (node.value.options){
             this.ast = new Token(node);
             this.ast.type = TokenType.QueryOptions;
             this.ast.raw = node.value.options.map(n => n.raw).join("&");
             this.query = qs.parse(this.ast.raw);
-            await Promise.all(node.value.options.map(async (item) => await this.Visit(item, Object.assign({}, context))));
+            await Promise.all(node.value.options.map(async (item) => await this.Visit(item, Object.assign({}, context), type)));
         }
+        if (node.value.ref) await this.Visit(node.value.ref, Object.assign({}, context), type);
+        if (node.value.count) await this.Visit(node.value.count, Object.assign({}, context), type);
     }
 
-    protected VisitExpandPath(node: Token) {
-        this.navigationProperty = node.raw;
+    protected async VisitExpandPath(node: Token, context: any, type: any) {
+        for (let item of node.value){
+            await this.Visit(item, Object.assign({}, context), type);
+            type = item[ODATA_TYPE] || type;
+        }
+        for (let i = this.navigation.length - 1; i >= 0; i--){
+            let nav = this.navigation[i];
+            if (nav.type == TokenType.EntityCollectionNavigationProperty || nav.type == TokenType.EntityNavigationProperty){
+                this.navigationProperty = nav.name;
+                break;
+            }
+        }
     }
 
     protected VisitId(node:Token){
@@ -223,7 +240,23 @@ export class ResourcePathVisitor{
         this.path += "\\))";
     }
 
+    protected VisitQualifiedTypeName(node:Token, context:any, type:any){
+        const children = Edm.getChildren(node[ODATA_TYPE]);
+        const child = children.find(t => `${t.namespace}.${t.name}` == node.raw);
+        if (child){
+            node[ODATA_TYPE] = child;
+            node[ODATA_TYPENAME] = node.raw;
+            this.navigation.push({
+                name: node.raw,
+                type: node.type,
+                node
+            });
+            this.path += `/${node.raw}`;
+        }
+    }
+
     protected async VisitSingleNavigation(node:Token, context:any, type: any){
+        if (node.value.name) this.Visit(node.value.name, context, type);
         await this.Visit(node.value.path, context, type);
     }
 

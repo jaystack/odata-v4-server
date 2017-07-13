@@ -10,7 +10,7 @@ let categories = require("../example/categories");
 let products = require("../example/products");
 let streamBuffers = require("stream-buffers");
 
-export function testFactory(createTest: Function) {
+export function testFactory(createTest: any) {
     describe("OData CRUD", () => {
         createTest("should return entity set result", TestServer, "GET /EntitySet", {
             statusCode: 200,
@@ -463,10 +463,10 @@ export function testFactory(createTest: Function) {
     });
 
     describe("Navigation property", () => {
-        createTest("should return navigation property result", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList", {
+        createTest("should return navigation property result", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/Meta.Meta/MediaList", {
             statusCode: 200,
             body: {
-                "@odata.context": "http://localhost/$metadata#Meta(1)/MediaList",
+                "@odata.context": "http://localhost/$metadata#Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/Meta.Meta/MediaList",
                 "value": [
                     {
                         "@odata.id": "http://localhost/Media(1)",
@@ -480,10 +480,10 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
-        createTest("should return navigation property result by key", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList(1)", {
+        createTest("should return navigation property result by key", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/Meta.Meta/MediaList(1)", {
             statusCode: 200,
             body: {
-                "@odata.context": "http://localhost/$metadata#Media/$entity",
+                "@odata.context": "http://localhost/$metadata#Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/Meta.Meta/MediaList/$entity",
                 "@odata.id": "http://localhost/Media(1)",
                 "@odata.mediaReadLink": "http://localhost/Media(1)/$value",
                 "@odata.mediaContentType": "audio/mp3",
@@ -551,7 +551,7 @@ export function testFactory(createTest: Function) {
     });
 
     describe("Expand", () => {
-        createTest("should return expanded Meta result with media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=MediaList", {
+        createTest("should return expanded Meta result with media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Meta.Meta/MediaList", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
@@ -579,7 +579,7 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
-        createTest("should return expanded Meta result with the filtered media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=MediaList($filter=Id eq 1)", {
+        createTest("should return expanded Meta result with the filtered media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Meta.Meta/MediaList($filter=Id eq 1)", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
@@ -607,7 +607,7 @@ export function testFactory(createTest: Function) {
             contentType: "application/json"
         });
 
-        createTest("should return expanded Meta result with the filtered media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=MediaList($top=1)", {
+        createTest("should return expanded Meta result with the filtered media", MetaTestServer, "GET /Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Meta.Meta/MediaList($top=1)", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
