@@ -342,6 +342,7 @@ export class ProductsController extends ODataController {
         })
     }
 }
+ProductsController.enableFilter(ProductsController.prototype.find, 'filter');
 
 @odata.type(Category)
 @Edm.EntitySet("Categories")
@@ -392,6 +393,7 @@ export class CategoriesController extends ODataController {
         })
     }
 }
+CategoriesController.enableFilter('find');
 
 export class Location {
     @Edm.String
