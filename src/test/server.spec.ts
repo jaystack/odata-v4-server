@@ -506,7 +506,7 @@ export function testFactory(createTest: any) {
             }
         });
 
-        createTest("should return stream result set count", TestServer,"GET /Categories('578f2baa12eaebabec4af290')/Products/$count", {
+        createTest("should return stream result set count", TestServer,"GET /CategoriesStream('578f2baa12eaebabec4af290')/Products/$count", {
             statusCode: 200,
             body: 13,
             elementType: Number,
