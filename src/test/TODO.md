@@ -20,7 +20,7 @@
 * Create HTTP Accept headers tests
 * Throw NotImplementedError
 * ~~Use controller class static .on() like @odata.GET, etc.~~
-* Use controller class static .enableFilter() like @odata.filter
+* ~~Use controller class static .enableFilter() like @odata.filter~~
 * Enum type on inherited entity type
 * Enum type as action/function parameters
 * Type definition on inherited entity type
@@ -35,7 +35,7 @@
 * Start server on specific hostname (localhost)
 * Set some HTTP headers and response status code in controller or action/function import
 * ~~Use $select OData query, expect @odata.context to be valid based on selection~~
-* Use resource path like Categories(1)/Products(1)
+* ~~Use resource path like Categories(1)/Products(1)~~
 * PUT handler in ODataController implement upsert, return entity if it was an insert, return null/undefined/void if it was an update
 * ~~Use $count on empty result set~~
 * ~~Use $count with bad result set~~
