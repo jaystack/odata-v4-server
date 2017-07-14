@@ -1061,7 +1061,7 @@ export class ODataProcessor extends Transform{
                         }else{
                             return expResult.then((expResult) => {
                                 return (<Promise<ODataResult>>(boundOpName == "$ref" && this.method != "get" ? ODataResult.NoContent : ODataRequestResult[this.method])(expResult, typeof expResult == "object" ? "application/json" : "text/plain")).then((result) => {
-                                    if (typeof expResult == "object" && boundOpName != "$ref") result.elementType = elementType;
+                                    if (typeof expResult == "object" && (boundOpName != "$ref" || this.method == "get")) result.elementType = elementType;
                                     resolve(result);
                                 }, reject);
                             }, reject);
@@ -1293,9 +1293,6 @@ export class ODataProcessor extends Transform{
         let entityType = function(){};
         util.inherits(entityType, elementType);
         result = Object.assign(new entityType(), result || {});
-
-        // TODO: resolve includes qualified type names and add included nav props to props array
-        // console.log(includes, ...includes['Meta.Meta/MediaList'].navigation);
 
         if (includes){
             for (let expand in includes){

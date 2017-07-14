@@ -672,9 +672,7 @@ export class MetaTestServer extends ODataServer {
     @Edm.TypeDefinition(ObjectID)
     @Edm.FunctionImport
     ObjId( @Edm.TypeDefinition(ObjectID) v: ObjectID) {
-        console.log(typeof (v))
-        return v;
-        // return v.toHexString();
+        return v.toHexString();
     }
 }
 
