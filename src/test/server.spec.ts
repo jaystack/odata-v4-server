@@ -455,6 +455,7 @@ export function testFactory(createTest: any) {
                         "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
                         "Data2@odata.mediaContentType": "image/png",
                         "Data2@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data2",
+                        "Data2@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data2",
                         "Data@odata.mediaContentType": "image/png"
                     }
                 ]
@@ -474,44 +475,31 @@ export function testFactory(createTest: any) {
                 "Data@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data",
                 "Data2@odata.mediaContentType": "image/png",
                 "Data2@odata.mediaReadLink": "http://localhost/ImagesControllerEntitySet(1)/Data2",
+                "Data2@odata.mediaEditLink": "http://localhost/ImagesControllerEntitySet(1)/Data2",
                 "Data@odata.mediaContentType": "image/png"
             },
             elementType: Image,
             contentType: "application/json"
         });
 
-        createTest("stream property write and pipe", TestServer, "GET /ImagesControllerEntitySet(1)/Data2", {
+        createTest("should return stream result set count", TestServer, "GET /CategoriesStream('578f2baa12eaebabec4af290')/Default.Category/Products", {
             statusCode: 200,
             body: {
-                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet(1)/Data2",
-                value: [
-                    {
-                        value: 0
-                    }
-                ]
+                "@odata.context": "http://localhost/$metadata#CategoriesStream('578f2baa12eaebabec4af290')/Products",
+                value: products.filter(product => product.CategoryId && product.CategoryId.toString() == "578f2baa12eaebabec4af290").map(product => Object.assign({
+                    "@odata.id": `http://localhost/Products('${product._id}')`
+                }, product))
             },
-            elementType: "Edm.Stream",
+            elementType: Product,
             contentType: "application/json"
         });
 
-        createTest("stream property value", TestServer, "GET /ImagesControllerEntitySet(1)/Data2/$value", {
-            statusCode: 200,
-            body: {
-                "@odata.context": "http://localhost/$metadata#ImagesControllerEntitySet(1)/Data2",
-                value: [
-                    {
-                        value: 0
-                    }
-                ]
-            }
-        });
-
-        createTest("should return stream result set count", TestServer,"GET /CategoriesStream('578f2baa12eaebabec4af290')/Products/$count", {
+        /*createTest("should return stream result set count", TestServer,"GET /CategoriesStream('578f2baa12eaebabec4af290')/Default.Category/Products/$count", {
             statusCode: 200,
             body: 13,
             elementType: Number,
             contentType: "text/plain"
-        });
+        });*/
     });
 
     describe("Media entity", () => {

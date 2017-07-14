@@ -3,11 +3,14 @@ import { TestServer, Foobar } from './test.model';
 import { ODataServer } from "../lib/index";
 import { testFactory } from './server.spec'
 import { Product, Category } from "../example/model";
+import * as fs from "fs";
+import * as path from "path";
+import * as streamBuffers from "stream-buffers";
+
 const { expect } = require("chai");
 const extend = require("extend");
 let categories = require("../example/categories");
 let products = require("../example/products");
-let streamBuffers = require("stream-buffers");
 
 function createTestFactory(it) {
     return function createTest(testcase: string, server: typeof ODataServer, command: string, compare: any, body?: any) {
@@ -256,10 +259,55 @@ describe("OData execute", () => {
             let readableStrBuffer = new streamBuffers.ReadableStreamBuffer();
             readableStrBuffer.put('tmp.png');
             return TestServer.execute("/ImagesControllerEntitySet(1)/Data", "POST", readableStrBuffer).then((result) => {
+                readableStrBuffer.stop();
                 expect(result).to.deep.equal({
                     statusCode: 204
                 });
             });
+        });
+
+        it("stream property GET", () => {
+            let writableStrBuffer = new streamBuffers.WritableStreamBuffer();
+            return TestServer.execute({
+                url: "/ImagesControllerEntitySet(1)/Data",
+                method: "GET",
+                response: writableStrBuffer
+            }).then(_ => {
+                expect(writableStrBuffer.getContentsAsString()).to.equal("tmp.png");
+            });
+        });
+
+        it("stream property with ODataStream POST", () => {
+            return TestServer.execute("/ImagesControllerEntitySet(1)/Data2", "POST", fs.createReadStream(path.join(__dirname, "fixtures", "logo_jaystack.png"))).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
+                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                    fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                }
+            });
+        });
+
+        it("stream property with ODataStream GET", (done) => {
+            let tmp = fs.createWriteStream(path.join(__dirname, "fixtures", "tmp.png"))
+            tmp.on("open", _ => {
+                TestServer.execute({
+                    url: "/ImagesControllerEntitySet(1)/Data2",
+                    method: "GET",
+                    response: tmp
+                }).then(_ => {
+                    expect(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png")));
+                    try{
+                        if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                            fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                        }
+                        done();
+                    }catch(err){
+                        done(err);
+                    }
+                }, done);
+            }).on("error", done);
         });
     });
 

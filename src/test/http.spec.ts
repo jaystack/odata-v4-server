@@ -6,6 +6,8 @@ import { TestServer, Foobar } from './test.model';
 import { Product, Category } from "../example/model";
 import * as request from 'request-promise';
 import * as streamBuffers from "stream-buffers";
+import * as fs from "fs";
+import * as path from "path";
 
 const extend = require("extend");
 let categories = require("../example/categories");
@@ -28,30 +30,35 @@ function createTest(testcase: string, server: typeof ODataServer, command: strin
         } else {
             port = serverCache.get(server);
         }
-        return request[method](`http://localhost:${port}${path}`, { json: body }, (err, response, result) => {
-            if (err) {
-                throw err;
-            }
-            if (result) {
-                if (typeof result == "object") {
-                    result = JSON.stringify(result);
+        return new Promise((resolve, reject) => {
+            request[method](`http://localhost:${port}${path}`, { json: body }, (err, response, result) => {
+                if (err) return reject(err);
+                try{
+                    if (result) {
+                        if (typeof result == "object") {
+                            result = JSON.stringify(result);
+                        }
+                        try { result = result.replace(new RegExp(`http:\\/\\/localhost:${port}\\/`, 'gi'), 'http://localhost/'); } catch (err) { }
+                        try { result = JSON.parse(result); } catch (err) { }
+                    }
+                    if (compare.body) {
+                        if (typeof compare.body == "object") {
+                            expect(result).to.deep.equal(JSON.parse(JSON.stringify(compare.body)));
+                        } else {
+                            expect(result).to.equal(compare.body);
+                        }
+                    }
+                    if (compare.statusCode) {
+                        expect(response.statusCode).to.equal(compare.statusCode);
+                    }
+                    if (compare.contentType) {
+                        expect(response.headers["content-type"].indexOf(compare.contentType)).to.be.above(-1);
+                    }
+                    resolve();
+                }catch(err){
+                    reject(err);
                 }
-                try { result = result.replace(new RegExp(`http:\\/\\/localhost:${port}\\/`, 'gi'), 'http://localhost/'); } catch (err) { }
-                try { result = JSON.parse(result); } catch (err) { }
-            }
-            if (compare.body) {
-                if (typeof compare.body == "object") {
-                    expect(result).to.deep.equal(JSON.parse(JSON.stringify(compare.body)));
-                } else {
-                    expect(result).to.equal(compare.body);
-                }
-            }
-            if (compare.statusCode) {
-                expect(response.statusCode).to.equal(compare.statusCode);
-            }
-            if (compare.contentType) {
-                expect(response.headers["content-type"].indexOf(compare.contentType)).to.be.above(-1);
-            }
+            });
         });
     });
 }
@@ -231,11 +238,49 @@ describe("OData HTTP", () => {
             let req = request.post(`http://localhost:3002/ImagesControllerEntitySet(1)/Data`);
             readableStrBuffer.pipe(req);
             readableStrBuffer.put('tmp.png');
+            readableStrBuffer.stop();
             req.on('error', (err) => {
                 done(err);
             });
             req.on('complete', (resp, body) => {
                 expect(resp.statusCode).to.equal(204);
+                done();
+            });
+        });
+
+        it("stream property GET", (done) => {
+            request.get(`http://localhost:3002/ImagesControllerEntitySet(1)/Data`, (err, resp, body) => {
+                if (err) return done(err);
+                expect(resp.statusCode).to.equal(200);
+                expect(body).to.equal("tmp.png");
+                done();
+            });
+        });
+
+        it("stream property with ODataStream POST", (done) => {
+            let req = request.post(`http://localhost:3002/ImagesControllerEntitySet(1)/Data2`);
+            fs.createReadStream(path.join(__dirname, "fixtures", "logo_jaystack.png")).pipe(req);
+            req.on('error', (err) => {
+                done(err);
+            });
+            req.on('complete', (resp, body) => {
+                expect(resp.statusCode).to.equal(204);
+                expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
+                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                    fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                }
+                done();
+            });
+        });
+
+        it("stream property with ODataStream GET", (done) => {
+            request.get(`http://localhost:3002/ImagesControllerEntitySet(1)/Data2`).on("response", resp => {
+                expect(resp.statusCode).to.equal(200);
+            }).on("error", done).pipe(fs.createWriteStream(path.join(__dirname, "fixtures", "tmp.png"))).on("finish", _ => {
+                expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
+                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                    fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                }
                 done();
             });
         });
@@ -247,6 +292,7 @@ describe("OData HTTP", () => {
             let req = request.post(`http://localhost:3002/MusicControllerEntitySet(1)/$value`);
             readableStrBuffer.pipe(req);
             readableStrBuffer.put('tmp.png');
+            readableStrBuffer.stop();
             req.on('error', (err) => {
                 done(err);
             });

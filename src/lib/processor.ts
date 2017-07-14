@@ -420,6 +420,7 @@ export enum ODataMetadataType{
 export interface ODataProcessorOptions{
     disableEntityConversion:boolean
     metadata:ODataMetadataType
+    objectMode:boolean
 }
 
 export class ODataProcessor extends Transform{
@@ -441,6 +442,7 @@ export class ODataProcessor extends Transform{
     private body:any
     private streamStart = false;
     private streamEnabled = false;
+    private streamObject = false;
     private streamEnd = false;
     private streamInlineCount:number;
     private elementType:any;
@@ -513,13 +515,16 @@ export class ODataProcessor extends Transform{
     _transform(chunk:any, _:string, done:Function){
         if (this.streamEnabled){
             if (!(chunk instanceof Buffer)){
+                this.streamObject = true;
                 if (!this.streamStart){
-                    this.push("{");
-                    if (this.options.metadata != ODataMetadataType.none){
-                        this.push(`"@odata.context":"${this.odataContext}",`);
+                    if (!this.options.objectMode){
+                        this.push("{");
+                        if (this.options.metadata != ODataMetadataType.none){
+                            this.push(`"@odata.context":"${this.odataContext}",`);
+                        }
+                        this.push('"value":[');
                     }
-                    this.push('"value":[');
-                }else this.push(',');
+                }else if (!this.options.objectMode) this.push(',');
                 try{
                     this.streamStart = true;
                     if (chunk instanceof Object){
@@ -528,11 +533,11 @@ export class ODataProcessor extends Transform{
                         }
                         let entity = {};
                         let defer;
-                        if (this.ctrl) defer = this.__appendLinks(this.ctrl, this.ctrl.prototype.elementType, entity, chunk);
+                        if (this.ctrl) defer = this.__appendLinks(this.ctrl, this.elementType || this.ctrl.prototype.elementType, entity, chunk);
                         let deferConvert = this.__convertEntity(entity, chunk, this.elementType || this.ctrl.prototype.elementType, this.resourcePath.includes);
                         defer = defer ? defer.then(_ => deferConvert) : deferConvert;
                         defer.then(() => {
-                            chunk = JSON.stringify(entity);
+                            chunk = this.options.objectMode ? entity : JSON.stringify(entity);
                             this.push(chunk);
                             if (typeof done == "function") done();
                         }, (err) => {
@@ -558,16 +563,30 @@ export class ODataProcessor extends Transform{
     }
 
     protected _flush(done?:Function){
-        if (this.streamEnabled){
-            if (this.streamStart){
-                if (typeof this.streamInlineCount == "number"){
-                    this.push(`],"@odata.count":${this.streamInlineCount}}`);
-                }else this.push("]}");
-            }else{
+        if (this.streamEnabled && this.streamObject){
+            if (this.options.objectMode){
+                let flushObject:any = {
+                    value: [],
+                    elementType: this.elementType || this.ctrl.prototype.elementType
+                };
                 if (this.options.metadata != ODataMetadataType.none){
-                    this.push('{"value":[]}');
+                    flushObject["@odata.context"] = this.odataContext;
+                }
+                if (this.streamStart && typeof this.streamInlineCount == "number"){
+                    flushObject["@odata.count"] = this.streamInlineCount;
+                }
+                this.push(flushObject);
+            }else{
+                if (this.streamStart){
+                    if (typeof this.streamInlineCount == "number"){
+                        this.push(`],"@odata.count":${this.streamInlineCount}}`);
+                    }else this.push("]}");
                 }else{
-                    this.push(`{"@odata.context":"${this.odataContext}","value":[]}`);
+                    if (this.options.metadata != ODataMetadataType.none){
+                        this.push('{"value":[]}');
+                    }else{
+                        this.push(`{"@odata.context":"${this.odataContext}","value":[]}`);
+                    }
                 }
             }
         }
@@ -610,6 +629,7 @@ export class ODataProcessor extends Transform{
                     }
                 }
                 if (part.key) part.key.forEach((key) => params[key.name] = key.value);
+                this.elementType = elementType;
                 return this.__read(ctrl, part, params, result, fn, elementType).then((result) => {
                     this.ctrl = this.serverType.getController(elementType);
                     return result;
@@ -657,6 +677,7 @@ export class ODataProcessor extends Transform{
                         }
                     }
                 }
+                this.elementType = elementType;
                 return this.__read(ctrl, part, params, result, fn, elementType).then((result) => {
                     this.ctrl = this.serverType.getController(elementType);
                     return result;
@@ -879,6 +900,7 @@ export class ODataProcessor extends Transform{
                 if (isStream(result) && include){
                     include.streamPromise.then((result) => {
                         (<Promise<ODataResult>>ODataRequestResult[method](result)).then((result) => {
+                            if (elementType) result.elementType = elementType;
                             return this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType, (include || this.resourcePath).includes).then(() => {
                                 resolve(result);
                             }, reject);
@@ -892,6 +914,7 @@ export class ODataProcessor extends Transform{
                         if (!this.streamStart &&
                             writeMethods.indexOf(this.method) < 0 && !result.body) return reject(new ResourceNotFoundError());
                         try{
+                            if (elementType) result.elementType = elementType;
                             this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType, (include || this.resourcePath).includes).then(() => {
                                 if (!this.streamEnd && this.streamEnabled && this.streamStart) this.on("end", () => resolve(result));
                                 else resolve(result);
@@ -902,6 +925,7 @@ export class ODataProcessor extends Transform{
                     }, reject);
                 }else{
                     try{
+                        if (elementType) result.elementType = elementType;
                         this.__appendODataContext(result, elementType || this.ctrl.prototype.elementType, (include || this.resourcePath).includes).then(() => {
                             if (!this.streamEnd && this.streamEnabled && this.streamStart) this.on("end", () => resolve(result));
                             else resolve(result);
@@ -1119,6 +1143,17 @@ export class ODataProcessor extends Transform{
             }
         };
         resolveBaseType(elementType);
+        if (!entitySet || ctrl.prototype.elementType != elementType){
+            let typeCtrl = this.serverType.getController(elementType);
+            if (typeCtrl){
+                for (let prop in this.entitySets){
+                    if (this.entitySets[prop] == typeCtrl){
+                        entitySet = prop;
+                        break;
+                    }
+                }
+            }
+        }
         let id;
         if (keys.length > 0){
             try{

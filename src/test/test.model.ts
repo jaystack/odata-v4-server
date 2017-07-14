@@ -5,10 +5,12 @@ import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataRes
 import { Product, Category } from "../example/model";
 import { Readable, PassThrough, Writable } from "stream";
 import { ObjectID } from "mongodb";
+import * as fs from "fs";
+import * as path from "path";
+import * as streamBuffers from "stream-buffers";
 const extend = require("extend");
 let categories = require("../example/categories");
 let products = require("../example/products");
-let streamBuffers = require("stream-buffers");
 
 export class Foobar {
     @Edm.Key
@@ -221,8 +223,6 @@ export class BoundOperationController extends ODataController {
     }
 }
 
-let globalWritableImgStrBuffer = new streamBuffers.WritableStreamBuffer();
-let globalReadableImgStrBuffer = new streamBuffers.ReadableStreamBuffer();
 @odata.type(Image)
 export class ImagesController extends ODataController {
     @odata.GET
@@ -243,21 +243,26 @@ export class ImagesController extends ODataController {
 
     @odata.GET("Data")
     getData( @odata.key _: number, @odata.context context: ODataHttpContext) {
-        globalReadableImgStrBuffer.put(globalWritableImgStrBuffer.getContents());
-        return globalReadableImgStrBuffer.pipe(context.response);
+        let globalReadableImgStrBuffer = new streamBuffers.ReadableStreamBuffer();
+        globalReadableImgStrBuffer.put("tmp.png");
+        globalReadableImgStrBuffer.stop();
+        return globalReadableImgStrBuffer;
     }
 
     @odata.POST("Data")
-    postData( @odata.key _: number, @odata.body data: any) {
+    postData( @odata.key _: number, @odata.body data: Readable) {
+        let globalWritableImgStrBuffer = new streamBuffers.WritableStreamBuffer();
         return data.pipe(globalWritableImgStrBuffer);
     }
 
     @odata.GET("Data2")
     getData2( @odata.key _: number, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
-        stream.write({ value: 0 });
-        new ODataStream(stream).pipe(globalWritableImgStrBuffer);
-        new ODataStream(stream).write(globalReadableImgStrBuffer);
-        stream.end();
+        return new ODataStream(fs.createReadStream(path.join(__dirname, "..", "..", "src", "test", "fixtures", "logo_jaystack.png"))).pipe(context.response);
+    }
+
+    @odata.POST("Data2")
+    postData2( @odata.key _: number, @odata.body data: Readable) {
+        return new ODataStream(fs.createWriteStream(path.join(__dirname, "..", "..", "src", "test", "fixtures", "tmp.png"))).write(data);
     }
 }
 
@@ -416,7 +421,7 @@ export class CategoriesStreamingController extends ODataController {
 
     @odata.GET("Products")
     getProducts( @odata.result result: Category, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
-        const filteredProducts = products.filter(p => p.CategoryId.toString() === result._id.toString());
+        const filteredProducts = products.filter(p => p.CategoryId && p.CategoryId.toString() === result._id.toString());
         filteredProducts.forEach(p => { stream.write(p) });
         stream.end();
     }

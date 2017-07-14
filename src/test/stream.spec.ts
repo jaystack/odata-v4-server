@@ -2,11 +2,13 @@
 import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music } from './test.model';
 import { Product, Category } from "../example/model";
 import { ODataServer } from "../lib/index";
-import { testFactory } from './server.spec'
+import { testFactory } from "./server.spec";
+import * as fs from "fs";
+import * as path from "path";
+import * as streamBuffers from "stream-buffers";
 const { expect } = require("chai");
 const extend = require("extend");
 let categories = require("../example/categories");
-let streamBuffers = require("stream-buffers");
 
 function createTest(testcase: string, server: typeof ODataServer, command: string, compare: any, body?: any) {
     let test = command.split(" ");
@@ -482,11 +484,73 @@ if (typeof describe == "function") {
                     context.body = readableStrBuffer
                     
                     testServer.write(context);
-                    testServer.on("data", data => resolve(data))
-                    testServer.on("error", err => reject(err))
-                })
-                .then(result => expect(result).to.deep.equal({ statusCode: 204 }))
-            })
+                    testServer.on("data", data => resolve(data));
+                    testServer.on("error", reject);
+                }).then(result => {
+                    readableStrBuffer.stop();
+                    expect(result).to.deep.equal({ statusCode: 204 });
+                });
+            });
+
+            it("stream property GET", () => {
+                let testServer = new TestServer();
+                let writableStrBuffer = new streamBuffers.WritableStreamBuffer();
+
+                return new Promise((resolve, reject) => {
+                    testServer.write({
+                        url: "/ImagesControllerEntitySet(1)/Data",
+                        method: "GET",
+                        response: writableStrBuffer
+                    });
+                    testServer.on("data", data => resolve(data));
+                    testServer.on("error", reject);
+                }).then(_ => {
+                    expect(writableStrBuffer.getContentsAsString()).to.equal("tmp.png");
+                });
+            });
+
+            it("stream property with ODataStream POST", () => {
+                let testServer = new TestServer();
+
+                return new Promise((resolve, reject) => {
+                    testServer.write({
+                        url: "/ImagesControllerEntitySet(1)/Data2",
+                        method: "POST",
+                        body: fs.createReadStream(path.join(__dirname, "fixtures", "logo_jaystack.png"))
+                    });
+                    testServer.on("data", data => resolve(data));
+                    testServer.on("error", reject);
+                }).then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 204
+                    });
+                    expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
+                    if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                        fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                    }
+                });
+            });
+
+            it("stream property with ODataStream GET", () => {
+                return new Promise((resolve, reject) => {
+                    let tmp = fs.createWriteStream(path.join(__dirname, "fixtures", "tmp.png"))
+                    tmp.on("open", _ => {
+                        let testServer = new TestServer();
+                        testServer.write({
+                            url: "/ImagesControllerEntitySet(1)/Data2",
+                            method: "GET",
+                            response: tmp
+                        });
+                        testServer.on("data", data => resolve(data));
+                        testServer.on("error", reject);
+                    }).on("error", reject);
+                }).then(_ => {
+                    expect(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png")));
+                    if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                        fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                    }
+                });
+            });
         });
 
         describe("Media entity", () => {

@@ -13,6 +13,8 @@ import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions, ODataMetadataType } from "./processor";
 import { HttpRequestError, UnsupportedMediaTypeError } from "./error";
 import { ContainerBase } from "./edm";
+export { Request, Response } from "express";
+import { Readable, Writable } from "stream";
 
 /** HTTP context interface when using the server HTTP request handler */
 export interface ODataHttpContext{
@@ -21,8 +23,8 @@ export interface ODataHttpContext{
     protocol:"http"|"https"
     host:string
     base:string
-    request:express.Request
-    response:express.Response
+    request:Request & Readable
+    response:Response & Writable
 }
 
 function ensureODataMetadataType(req, res){
@@ -132,9 +134,9 @@ export class ODataServerBase extends Transform{
         };
     }
 
-    static execute(url:string, method:string, body?:any):Promise<ODataResult>;
-    static execute(context:any, body?:any):Promise<ODataResult>;
-    static execute(url:string | any, method:string | any, body?:any):Promise<ODataResult>{
+    static execute<T>(url:string, method:string, body?:any):Promise<ODataResult<T>>;
+    static execute<T>(context:any, body?:any):Promise<ODataResult<T>>;
+    static execute<T>(url:string | any, method:string | any, body?:any):Promise<ODataResult<T>>{
         let context:any = {};
         if (typeof url == "object"){
             context = Object.assign(context, url);
@@ -148,12 +150,32 @@ export class ODataServerBase extends Transform{
             context.method = method;
         }
         let processor = this.createProcessor(context, <ODataProcessorOptions>{
+            objectMode: true,
             metadata: context.metadata || ODataMetadataType.minimal
         });
+        let values = [];
+        let flushObject;
         let response = "";
-        processor.on("data", (chunk) => response += chunk.toString());
-        return processor.execute(context.body || body).then((result:ODataResult) => {
-            if (response) result.body = JSON.parse(response);
+        if (context.response instanceof Writable) processor.pipe(context.response);
+        processor.on("data", (chunk:any) => {
+            if (!(typeof chunk == "string" || chunk instanceof Buffer)){
+                if (chunk["@odata.context"] && chunk.value && Array.isArray(chunk.value) && chunk.value.length == 0){
+                    flushObject = chunk;
+                    flushObject.value = values;
+                }else{
+                    values.push(chunk);
+                }
+            }else response += chunk.toString();
+        });
+        return processor.execute(context.body || body).then((result:ODataResult<T>) => {
+            if (flushObject){
+                result.body = flushObject;
+                if (!result.elementType || typeof result.elementType == "object") result.elementType = flushObject.elementType;
+                delete flushObject.elementType;
+                result.contentType = result.contentType || "application/json";
+            }else if (result && response){
+                result.body = <any>response;
+            }
             return result;
         });
     }
