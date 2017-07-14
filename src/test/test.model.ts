@@ -395,7 +395,8 @@ export class CategoriesController extends ODataController {
 }
 CategoriesController.enableFilter('find');
 
-@odata.type(Category)
+class CategoryStream extends Category{}
+@odata.type(CategoryStream)
 @Edm.EntitySet("Categories")
 export class CategoriesStreamingController extends ODataController {
 
