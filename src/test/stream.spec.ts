@@ -24,8 +24,9 @@ function createTest(testcase: string, server: typeof ODataServer, command: strin
 
         return new Promise((resolve, reject) => {
             testServer.write(context);
-            testServer.on("data", data => { resolve(data) })
-            testServer.on("error", err => { reject(err) })
+            testServer.on("data", data => { resolve(data) });
+            testServer.on("error", err => { reject(err) });
+            testServer.end();
         }).then(result => {
             expect(result).to.deep.equal(compare);
         })
