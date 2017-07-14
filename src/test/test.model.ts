@@ -342,6 +342,7 @@ export class ProductsController extends ODataController {
         })
     }
 }
+ProductsController.enableFilter(ProductsController.prototype.find, 'filter');
 
 @odata.type(Category)
 @Edm.EntitySet("Categories")
@@ -390,6 +391,33 @@ export class CategoriesController extends ODataController {
             });
             resolve(products);
         })
+    }
+}
+CategoriesController.enableFilter('find');
+
+@odata.type(Category)
+@Edm.EntitySet("Categories")
+export class CategoriesStreamingController extends ODataController {
+
+    @odata.GET
+    find( @odata.filter filter: Token): Category[] {
+        if (filter) return categories.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
+        return categories;
+    }
+
+    @odata.GET
+    @odata.parameters({
+        key: odata.key
+    })
+    findOne(key: string): Category {
+        return categories.filter(category => category._id.toString() == key)[0] || null;
+    }
+
+    @odata.GET("Products")
+    getProducts( @odata.result result: Category, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
+        const filteredProducts = products.filter(p => p.CategoryId.toString() === result._id.toString());
+        filteredProducts.forEach(p => { stream.write(p) });
+        stream.end();
     }
 }
 
@@ -483,6 +511,7 @@ export class HiddenController extends ODataController { }
 @odata.controller(CategoriesController, true)
 @odata.controller(UsersController, true, User)
 @odata.controller(HiddenController)
+@odata.controller(CategoriesStreamingController, "CategoriesStream")
 @odata.container("TestContainer")
 export class TestServer extends ODataServer {
     @Edm.ActionImport
