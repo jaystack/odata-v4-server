@@ -413,14 +413,10 @@ export class TestContainer extends Edm.ContainerBase {
 export class MetaController extends ODataController {
     @odata.GET
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
-        let meta = new Meta();
-        meta.Id = 1;
-        meta.p0 = 1;
-        meta.p1 = true;
-        meta.p9 = 9;
-        meta.p10 = 10;
-        meta.MongoId = new ObjectID();
-        return [meta];
+        return [
+            { MongoId: new ObjectID('5968aad95eb7eb3a94a264f7'), b0: "basemeta", "@odata.type": BaseMeta },
+            { Id : 1, p0 : 1, p1 : true, p9 : 9, p10 : 10, MongoId : new ObjectID('5968aad95eb7eb3a94a264f6'), "@odata.type": Meta }
+        ];
     }
 
     @odata.method("GET")
@@ -434,8 +430,8 @@ export class MetaController extends ODataController {
     }
 
     // @odata.POST
-    // insert( @odata.type() type: string) {
-
+    // insert( @odata.body body: any, @odata.type type: string) {
+    //     console.log(type, body);
     // }
 
     @odata.GET("MediaList")

@@ -2,7 +2,7 @@
 import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer } from './test.model';
 import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity } from './metadata.spec';
+import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity, BaseMeta } from './metadata.spec';
 import { ObjectID } from "mongodb";
 const { expect } = require("chai");
 const extend = require("extend");
@@ -630,6 +630,49 @@ export function testFactory(createTest: any) {
             elementType: CompoundKey,
             contentType: "application/json"
         });
+
+        createTest("should return Meta result", MetaTestServer, "GET /Meta", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Meta",
+                "value": [
+                    {
+                        "@odata.id": "http://localhost/Meta('5968aad95eb7eb3a94a264f7')",
+                        "@odata.type": "#Meta.BaseMeta",
+                        "MongoId": new ObjectID("5968aad95eb7eb3a94a264f7"),
+                        "b0": "basemeta"
+                    },
+                    {
+                        "@odata.id": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)",
+                        "@odata.type": "#Meta.Meta",
+                        "MongoId": new ObjectID("5968aad95eb7eb3a94a264f6"),
+                        "Id": 1,
+                        "p0": 1,
+                        "p1": true,
+                        "p9": 9,
+                        "p10": 10,
+                        "p14@odata.mediaReadLink": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)/p14",
+                        "p14@odata.mediaContentType": "test",
+                        "p47@odata.mediaReadLink": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)/p47",
+                        "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)/p66"
+                    }
+                ]
+            },
+            elementType: BaseMeta,
+            contentType: "application/json"
+        });
+
+        // createTest("should create BaseMeta entity", MetaTestServer, "POST /Meta", {
+        //     statusCode: 204
+        // }, { 
+        //     Id : 2, 
+        //     p0 : 2, 
+        //     p1 : false, 
+        //     p9 : 29, 
+        //     p10 : 30, 
+        //     MongoId : new ObjectID('5968aad95eb7eb3a94a264f6')
+        //     // "@odata.type" : Meta
+        // });
 
         createTest("should return Meta result by keys", MetaTestServer, "GET /Meta(Id=1,MongoId='578f2b8c12eaebabec4af242',p9=9,p10=10)", {
             statusCode: 200,
