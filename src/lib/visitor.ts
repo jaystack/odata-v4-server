@@ -307,7 +307,7 @@ export class ResourcePathVisitor{
         this.path += "/" + part.name;
     }
 
-    protected async VisitBoundFunctionCall(node:Token){
+    protected async VisitBoundFunctionCall(node:Token, context:any){
         let part = {
             type: node.type,
             name: node.value.call.value.namespace + "." + node.value.call.value.name,
@@ -317,10 +317,12 @@ export class ResourcePathVisitor{
         this.navigation.push(part);
         this.path += "/" + part.name;
         this.path += "(\\(";
+        context.parameters = Edm.getParameters(node[ODATA_TYPE], part.name);
         await Promise.all(node.value.params.value.map(async (param, i) => {
             await this.Visit(param, context);
             if (i < node.value.params.value.length - 1) this.path += ",";
         }));
+        delete context.parameters;
         this.path += "\\))";
     }
     
@@ -334,14 +336,20 @@ export class ResourcePathVisitor{
         this.navigation.push(part);
         this.path += "/" + part.name;
         this.path += "(\\(";
-        await Promise.all(node.value.params.map(async (param) => await this.Visit(param, context)));
+        context.parameters = Edm.getParameters(node[ODATA_TYPE], part.name);
+        await Promise.all(node.value.params.map(async (param) => await this.Visit(param, Object.assign({}, context))));
+        delete context.parameters;
         this.path += "\\))";
     }
     
     protected async VisitFunctionParameter(node:Token, context:any){
+        let edmParam = context.parameters.find(p => p.name == [node.value.name.value.name]);
+        let deserializer = (edmParam && Edm.getURLDeserializer(node[ODATA_TYPE], edmParam.name, edmParam.type, this.serverType.container)) || (_ => _);
+
         await this.Visit(node.value.value, context = Object.assign({}, context));
+
         let params = this.navigation[this.navigation.length - 1].params;
-        params[node.value.name.value.name] = (literal => _ => typeof literal == "function" ? literal() : literal)(context.literal);
+        params[node.value.name.value.name] = (literal => _ => deserializer(typeof literal == "function" ? literal() : literal))(context.literal);
         this.path += node.value.name.value.name + "=([^,]+)";
         delete context.literal;
     }
