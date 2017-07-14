@@ -1,5 +1,5 @@
 /// <reference types="mocha" />
-import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music } from './test.model';
+import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer } from './test.model';
 import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
 import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity } from './metadata.spec';
@@ -824,6 +824,38 @@ export function testFactory(createTest: any) {
                 "value": "578f2b8c12eaebabec4af288"
             },
             elementType: ObjectID,
+            contentType: "application/json"
+        });
+    });
+
+    describe("Create server, controller, model with .define() method", () => {
+        createTest("shuld return DefTest result", DefTestServer, `GET /DefTest`, {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#DefTest",
+                "value": [
+                    {
+                        "@odata.id": "http://localhost/DefTest(1)",
+                        "id": 1,
+                        "key": "testkey",
+                        "value": "testvalue"
+                    }
+                ]
+            },
+            elementType: DefTest,
+            contentType: "application/json"
+        });
+
+        createTest("shuld return DefTest result by key", DefTestServer, `GET /DefTest(11)`, {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#DefTest/$entity",
+                "@odata.id": "http://localhost/DefTest(11)",
+                "id": 11,
+                "key": "testkey11",
+                "value": "testvalue11"
+            },
+            elementType: DefTest,
             contentType: "application/json"
         });
     });

@@ -16,7 +16,7 @@
 * ~~Use @odata.method('methodname', 'navprop')~~
 * ~~Use @odata.link('keyname')~~
 * ~~Use @odata.id~~
-* Use .define() to define models, controllers, server, see es6.js example
+* ~~Use .define() to define models, controllers, server, see es6.js example~~
 * Create HTTP Accept headers tests
 * Throw NotImplementedError
 * ~~Use controller class static .on() like @odata.GET, etc.~~

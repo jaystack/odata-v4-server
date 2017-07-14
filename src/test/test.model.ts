@@ -1,7 +1,7 @@
 /// <reference types="mocha" />
 import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
-import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream } from "../lib/index";
+import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream, ODataEntity } from "../lib/index";
 import { Product, Category } from "../example/model";
 import { Readable, PassThrough, Writable } from "stream";
 import { ObjectID } from "mongodb";
@@ -435,6 +435,39 @@ export class UsersController extends ODataController {
     @Edm.Action
     logout() { }
 }
+
+export class DefTest extends ODataEntity { }
+DefTest.define({
+    id: [Edm.Int32, Edm.Key, Edm.Computed],
+    key: Edm.String,
+    value: Edm.String
+});
+
+export class DefTestController extends ODataController {
+    all() {
+        return [Object.assign(new DefTest(), {
+            id: 1,
+            key: 'testkey',
+            value: 'testvalue'
+        })];
+    }
+    one(key) {
+        return Object.assign(new DefTest(), {
+            id: key,
+            key: `testkey${key}`,
+            value: `testvalue${key}`
+        });
+    }
+}
+DefTestController.define(odata.type(DefTest), {
+    all: odata.GET,
+    one: [odata.GET, {
+        key: odata.key
+    }]
+});
+
+export class DefTestServer extends ODataServer{}
+DefTestServer.define(odata.controller(DefTestController, true));
 
 export class HiddenController extends ODataController { }
 
