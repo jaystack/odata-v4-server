@@ -19,7 +19,7 @@
 * Use .define() to define models, controllers, server, see es6.js example
 * Create HTTP Accept headers tests
 * Throw NotImplementedError
-* Use controller class static .on() like @odata.GET, etc.
+* ~~Use controller class static .on() like @odata.GET, etc.~~
 * Use controller class static .enableFilter() like @odata.filter
 * Enum type on inherited entity type
 * Enum type as action/function parameters

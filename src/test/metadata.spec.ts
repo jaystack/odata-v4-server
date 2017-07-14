@@ -539,30 +539,29 @@ export class CompoundKeyController extends ODataController {
 @odata.namespace("Controller")
 @odata.type(TestEntity)
 export class TestEntityController extends ODataController {
-    @odata.GET
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
         let te = new TestEntity();
         te.test = 1;
         return [te];
     }
 
-    @odata.method("GET")
     findOneByKeys( @odata.id id: number) {
         let te = new TestEntity();
         te.test = id;
         return te;
     }
 }
+TestEntityController.on('GET', 'findAll', 'findOneByKeys');
 
 @odata.namespace("Controller")
 @odata.type(EmptyEntity)
 export class EmptyEntityController extends ODataController {
-    @odata.GET
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
         let ee = new EmptyEntity();
         return [ee];
     }
 }
+EmptyEntityController.on('GET', 'findAll')
 
 @odata.namespace("Controller")
 @odata.type(EmptyEntity)
