@@ -431,22 +431,137 @@ export class CategoriesStreamingController extends ODataController {
     }
 }
 
+/**
+ *  GENERATOR CONTROLLERS
+ */
+
+const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFromHexString(_id) : _id;
+
 const delay = async function (ms: number): Promise<any> {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
-class CategoryGenerator extends Category{}
-@odata.type(CategoryGenerator)
-@Edm.EntitySet("Categories")
+
+@Edm.Annotate({
+    term: "UI.DisplayName",
+    string: "Products2"
+})
+export class Product2 {
+    @Edm.Key
+    @Edm.Computed
+    @Edm.String
+    @Edm.Convert(toObjectID)
+    @Edm.Annotate({
+        term: "UI.DisplayName",
+        string: "Product2 identifier"
+    }, {
+        term: "UI.ControlHint",
+        string: "ReadOnly"
+    })
+    _id:ObjectID
+
+    @Edm.String
+    @Edm.Required
+    @Edm.Convert(toObjectID)
+    CategoryId:ObjectID
+
+    @Edm.ForeignKey("Category2Id")
+    @Edm.EntityType(Edm.ForwardRef(() => Category2))
+    @Edm.Partner("Products2")
+    Category2:Category2
+
+    @Edm.Boolean
+    Discontinued:boolean
+
+    @Edm.String
+    @Edm.Annotate({
+        term: "UI.DisplayName",
+        string: "Product2 title"
+    }, {
+        term: "UI.ControlHint",
+        string: "ShortText"
+    })
+    Name:string
+
+    @Edm.String
+    @Edm.Annotate({
+        term: "UI.DisplayName",
+        string: "Product2 English name"
+    }, {
+        term: "UI.ControlHint",
+        string: "ShortText"
+    })
+    QuantityPerUnit:string
+
+    @Edm.Decimal
+    @Edm.Annotate({
+        term: "UI.DisplayName",
+        string: "Unit price of product2"
+    }, {
+        term: "UI.ControlHint",
+        string: "Decimal"
+    })
+    UnitPrice:number
+}
+
+@Edm.OpenType
+@Edm.Annotate({
+    term: "UI.DisplayName",
+    string: "Categories2"
+})
+export class Category2 {
+    @Edm.Key
+    @Edm.Computed
+    @Edm.String
+    @Edm.Convert(toObjectID)
+    @Edm.Annotate({
+        term: "UI.DisplayName",
+        string: "Category2 identifier"
+    },
+    {
+        term: "UI.ControlHint",
+        string: "ReadOnly"
+    })
+    _id:ObjectID
+
+    @Edm.String
+    Description:string
+
+    @Edm.String
+    @Edm.Annotate({
+        term: "UI.DisplayName",
+        string: "Category2 name"
+    },
+    {
+        term: "UI.ControlHint",
+        string: "ShortText"
+    })
+    Name:string
+
+    @Edm.ForeignKey("Category2Id")
+    @Edm.Collection(Edm.EntityType(Product2))
+    @Edm.Partner("Category2")
+    Products2:Product2[]
+
+    @Edm.Collection(Edm.String)
+    @Edm.Function
+    echo(){
+        return ["echotest"];
+    }
+}
+
+@odata.type(Category2)
+@Edm.EntitySet("Categories2")
 export class CategoriesGeneratorController extends ODataController {
     @odata.GET
     *find( @odata.filter filter: Token, @odata.stream stream: Writable) {
-        let response = [];
+        let response = categories;
         if (filter) response = categories.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
-        response = categories;
+
         for (let c of response) {
             stream.write(c);
             yield delay(1);
         }
+
         stream.end();
     }
 
@@ -455,41 +570,55 @@ export class CategoriesGeneratorController extends ODataController {
         key: odata.key
     })
     *findOne(key: string, @odata.stream stream: Writable) {
-        yield categories.find(category => category._id.toString() == key) || null;
+        let response = yield categories.find(category => category._id.toString() === key) || null;
+        yield delay(1);
+        stream.write(response);
+        return response
     }
 
-    /**
-     * /CategoriesGeneratorEntitySet('578f2baa12eaebabec4af28b')/Products/$ref
-     * @TODO:
-     * Unexpected character at 58
-     * at C:\\Git\\odata\\odata-v4-server\\node_modules\\odata-v4-parser\\lib\\parser.js:20:19
-     */
-    @odata.GET("Products").$ref
-    @odata.parameter("key", odata.key)
-    @odata.parameter("link", odata.link)
-    *findProducts( key: string, link: string, @odata.stream stream: Writable) {
-        const filteredProducts = products.filter(p => p.CategoryId.toString() === key);
-        for (let p of filteredProducts) {
-            yield delay(1);
-            stream.write(p);
+    @odata.GET("Products2")
+    *findProduct( @odata.key key: string, @odata.stream stream: Writable, @odata.result result: Category2) {
+        let response = [];
+        response = products.filter((product) => {
+            if (product.CategoryId.toString() === result._id.toString() && product._id.toString() === key.toString()) {
+                return product;
+            }
+        });
+        for (let c of response) {
+            stream.write(c);
+            yield delay(400);
+        }
+        stream.end();
+    }
+
+    @odata.GET("Products2")
+    *findProducts( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: Category2) {
+        let response = [];
+        response = products.filter((product) => {
+            if(product.CategoryId.toString() === result._id.toString()) {
+                return product;
+            }
+        });
+        console.log(response)
+        for (let c of response) {
+            stream.write(c);
+            yield delay(400);
         }
         stream.end();
     }
 }
-CategoriesGeneratorController.enableFilter('find');
 
-class ProductGenerator extends Product{}
-@odata.type(ProductGenerator)
-@Edm.EntitySet("Products")
+@odata.type(Product2)
+@Edm.EntitySet("Products2")
 export class ProductsGeneratorController extends ODataController {
     @odata.GET
     *find( @odata.filter filter: Token, @odata.stream stream: Writable) {
-        let response = [];
+        let response = products;
         if (filter) response = products.map((product) => Object.assign({}, product, { _id: product._id.toString() })).filter(createFilter(filter));
-        response = categories;
+        
         for (let c of response) {
             stream.write(c);
-            yield delay(100);
+            yield delay(400);
         }
         stream.end();
     }
@@ -500,12 +629,27 @@ export class ProductsGeneratorController extends ODataController {
     })
     *findOne(key: string, @odata.stream stream: Writable) {
         const response = products.filter(p => p._id.toString() == key)[0] || null;
-        yield delay(400);
+        yield delay(1);
         stream.write(response);
+        return response;
+    }
+
+    @odata.GET("Category2")
+    *findCategories( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: any) {
+        let response = [];
+        response = categories.filter((c) => {
+            if(c._id.toString() === result.CategoryId.toString()) {
+                return c;
+            }
+        });
+        console.log(response)
+        for (let c of response) {
+            stream.write(c);
+            yield delay(400);
+        }
         stream.end();
     }
 }
-ProductsGeneratorController.enableFilter(ProductsGeneratorController.prototype.find, 'filter, stream');
 
 export class Location {
     @Edm.String
@@ -598,8 +742,8 @@ export class HiddenController extends ODataController { }
 @odata.controller(UsersController, true, User)
 @odata.controller(HiddenController)
 @odata.controller(CategoriesStreamingController, "CategoriesStream")
-@odata.controller(CategoriesGeneratorController, "CategoriesGeneratorEntitySet")
-@odata.controller(ProductsGeneratorController, "ProductsGeneratorEntitySet")
+@odata.controller(CategoriesGeneratorController, "Categories2")
+@odata.controller(ProductsGeneratorController, "Products2")
 @odata.container("TestContainer")
 export class TestServer extends ODataServer {
     @Edm.ActionImport
