@@ -33,7 +33,7 @@ function createTest(testcase: string, server: typeof ODataServer, command: strin
         return new Promise((resolve, reject) => {
             request[method](`http://localhost:${port}${path}`, { json: body }, (err, response, result) => {
                 if (err) return reject(err);
-                try{
+                try {
                     if (result) {
                         if (typeof result == "object") {
                             result = JSON.stringify(result);
@@ -55,7 +55,7 @@ function createTest(testcase: string, server: typeof ODataServer, command: strin
                         expect(response.headers["content-type"].indexOf(compare.contentType)).to.be.above(-1);
                     }
                     resolve();
-                }catch(err){
+                } catch (err) {
                     reject(err);
                 }
             });
@@ -67,6 +67,187 @@ describe("OData HTTP", () => {
     TestServer.create(3002);
     serverCache.set(TestServer, 3002);
     testFactory(createTest);
+
+    describe("accept header", () => {
+        it("should return entityset result with 'application/json;odata.metadata=full' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: 'application/json;odata.metadata=full' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3002/$metadata#EntitySet",
+                    value: [{
+                        "@odata.id": "http://localhost:3002/EntitySet(1)",
+                        "@odata.editLink": "http://localhost:3002/EntitySet(1)",
+                        "@odata.type": "#Default.Foobar",
+                        "a": 1,
+                        "a@odata.type": "#Int16",
+                        "id": 1,
+                        "id@odata.type": "#Int32",
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with 'application/json;odata.metadata=none' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: 'application/json;odata.metadata=none' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    value: [{
+                        "a": 1,
+                        "id": 1
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with 'text/html;odata.metadata=full' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: 'text/html;odata.metadata=full' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3002/$metadata#EntitySet",
+                    value: [{
+                        "@odata.id": "http://localhost:3002/EntitySet(1)",
+                        "@odata.editLink": "http://localhost:3002/EntitySet(1)",
+                        "@odata.type": "#Default.Foobar",
+                        "a": 1,
+                        "a@odata.type": "#Int16",
+                        "id": 1,
+                        "id@odata.type": "#Int32",
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with 'text/html;odata.metadata=minimal' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: 'text/html;odata.metadata=minimal' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3002/$metadata#EntitySet",
+                    value: [{
+                        "@odata.id": "http://localhost:3002/EntitySet(1)",
+                        "@odata.editLink": "http://localhost:3002/EntitySet(1)",
+                        "a": 1,
+                        "id": 1,
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with 'text/html;odata.metadata=none' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: 'text/html;odata.metadata=none' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    value: [{
+                        "a": 1,
+                        "id": 1
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with 'xml;odata.metadata=full' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: 'xml;odata.metadata=full' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3002/$metadata#EntitySet",
+                    value: [{
+                        "@odata.id": "http://localhost:3002/EntitySet(1)",
+                        "@odata.editLink": "http://localhost:3002/EntitySet(1)",
+                        "@odata.type": "#Default.Foobar",
+                        "a": 1,
+                        "a@odata.type": "#Int16",
+                        "id": 1,
+                        "id@odata.type": "#Int32",
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with 'xml;odata.metadata=minimal' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: 'xml;odata.metadata=minimal' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3002/$metadata#EntitySet",
+                    value: [{
+                        "@odata.id": "http://localhost:3002/EntitySet(1)",
+                        "@odata.editLink": "http://localhost:3002/EntitySet(1)",
+                        "a": 1,
+                        "id": 1,
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with 'xml;odata.metadata=none' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: 'xml;odata.metadata=none' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    value: [{
+                        "a": 1,
+                        "id": 1
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with '*/*;odata.metadata=full' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: '*/*;odata.metadata=full' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3002/$metadata#EntitySet",
+                    value: [{
+                        "@odata.id": "http://localhost:3002/EntitySet(1)",
+                        "@odata.editLink": "http://localhost:3002/EntitySet(1)",
+                        "@odata.type": "#Default.Foobar",
+                        "a": 1,
+                        "a@odata.type": "#Int16",
+                        "id": 1,
+                        "id@odata.type": "#Int32",
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with '*/*;odata.metadata=minimal' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: '*/*;odata.metadata=minimal' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3002/$metadata#EntitySet",
+                    value: [{
+                        "@odata.id": "http://localhost:3002/EntitySet(1)",
+                        "@odata.editLink": "http://localhost:3002/EntitySet(1)",
+                        "a": 1,
+                        "id": 1,
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with '*/*;odata.metadata=none' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: '*/*;odata.metadata=none' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    value: [{
+                        "a": 1,
+                        "id": 1
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with '*/*;odata.metadata=minimal;charset=utf-16' header", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: '*/*;odata.metadata=minimal;charset=utf-16' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3002/$metadata#EntitySet",
+                    value: [{
+                        "@odata.id": "http://localhost:3002/EntitySet(1)",
+                        "@odata.editLink": "http://localhost:3002/EntitySet(1)",
+                        "a": 1,
+                        "id": 1,
+                    }]
+                });
+            });
+        });
+
+        it("should return entityset result with '*/*;odata.metadata=none;charset=utf-16", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: '*/*;odata.metadata=none;charset=utf-16' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    value: [{
+                        "a": 1,
+                        "id": 1
+                    }]
+                });
+            });
+        });
+    });
 
     it("should update foobar's foo property ", () => {
         return request.put(`http://localhost:3002/EntitySet(1)/foo`, { json: { foo: "PUT" } }, (err, response, result) => {
@@ -266,7 +447,7 @@ describe("OData HTTP", () => {
             req.on('complete', (resp, body) => {
                 expect(resp.statusCode).to.equal(204);
                 expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
-                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))) {
                     fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
                 }
                 done();
@@ -278,7 +459,7 @@ describe("OData HTTP", () => {
                 expect(resp.statusCode).to.equal(200);
             }).on("error", done).pipe(fs.createWriteStream(path.join(__dirname, "fixtures", "tmp.png"))).on("finish", _ => {
                 expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
-                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))) {
                     fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
                 }
                 done();
