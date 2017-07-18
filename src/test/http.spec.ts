@@ -4,6 +4,7 @@ import { testFactory } from './server.spec';
 import { MetaTestServer } from './metadata.spec';
 import { TestServer, Foobar } from './test.model';
 import { Product, Category } from "../example/model";
+import { ObjectID } from "mongodb";
 import * as request from 'request-promise';
 import * as streamBuffers from "stream-buffers";
 import * as fs from "fs";
@@ -67,6 +68,9 @@ describe("OData HTTP", () => {
     TestServer.create(3002);
     serverCache.set(TestServer, 3002);
     testFactory(createTest);
+
+    MetaTestServer.create(3003);
+    serverCache.set(MetaTestServer, 3003);
 
     describe("accept header", () => {
         it("should return entityset result with 'application/json;odata.metadata=full' header", () => {
@@ -257,6 +261,160 @@ describe("OData HTTP", () => {
                         id: 999,
                         foo: "999"
                     });
+                });
+            });
+        });
+
+        it("should return expanded Meta with 'application/json;odata.metadata=full' header", () => {
+            return request.get(`http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Meta.Meta/MediaList`, { headers: { accept: 'application/json;odata.metadata=full' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3003/$metadata#Meta/$entity",
+                    "@odata.id": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
+                    "@odata.type": "#Meta.Meta",
+                    "Complex@odata.type": "#Meta.Complex",
+                    "ComplexList@odata.type": "#Collection(Meta.Complex)",
+                    "Id": 1,
+                    "Id@odata.type": "#Int32",
+                    "MediaList": [
+                        {
+                            "@odata.id": "http://localhost:3003/Media(Id=1,StringId='two')",
+                            "@odata.mediaContentType": "audio/mp3",
+                            "@odata.mediaReadLink": "http://localhost:3003/Media(Id=1,StringId='two')/$value",
+                            "@odata.type": "#Media.Media",
+                            "Id": 1,
+                            "Id@odata.type": "#Int32",
+                            "Meta@odata.associationLink": "http://localhost:3003/Media(Id=1,StringId='two')/Meta/$ref",
+                            "Meta@odata.navigationLink": "http://localhost:3003/Media(Id=1,StringId='two')/Meta",
+                            "StringId": "two"
+                        }
+                    ],
+                    "MediaList@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList/$ref",
+                    "MediaList@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList",
+                    "MongoId": "578f2b8c12eaebabec4af242",
+                    "MongoId@odata.type": "#Server.ObjectID2",
+                    "b0": "b0",
+                    "p0@odata.type": "#Binary",
+                    "p10": 10,
+                    "p10@odata.type": "#Int32",
+                    "p11@odata.type": "#Int64",
+                    "p12@odata.type": "#SByte",
+                    "p13@odata.type": "#Single",
+                    "p14@odata.mediaContentType": "test",
+                    "p14@odata.mediaReadLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p14",
+                    "p14@odata.type": "#Stream",
+                    "p16@odata.type": "#TimeOfDay",
+                    "p17@odata.type": "#Geography",
+                    "p18@odata.type": "#GeographyPoint",
+                    "p19@odata.type": "#GeographyLineString",
+                    "p20@odata.type": "#GeographyPolygon",
+                    "p21@odata.type": "#GeographyMultiPoint",
+                    "p22@odata.type": "#GeographyMultiLineString",
+                    "p23@odata.type": "#GeographyMultiPolygon",
+                    "p24@odata.type": "#GeographyCollection",
+                    "p25@odata.type": "#Geometry",
+                    "p26@odata.type": "#GeometryPoint",
+                    "p27@odata.type": "#GeometryLineString",
+                    "p28@odata.type": "#GeometryPolygon",
+                    "p29@odata.type": "#GeometryMultiPoint",
+                    "p2@odata.type": "#Byte",
+                    "p30@odata.type": "#GeometryMultiLineString",
+                    "p31@odata.type": "#GeometryMultiPolygon",
+                    "p32@odata.type": "#GeometryCollection",
+                    "p33@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p33/$ref",
+                    "p33@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p33",
+                    "p34@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p34/$ref",
+                    "p34@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p34",
+                    "p35@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p35/$ref",
+                    "p35@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p35",
+                    "p36@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p36/$ref",
+                    "p36@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p36",
+                    "p37@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p37/$ref",
+                    "p37@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p37",
+                    "p38@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p38/$ref",
+                    "p38@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p38",
+                    "p39@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p39/$ref",
+                    "p39@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p39",
+                    "p3@odata.type": "#Date",
+                    "p40@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p40/$ref",
+                    "p40@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p40",
+                    "p41@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p41/$ref",
+                    "p41@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p41",
+                    "p42@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p42/$ref",
+                    "p42@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p42",
+                    "p43@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p43/$ref",
+                    "p43@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p43",
+                    "p44@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p44/$ref",
+                    "p44@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p44",
+                    "p45@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p45/$ref",
+                    "p45@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p45",
+                    "p46@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p46/$ref",
+                    "p46@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p46",
+                    "p47@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p47/$ref",
+                    "p47@odata.mediaReadLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p47",
+                    "p47@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p47",
+                    "p48@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p48/$ref",
+                    "p48@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p48",
+                    "p49@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p49/$ref",
+                    "p49@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p49",
+                    "p4@odata.type": "#DateTimeOffset",
+                    "p50@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p50/$ref",
+                    "p50@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p50",
+                    "p51@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p51/$ref",
+                    "p51@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p51",
+                    "p52@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p52/$ref",
+                    "p52@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p52",
+                    "p53@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p53/$ref",
+                    "p53@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p53",
+                    "p54@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p54/$ref",
+                    "p54@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p54",
+                    "p55@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p55/$ref",
+                    "p55@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p55",
+                    "p56@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p56/$ref",
+                    "p56@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p56",
+                    "p57@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p57/$ref",
+                    "p57@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p57",
+                    "p58@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p58/$ref",
+                    "p58@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p58",
+                    "p59@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p59/$ref",
+                    "p59@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p59",
+                    "p5@odata.type": "#Decimal",
+                    "p60@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p60/$ref",
+                    "p60@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p60",
+                    "p61@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p61/$ref",
+                    "p61@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p61",
+                    "p62@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p62/$ref",
+                    "p62@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p62",
+                    "p63@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p63/$ref",
+                    "p63@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p63",
+                    "p64@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p64/$ref",
+                    "p64@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p64",
+                    "p65@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p65/$ref",
+                    "p65@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p65",
+                    "p66@odata.mediaReadLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/p66",
+                    "p66@odata.type": "#Stream",
+                    "p6@odata.type": "#Double",
+                    "p7@odata.type": "#Duration",
+                    "p8@odata.type": "#Guid",
+                    "p9": 9,
+                    "p9@odata.type": "#Int16"
+                });
+            });
+        });
+
+        it("should return expanded Meta with 'application/json;odata.metadata=none' header", () => {
+            return request.get(`http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Meta.Meta/MediaList`, { headers: { accept: 'application/json;odata.metadata=none' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "Id": 1,
+                    "MediaList": [
+                        {
+                            "Id": 1,
+                            "StringId": "two"
+                        }
+                    ],
+                    "MongoId": "578f2b8c12eaebabec4af242",
+                    "b0": "b0",
+                    "p10": 10,
+                    "p9": 9,
                 });
             });
         });

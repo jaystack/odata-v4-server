@@ -17,7 +17,7 @@
 * ~~Use @odata.link('keyname')~~
 * ~~Use @odata.id~~
 * ~~Use .define() to define models, controllers, server, see es6.js example~~
-* Create HTTP Accept headers tests
+* ~~Create HTTP Accept headers tests~~
 * Throw NotImplementedError
 * ~~Use controller class static .on() like @odata.GET, etc.~~
 * ~~Use controller class static .enableFilter() like @odata.filter~~
@@ -50,7 +50,7 @@
 * Try to access non-existent entity set
 * Implement inline count for stream result with @odata.count or inlinecount
 * Use navigation property on stream result
-* Use HTTP Accept header including odata.metadata=full|none
+* ~~Use HTTP Accept header including odata.metadata=full|none~~
 * ~~Implement navigation property with @odata.GET('navprop')~~
 * Implement navigation property POST (to insert into a navigation property set)
 * Implement unexposed controllers (without a public entity set, available on a navigation property)
@@ -64,6 +64,6 @@
 * ~~Use $count after stream result set (Categories(1)/Products/$count)~~
 * Use @odata.type as function pointer in inheritance result set
 * Use $expand with single entity
-* Use $expand with HTTP Accept header odata.metadata=full, expect @odata.associationLink and @odata.navigationLink in result
+* ~~Use $expand with HTTP Accept header odata.metadata=full, expect @odata.associationLink and @odata.navigationLink in result~~
 * Use ODataStream class for Edm.Stream property implementation
 * Use ODataResult static Created, Ok, NoContent directly
