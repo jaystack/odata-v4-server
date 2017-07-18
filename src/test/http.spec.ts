@@ -419,6 +419,14 @@ describe("OData HTTP", () => {
             });
         });
 
+        it("should return error if odata-maxversion less then 4.0", () => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { 'odata-maxversion': '3.0' ,accept: '*/*;odata.metadata=full' } }, (err, response, result) => {
+                expect(response.statusCode).to.equal(500);
+            }).catch(ex => {
+                if (ex) return expect(ex.statusCode).to.equal(500);
+            });
+        });
+
         // it(">>>>>>", () => {
         //     return request.get(`http://localhost:3002/HeaderTestEntity`, (err, response, result) => {
         //         expect(JSON.parse(result)).to.deep.equal({
