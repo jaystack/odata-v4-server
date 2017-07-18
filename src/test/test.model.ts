@@ -11,6 +11,8 @@ import * as streamBuffers from "stream-buffers";
 const extend = require("extend");
 let categories = require("../example/categories");
 let products = require("../example/products");
+let categories2 = require("./model/categories");
+let products2 = require("./model/products");
 
 export class Foobar {
     @Edm.Key
@@ -465,7 +467,7 @@ export class Product2 {
     @Edm.Convert(toObjectID)
     CategoryId:ObjectID
 
-    @Edm.ForeignKey("Category2Id")
+    @Edm.ForeignKey("CategoryId")
     @Edm.EntityType(Edm.ForwardRef(() => Category2))
     @Edm.Partner("Products2")
     Category2:Category2
@@ -538,7 +540,7 @@ export class Category2 {
     })
     Name:string
 
-    @Edm.ForeignKey("Category2Id")
+    @Edm.ForeignKey("CategoryId")
     @Edm.Collection(Edm.EntityType(Product2))
     @Edm.Partner("Category2")
     Products2:Product2[]
@@ -555,14 +557,13 @@ export class Category2 {
 export class CategoriesGeneratorController extends ODataController {
     @odata.GET
     *find( @odata.filter filter: Token, @odata.stream stream: Writable) {
-        let response = categories;
-        if (filter) response = categories.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
+        let response = categories2;
+        if (filter) response = yield categories2.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
 
-        for (let c of response) {
-            stream.write(c);
+        for (let category of response) {
+            stream.write(category);
             yield delay(1);
-        }
-
+        };
         stream.end();
     }
 
@@ -570,40 +571,22 @@ export class CategoriesGeneratorController extends ODataController {
     @odata.parameters({
         key: odata.key
     })
-    *findOne(key: string, @odata.stream stream: Writable) {
-        let response = yield categories.find(category => category._id.toString() === key) || null;
-        yield delay(1);
-        stream.write(response);
-        return response
+    *findOne(key: string) {
+        return yield categories2.find(category => category._id.toString() === key) || null;
     }
 
     @odata.GET("Products2")
-    *findProduct( @odata.key key: string, @odata.stream stream: Writable, @odata.result result: Category2) {
-        let response = [];
-        response = products.filter((product) => {
-            if (product.CategoryId.toString() === result._id.toString() && product._id.toString() === key.toString()) {
-                return product;
-            }
-        });
-        for (let c of response) {
-            stream.write(c);
-            yield delay(400);
-        }
-        stream.end();
+    *findProduct( @odata.key key: string, @odata.result result: Category2) {
+        return yield products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString() && product._id.toString() === key.toString());
     }
 
     @odata.GET("Products2")
     *findProducts( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: Category2) {
         let response = [];
-        response = products.filter((product) => {
-            if(product.CategoryId.toString() === result._id.toString()) {
-                return product;
-            }
-        });
-        console.log(response)
+        response = products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString());
         for (let c of response) {
             stream.write(c);
-            yield delay(400);
+            yield delay(10);
         }
         stream.end();
     }
@@ -614,13 +597,13 @@ export class CategoriesGeneratorController extends ODataController {
 export class ProductsGeneratorController extends ODataController {
     @odata.GET
     *find( @odata.filter filter: Token, @odata.stream stream: Writable) {
-        let response = products;
-        if (filter) response = products.map((product) => Object.assign({}, product, { _id: product._id.toString() })).filter(createFilter(filter));
+        let response = products2;
+        if (filter) response = yield products2.map((product) => Object.assign({}, product, { _id: product._id.toString() })).filter(createFilter(filter));
         
-        for (let c of response) {
-            stream.write(c);
-            yield delay(400);
-        }
+        for (let category of response) {
+            stream.write(category);
+            yield delay(1);
+        };
         stream.end();
     }
 
@@ -628,25 +611,17 @@ export class ProductsGeneratorController extends ODataController {
     @odata.parameters({
         key: odata.key
     })
-    *findOne(key: string, @odata.stream stream: Writable) {
-        const response = products.filter(p => p._id.toString() == key)[0] || null;
-        yield delay(1);
-        stream.write(response);
-        return response;
+    *findOne(key: string) {
+        return yield products2.filter(p => p._id.toString() == key)[0] || null;
     }
 
     @odata.GET("Category2")
     *findCategories( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: any) {
         let response = [];
-        response = categories.filter((c) => {
-            if(c._id.toString() === result.CategoryId.toString()) {
-                return c;
-            }
-        });
-        console.log(response)
+        response = categories2.filter((c) => c && c._id.toString() === result.CategoryId.toString());
         for (let c of response) {
             stream.write(c);
-            yield delay(400);
+            yield delay(1);
         }
         stream.end();
     }

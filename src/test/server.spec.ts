@@ -1,5 +1,5 @@
 /// <reference types="mocha" />
-import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer } from './test.model';
+import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer, Product2, Category2 } from './test.model';
 import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
 import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity, BaseMeta } from './metadata.spec';
@@ -344,6 +344,90 @@ export function testFactory(createTest: any) {
                 "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')"
             }, products.filter(product => product._id.toString() == "578f2b8c12eaebabec4af23c")[0]),
             elementType: Product,
+            contentType: "application/json"
+        });
+
+        createTest("should return stream result set of Categories using generator function", TestServer, "GET /Categories2", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories2",
+                value: categories.map(category => {
+                    return Object.assign({ "@odata.id": `http://localhost/Categories2('${category._id}')` }, category)
+                })
+            },
+            elementType: Category2,
+            contentType: "application/json"
+        });
+
+        createTest("should return stream result set of Products using generator function", TestServer, "GET /Products2", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Products2",
+                value: products.map(product => {
+                    return Object.assign({ "@odata.id": `http://localhost/Products2('${product._id}')` }, product)
+                })
+            },
+            elementType: Product2,
+            contentType: "application/json"
+        });
+
+        createTest("should return exact Category using generator function", TestServer, "GET /Categories2('578f2baa12eaebabec4af289')", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories2/$entity",
+                "@odata.id": "http://localhost/Categories2('578f2baa12eaebabec4af289')",
+                "Description": "Soft drinks",
+                "Name": "Beverages",
+                "_id": new ObjectID("578f2baa12eaebabec4af289")
+            },
+            elementType: Category2,
+            contentType: "application/json"
+        });
+
+        createTest("should return stream result stream of Products referenced to Category using generator function", TestServer, "GET /Categories2('578f2baa12eaebabec4af290')/Products2", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories2('578f2baa12eaebabec4af290')/Products2",
+                value: products.filter(product => product && product.CategoryId.toString() === "578f2baa12eaebabec4af290")
+                    .map(product => {
+                        return Object.assign({ "@odata.id": `http://localhost/Products2('${product._id}')` }, product)
+                    })
+            },
+            elementType: Product2,
+            contentType: "application/json"
+        });
+
+        createTest("should return product referenced to category using generator function", TestServer, "GET /Categories2('578f2baa12eaebabec4af289')/Products2('578f2b8c12eaebabec4af23c')", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Products2/$entity",
+                "value": [
+                    {
+                        "@odata.id": "http://localhost/Products2('578f2b8c12eaebabec4af23c')",
+                        "Discontinued": false, "Name": "Chai", "QuantityPerUnit": "10 boxes x 20 bags",
+                        "UnitPrice": 39,
+                        "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
+                        "CategoryId": new ObjectID("578f2baa12eaebabec4af289")
+                    }]
+            },
+            elementType: Product2,
+            contentType: "application/json"
+        });
+
+        createTest("should return stream result stream of Categories referenced to Product using generator function", TestServer, "GET /Products2('578f2b8c12eaebabec4af23c')/Category2", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories2/$entity",
+                "value": [
+                    {
+                        "@odata.id": "http://localhost/Categories2('578f2baa12eaebabec4af289')",
+                        "Description": "Soft drinks",
+                        "Name": "Beverages",
+                        "_id": new ObjectID("578f2baa12eaebabec4af289")
+                    }
+                ]
+            },
+            elementType: Category2,
             contentType: "application/json"
         });
 
