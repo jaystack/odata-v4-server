@@ -85,12 +85,13 @@ export class SyncTestController extends ODataController {
     @odata.GET()
     entity( @odata.key() key: number) {
         if (key === 1) return ODataResult.Ok(foobarObj);
+        if (key === 999) return ODataResult.Ok({ id: key, foo: "999" });
         return ODataResult.Ok({ id: key, foo: "bar" });
     }
 
     @odata.method("POST")
     insert( @odata.body body: any) {
-        body.id = 1;
+        if (!body.id) body.id = 1;
         return body;
     }
 
@@ -724,6 +725,33 @@ DefTestController.define(odata.type(DefTest), {
     }]
 });
 
+export class HeaderTestEntity {
+    @Edm.Int32
+    @Edm.Key
+    @Edm.Required
+    Id: number
+}
+
+@odata.type(HeaderTestEntity)
+export class HeaderTestEntityController extends ODataController {
+    @odata.GET
+    findAll( @odata.context ctx: ODataHttpContext, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+        // ctx.request.headers.append('odata.metadata', 'full')
+        ctx.request.headers.set('odata.metadata', 'full');
+        let te = new HeaderTestEntity();
+        te.Id = 1;
+        return [te];
+    }
+
+    @odata.GET
+    findOneByKeys( @odata.id id: number, @odata.context ctx: ODataHttpContext) {
+        ctx.request.headers.set('odata.metadata', 'none');
+        let te = new HeaderTestEntity();
+        te.Id = id;
+        return te;
+    }
+}
+
 export class DefTestServer extends ODataServer{}
 DefTestServer.define(odata.controller(DefTestController, true));
 
@@ -744,6 +772,7 @@ export class HiddenController extends ODataController { }
 @odata.controller(CategoriesStreamingController, "CategoriesStream")
 @odata.controller(CategoriesGeneratorController, "Categories2")
 @odata.controller(ProductsGeneratorController, "Products2")
+@odata.controller(HeaderTestEntityController, "HeaderTestEntity")
 @odata.container("TestContainer")
 export class TestServer extends ODataServer {
     @Edm.ActionImport

@@ -237,7 +237,7 @@ describe("OData HTTP", () => {
             });
         });
 
-        it("should return entityset result with '*/*;odata.metadata=none;charset=utf-16", () => {
+        it("should return entityset result with '*/*;odata.metadata=none;charset=utf-16' header", () => {
             return request.get(`http://localhost:3002/EntitySet`, { headers: { accept: '*/*;odata.metadata=none;charset=utf-16' } }, (err, response, result) => {
                 expect(JSON.parse(result)).to.deep.equal({
                     value: [{
@@ -247,6 +247,29 @@ describe("OData HTTP", () => {
                 });
             });
         });
+
+        it("should create new foo element with 'application/json;odata.metadata=full' header", () => {
+            return request.post(`http://localhost:3002/EntitySet`, { headers: { accept: 'application/json;odata.metadata=full' }, json: { id: 999, foo: "999" } }, (err, response, result) => {
+                expect(response.statusCode).to.equal(201);
+            }).then(_ => {
+                return request.get(`http://localhost:3002/EntitySet(999)`, { headers: { accept: 'application/json;odata.metadata=none' } }, (err, response, result) => {
+                    expect(JSON.parse(result)).to.deep.equal({
+                        id: 999,
+                        foo: "999"
+                    });
+                });
+            });
+        });
+
+        // it(">>>>>>", () => {
+        //     return request.get(`http://localhost:3002/HeaderTestEntity`, (err, response, result) => {
+        //         expect(JSON.parse(result)).to.deep.equal({
+        //             value: [{
+        //                 "Id": 1
+        //             }]
+        //         });
+        //     });
+        // });
     });
 
     it("should update foobar's foo property ", () => {
