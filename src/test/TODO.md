@@ -30,7 +30,7 @@
 * ~~Use server static .addController() like @odata.controller~~
 * ~~Use metadata JSON for public $metadata definition, like in the bigdata.ts example~~
 * ~~Use HTTP header OData-MaxVersion with less than 4.0~~
-* Use HTTP Accept headers with text/html, */*, some xml and an unsupported type
+* ~~Use HTTP Accept headers with text/html, */*, some xml and an unsupported type~~
 * Try to use OData query parameters on service document, expect 500 Unsupported query error
 * Start server on specific hostname (localhost)
 * Set some HTTP headers and response status code in controller or action/function import

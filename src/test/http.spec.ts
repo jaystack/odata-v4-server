@@ -419,6 +419,14 @@ describe("OData HTTP", () => {
             });
         });
 
+        it("should return error if the media type is unsupported", () => {
+            return request.get(`http://localhost:3003/EntitySet`, { headers: { accept: 'text/plain;odata.metadata=none' } }, (err, response, result) => {
+                expect(response.statusCode).to.equal(415);
+            }).catch(ex => {
+                if (ex) return expect(ex.statusCode).to.equal(415);
+            });
+        });
+
         it("should return error if odata-maxversion less then 4.0", () => {
             return request.get(`http://localhost:3002/EntitySet`, { headers: { 'odata-maxversion': '3.0' ,accept: '*/*;odata.metadata=full' } }, (err, response, result) => {
                 expect(response.statusCode).to.equal(500);
