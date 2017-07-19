@@ -888,6 +888,21 @@ export function testFactory(createTest: any) {
             elementType: TestEntity,
             contentType: "application/json"
         });
+
+        createTest("should create a test entity with base controller insert method", MetaTestServer, "POST /TestEntity", {
+            statusCode: 201,
+            body: {
+                "@odata.context": "http://localhost/$metadata#TestEntity/$entity",
+                "@odata.id": "http://localhost/TestEntity(99)",
+                "Genre": "Server.Genre2'0'",
+                "test": 99
+            },
+            elementType: TestEntity,
+            contentType: "application/json"
+        },
+        {
+            test: 99
+        });
     });
 
     describe("Empty entity", () => {

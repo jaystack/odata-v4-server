@@ -534,7 +534,24 @@ export class CompoundKeyController extends ODataController {
 
 @odata.namespace("Controller")
 @odata.type(TestEntity)
-export class TestEntityController extends ODataController {
+export class BaseTestEntityController extends ODataController {
+    @odata.GET
+    findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+        let te = new TestEntity();
+        te.test = 10;
+        return [te];
+    }
+
+    @odata.POST
+    insert( @ odata.body body: TestEntity) {
+        return body;
+    }
+
+}
+
+@odata.namespace("Controller")
+@odata.type(TestEntity)
+export class TestEntityController extends BaseTestEntityController {
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
         let te = new TestEntity();
         te.test = 1;
