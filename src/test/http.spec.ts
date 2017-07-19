@@ -273,6 +273,7 @@ describe("OData HTTP", () => {
                     "@odata.type": "#Meta.Meta",
                     "Complex@odata.type": "#Meta.Complex",
                     "ComplexList@odata.type": "#Collection(Meta.Complex)",
+                    "Genre@odata.type": "#Meta.undefined",
                     "Id": 1,
                     "Id@odata.type": "#Int32",
                     "MediaList": [
