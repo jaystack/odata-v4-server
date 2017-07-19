@@ -254,6 +254,65 @@ describe("OData execute", () => {
         });
     });
 
+    describe("Execute parameter is object", () => {
+        it("should update foobar's foo property ", () => {
+            let context: any = {};
+            context.url = '/EntitySet(1)/foo';
+            context.method = 'PUT';
+            return TestServer.execute(context, { foo: "PUT" }).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                let ctx: any = {};
+                ctx.url = '/EntitySet(1)';
+                ctx.method = 'GET';
+                return TestServer.execute(ctx).then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: {
+                            "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
+                            "@odata.id": "http://localhost/EntitySet(1)",
+                            "@odata.editLink": "http://localhost/EntitySet(1)",
+                            id: 1,
+                            foo: "PUT"
+                        },
+                        elementType: Foobar,
+                        contentType: "application/json"
+                    });
+                });
+            });
+        });
+
+        it("should delta update foobar's foo property ", () => {
+            let context: any = {};
+            context.url = '/EntitySet(1)/foo';
+            context.method = 'PATCH';
+            context.body = { foo: "bar" };
+            return TestServer.execute(context).then((result) => {
+                expect(result).to.deep.equal({
+                    statusCode: 204
+                });
+                let ctx: any = {};
+                ctx.url = '/EntitySet(1)';
+                ctx.method = 'GET';
+                return TestServer.execute(ctx).then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: {
+                            "@odata.context": "http://localhost/$metadata#EntitySet/$entity",
+                            "@odata.id": "http://localhost/EntitySet(1)",
+                            "@odata.editLink": "http://localhost/EntitySet(1)",
+                            id: 1,
+                            foo: "bar"
+                        },
+                        elementType: Foobar,
+                        contentType: "application/json"
+                    });
+                });
+            });
+        });
+    });
+
     describe("Stream properties", () => {
         it("stream property POST", () => {
             let readableStrBuffer = new streamBuffers.ReadableStreamBuffer();
@@ -283,7 +342,7 @@ describe("OData execute", () => {
                     statusCode: 204
                 });
                 expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
-                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))) {
                     fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
                 }
             });
@@ -298,12 +357,12 @@ describe("OData execute", () => {
                     response: tmp
                 }).then(_ => {
                     expect(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png")));
-                    try{
-                        if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                    try {
+                        if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))) {
                             fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
                         }
                         done();
-                    }catch(err){
+                    } catch (err) {
                         done(err);
                     }
                 }, done);

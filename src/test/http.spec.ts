@@ -69,7 +69,7 @@ describe("OData HTTP", () => {
     serverCache.set(TestServer, 3002);
     testFactory(createTest);
 
-    MetaTestServer.create(3003);
+    MetaTestServer.create(3003, 'localhost');
     serverCache.set(MetaTestServer, 3003);
 
     describe("accept header", () => {
