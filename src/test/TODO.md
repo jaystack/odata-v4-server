@@ -23,7 +23,7 @@
 * ~~Use controller class static .enableFilter() like @odata.filter~~
 * ~~Enum type on inherited entity type~~
 * ~~Enum type as action/function parameters~~
-* Type definition on inherited entity type
+* ~~Type definition on inherited entity type~~
 * Multi-level inheritance for Edm.Container
 * Use server .execute() with context object as first parameter
 * ~~Use server as stream~~

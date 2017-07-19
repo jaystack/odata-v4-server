@@ -291,6 +291,7 @@ describe("OData HTTP", () => {
                     ],
                     "MediaList@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList/$ref",
                     "MediaList@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList",
+                    "Meta.MongoId@odata.type": "#Server.ObjectID2",
                     "MongoId": "578f2b8c12eaebabec4af242",
                     "MongoId@odata.type": "#Server.ObjectID2",
                     "b0": "b0",
