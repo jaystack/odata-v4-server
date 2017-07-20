@@ -3,6 +3,7 @@ import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream, ODataEntity } from "../lib/index";
 import { Product, Category } from "../example/model";
+import { ProductPromise, CategoryPromise } from "./model/ProductPromise";
 import { Readable, PassThrough, Writable } from "stream";
 import { ObjectID } from "mongodb";
 import * as fs from "fs";
@@ -627,9 +628,7 @@ export class ProductsGeneratorController extends ODataController {
     }
 }
 
-export class ProductPromise extends Product2{}
 @odata.type(ProductPromise)
-@Edm.EntitySet("Products2")
 export class ProductsPromiseGeneratorController extends ODataController {
     @odata.GET
     *find( @odata.filter filter: Token) {
@@ -650,15 +649,13 @@ export class ProductsPromiseGeneratorController extends ODataController {
         return yield Promise.resolve(products2.filter(p => p._id.toString() == key)[0] || null);
     }
 
-    @odata.GET("Category2")
-    *findCategories( @odata.filter filter: Token, @odata.result result: any) {
+    @odata.GET("CategoryPromise")
+    *findCategories( @odata.filter filter: Token, @odata.result result: ProductPromise) {
         return yield Promise.resolve(categories2.filter((c) => c && c._id.toString() === result.CategoryId.toString()));
     }
 }
 
-export class CategoryPromise extends Category2{}
 @odata.type(CategoryPromise)
-@Edm.EntitySet("Categories2")
 export class CategoriesPromiseGeneratorController extends ODataController {
     @odata.GET
     *find( @odata.filter filter: Token) {
@@ -679,13 +676,13 @@ export class CategoriesPromiseGeneratorController extends ODataController {
         return yield Promise.resolve(categories2.find(category => category._id.toString() === key) || null);
     }
 
-    @odata.GET("Products2")
-    *findProduct( @odata.key key: string, @odata.result result: Category2) {
+    @odata.GET("ProductPromises")
+    *findProduct( @odata.key key: string, @odata.result result: CategoryPromise) {
         return yield Promise.resolve(products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString() && product._id.toString() === key.toString()));
     }
 
-    @odata.GET("Products2")
-    *findProducts( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: Category2) {
+    @odata.GET("ProductPromises")
+    *findProducts( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: CategoryPromise) {
         return yield Promise.resolve(products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString()));
     }
 }
@@ -808,8 +805,8 @@ export class HiddenController extends ODataController { }
 @odata.controller(UsersController, true, User)
 @odata.controller(HiddenController)
 @odata.controller(CategoriesStreamingController, "CategoriesStream")
-@odata.controller(CategoriesGeneratorController, "Categories2")
-@odata.controller(ProductsGeneratorController, "Products2")
+@odata.controller(CategoriesGeneratorController)
+@odata.controller(ProductsGeneratorController)
 @odata.controller(CategoriesPromiseGeneratorController, "AdvancedCategories")
 @odata.controller(ProductsPromiseGeneratorController, "AdvancedProducts")
 @odata.controller(HeaderTestEntityController, "HeaderTestEntity")

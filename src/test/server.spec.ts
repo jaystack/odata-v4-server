@@ -1,7 +1,8 @@
 /// <reference types="mocha" />
-import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer, Product2, Category2, CategoryPromise, ProductPromise } from './test.model';
+import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer, Product2, Category2 } from './test.model';
 import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
+import { ProductPromise, CategoryPromise } from "./model/ProductPromise";
 import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity, BaseMeta } from './metadata.spec';
 import { ObjectID } from "mongodb";
 const { expect } = require("chai");
@@ -428,7 +429,7 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        createTest("should return promise of products using generator function", TestServer, "GET /AdvancedProducts/Default.Product2", {
+        createTest("should return promise of products using generator function", TestServer, "GET /AdvancedProducts", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#AdvancedProducts",
@@ -440,7 +441,7 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        // createTest("should return promise of categories using generator function", TestServer, "GET /AdvancedCategories/Default.Category2", {
+        // createTest("should return promise of categories using generator function", TestServer, "GET /AdvancedCategories", {
         //     statusCode: 200,
         //     body: {
         //         "@odata.context": "http://localhost/$metadata#AdvancedCategories",
@@ -452,7 +453,7 @@ export function testFactory(createTest: any) {
         //     contentType: "application/json"
         // });
 
-        createTest("should return promise of product using generator function", TestServer, "GET /AdvancedProducts('578f2b8c12eaebabec4af23c')/Default.Product2", {
+        createTest("should return promise of product using generator function", TestServer, "GET /AdvancedProducts('578f2b8c12eaebabec4af23c')", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#AdvancedProducts/$entity",
@@ -468,7 +469,7 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        createTest("should return promise of category using generator function", TestServer, "GET /AdvancedCategories('578f2baa12eaebabec4af289')/Default.Category2", {
+        createTest("should return promise of category using generator function", TestServer, "GET /AdvancedCategories('578f2baa12eaebabec4af289')", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#AdvancedCategories/$entity",
@@ -481,30 +482,31 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        createTest("should return promise of category referenced to product using generator function", TestServer, "GET /AdvancedProducts('578f2b8c12eaebabec4af23c')/Default.Product2/Category2", {
+        createTest("should return promise of category referenced to product using generator function", TestServer, "GET /AdvancedProducts('578f2b8c12eaebabec4af23c')/CategoryPromise", {
             statusCode: 200,
             body: {
-                "@odata.context": "http://localhost/$metadata#Categories2/$entity",
+                "@odata.context": "http://localhost/$metadata#AdvancedCategories/$entity",
                 "value": [{
-                    "@odata.id": "http://localhost/Categories2('578f2baa12eaebabec4af289')",
+                    "@odata.id": "http://localhost/AdvancedCategories('578f2baa12eaebabec4af289')",
                     "Description": "Soft drinks",
                     "Name": "Beverages",
                     "_id": new ObjectID("578f2baa12eaebabec4af289")
                 }]
             },
-            elementType: Category2,
+            elementType: CategoryPromise,
             contentType: "application/json"
         });
-        createTest("should return promise of products referenced to category using generator function", TestServer, "GET /AdvancedCategories('578f2baa12eaebabec4af289')/Default.Category2/Products2", {
+
+        createTest("should return promise of products referenced to category using generator function", TestServer, "GET /AdvancedCategories('578f2baa12eaebabec4af289')/ProductPromises", {
             statusCode: 200,
             body: {
-                "@odata.context": "http://localhost/$metadata#AdvancedCategories('578f2baa12eaebabec4af289')/Products2",
+                "@odata.context": "http://localhost/$metadata#AdvancedCategories('578f2baa12eaebabec4af289')/ProductPromises",
                 "value": products.filter((product) => product && product.CategoryId.toString() === "578f2baa12eaebabec4af289")
                     .map(product => {
-                        return Object.assign({ "@odata.id": `http://localhost/Products2('${product._id}')` }, product)
+                        return Object.assign({ "@odata.id": `http://localhost/AdvancedProducts('${product._id}')` }, product)
                     })
             },
-            elementType: Product2,
+            elementType: ProductPromise,
             contentType: "application/json"
         });
 
