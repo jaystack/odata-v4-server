@@ -427,6 +427,15 @@ export class TestEntity {
 }
 
 export class EmptyEntity {
+    @Edm.Action
+    enumTypeAction( @Edm.EnumType(Genre) value: Genre, @odata.type type: any) {
+        // console.log(type, value);
+    }
+
+    @Edm.Function(Edm.EnumType(Genre))
+    enumTypeFunction( @Edm.EnumType(Genre) value: Genre, @odata.type type: any) {
+        return value;
+    }
 }
 export class EmptyEntity2 {
 }
@@ -805,6 +814,17 @@ export class MetaTestServer extends ODataServer {
     @Edm.FunctionImport
     ObjId( @Edm.TypeDefinition(ObjectID) v: ObjectID) {
         return v.toHexString();
+    }
+
+    @Edm.ActionImport
+    ServerEnumTypeActionImport( @Edm.EnumType(Genre) value: Genre, @odata.type type: any) {
+        // console.log(type, value);
+    }
+
+    @Edm.FunctionImport(Edm.EnumType(Genre))
+    ServerEnumTypeFunctionImport( @Edm.EnumType(Genre) value: Genre, @odata.type type: any) {
+        // console.log(type, value);        
+        return value;
     }
 }
 

@@ -1,17 +1,17 @@
 # Test cases
 
-* Inherited ODataController: LogsController extends InMemoryController{}
-* Type definition URL deserializer (to handle ObjectID conversion from Edm.String to ObjectID instance)
-* Type definition URL serializer (to handle ObjectID conversion from ObjectID to Edm.String as entity key)
-* Type definition with @odata.type property to define type name, without using Edm.ContainerBase
-* Type definition in Edm.ContainerBase and use full name for type name, like 'Sytem.ObjectID'
-* Type definition with new schema namespace in server
-* Same as above 3 for EnumTypes
+* ~~Inherited ODataController: LogsController extends InMemoryController{}~~
+* ~~Type definition URL deserializer (to handle ObjectID conversion from Edm.String to ObjectID instance)~~
+* ~~Type definition URL serializer (to handle ObjectID conversion from ObjectID to Edm.String as entity key)~~
+* ~~Type definition with @odata.type property to define type name, without using Edm.ContainerBase~~
+* ~~Type definition in Edm.ContainerBase and use full name for type name, like 'Sytem.ObjectID'~~
+* ~~Type definition with new schema namespace in server~~
+* ~~Same as above 3 for EnumTypes~~
 * More inheritance test cases
-* Entity and entity collection bound function with entity type as return type
-* Entity and entity collection bound function with enum and type definition parameters
-* Entity and entity collection bound action with parameters
-* More enum types and type definitions
+* ~~Entity and entity collection bound function with entity type as return type~~
+* ~~Entity and entity collection bound function with enum and type definition parameters~~
+* ~~Entity and entity collection bound action with parameters~~
+* ~~More enum types and type definitions~~
 * ~~@odata.type as action/function parameter~~
 * ~~Use @odata.method('methodname', 'navprop')~~
 * ~~Use @odata.link('keyname')~~
