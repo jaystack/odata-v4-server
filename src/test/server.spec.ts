@@ -564,6 +564,29 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
+        createTest("should return Category entity with navigation property", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products('578f2b8c12eaebabec4af23c')/Category", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories/$entity",
+                "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af289')",
+                "Description": "Soft drinks",
+                "Name": "Beverages",
+                "_id": new ObjectID("578f2baa12eaebabec4af289")
+            },
+            elementType: Category,
+            contentType: "application/json"
+        });
+
+        createTest("should return Category name with navigation property", TestServer, "GET /Categories('578f2baa12eaebabec4af289')/Products('578f2b8c12eaebabec4af23c')/Category/Name", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories/$entity/Name",
+                "value": "Beverages"
+            },
+            elementType: "Edm.String",
+            contentType: "application/json"
+        });
+
         createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')?$expand=Category", {
             statusCode: 200,
             body: Object.assign({
