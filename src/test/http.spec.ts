@@ -271,6 +271,7 @@ describe("OData HTTP", () => {
                     "@odata.context": "http://localhost:3003/$metadata#Meta/$entity",
                     "@odata.id": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
                     "@odata.type": "#Meta.Meta",
+                    "Color@odata.type": "#Color2",
                     "Complex@odata.type": "#Meta.Complex",
                     "ComplexList@odata.type": "#Collection(Meta.Complex)",
                     "Genre@odata.type": "#Meta.undefined",
