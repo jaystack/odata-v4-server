@@ -1176,7 +1176,7 @@ export class ODataProcessor extends Transform{
                                 Edm.getURLSerializer(
                                     elementType,
                                     it,
-                                    Edm.getType(elementType, keys[0], this.serverType.container),
+                                    Edm.getType(elementType, it, this.serverType.container),
                                     this.serverType.container
                                 ))}`))).join(",");
                 }
