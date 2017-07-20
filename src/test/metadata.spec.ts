@@ -2,6 +2,8 @@
 import { ODataController, ODataServer, ODataProcessor, Edm, odata, ODataStream, createODataServer } from "../lib/index";
 import { PassThrough } from "stream";
 import { ObjectID } from "mongodb";
+import * as fs from "fs";
+import * as path from "path";
 const { expect } = require("chai");
 const beautify = require("xml-beautifier");
 
@@ -113,15 +115,20 @@ export class Complex extends SubComplex {
     c0: string
 }
 
+@Edm.String
+export class SimpleObjectID extends ObjectID{
+    static "@odata.type" = "Simple.ObjectID"
+}
 export class SimpleEntity {
     @Edm.Key
     @Edm.Computed
-    @Edm.TypeDefinition(ObjectID)
-    MongoId: ObjectID
+    @Edm.TypeDefinition(SimpleObjectID)
+    MongoId: SimpleObjectID
 }
 
+@Edm.String
 export class MyType {
-    "@odata.type" = "Server.MyType"
+    static "@odata.type" = "Server.MyType"
 }
 
 export enum Color {
@@ -162,9 +169,8 @@ export class Meta extends BaseMeta {
     Id: number
 
     @Edm.TypeDefinition(ObjectID)
-    'Meta.MongoId': ObjectID
+    MongoId: ObjectID
 
-    @Edm.String
     @Edm.TypeDefinition(MyType)
     myType: MyType
 
@@ -403,7 +409,7 @@ export class Meta extends BaseMeta {
     @Edm.Partner("Meta")
     MediaList: Media[]
 
-    @Edm.EnumType(Edm.ForwardRef(() => Genre))
+    @Edm.EnumType(Genre)
     Genre: Genre
 
     @Edm.EnumType(Color)
@@ -422,6 +428,20 @@ export class TestEntity {
 
 export class EmptyEntity {
 }
+export class EmptyEntity2 {
+}
+export class EmptyEntity3 {
+}
+export class EmptyEntity4 {
+}
+export class EmptyEntity5 {
+}
+export class EmptyEntity6 {
+}
+export class EmptyEntity7 {
+}
+export class HiddenEmptyEntity {
+}
 
 export class TestContainer extends Edm.ContainerBase {
     @Edm.Flags
@@ -430,11 +450,11 @@ export class TestContainer extends Edm.ContainerBase {
     @Edm.Serialize(value => `Server.Genre2'${value || 0}'`)
     Genre2 = Genre
 
-    @Edm.Flags
+    /*@Edm.Flags
     @Edm.Int64
     @Edm.URLSerialize((value: Genre) => `Server.Genre2'${value || 0}'`)
     @Edm.Serialize(value => `Server.Genre2'${value || 0}'`)
-    'Genre.2' = Genre
+    'Genre.2' = Genre*/
 
     @Edm.String
     @Edm.URLSerialize((value: ObjectID) => `'${value.toHexString()}'`)
@@ -442,11 +462,11 @@ export class TestContainer extends Edm.ContainerBase {
     @Edm.Deserialize(value => new ObjectID(value))
     ObjectID2 = ObjectID
 
-    @Edm.String
+    /*@Edm.String
     @Edm.URLSerialize((value: ObjectID) => `'${value.toHexString()}'`)
     @Edm.URLDeserialize((value: string) => new ObjectID(value))
     @Edm.Deserialize(value => new ObjectID(value))
-    'ObjectI.D2' = ObjectID
+    'Object.ID2' = ObjectID*/
 
     Test2 = TestEntity
 }
@@ -657,7 +677,7 @@ export class EmptyEntityController extends ODataController {
 EmptyEntityController.on('GET', 'findAll')
 
 @odata.namespace("Controller")
-@odata.type(EmptyEntity)
+@odata.type(EmptyEntity2)
 export class EmptyEntity2Controller extends ODataController {
     @odata.GET
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
@@ -666,7 +686,7 @@ export class EmptyEntity2Controller extends ODataController {
 }
 
 @odata.namespace("Controller")
-@odata.type(EmptyEntity)
+@odata.type(EmptyEntity3)
 export class EmptyEntity3Controller extends ODataController {
     @odata.GET
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
@@ -675,7 +695,7 @@ export class EmptyEntity3Controller extends ODataController {
 }
 
 @odata.namespace("Controller")
-@odata.type(EmptyEntity)
+@odata.type(EmptyEntity4)
 export class EmptyEntity4Controller extends ODataController {
     @odata.GET
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
@@ -684,7 +704,7 @@ export class EmptyEntity4Controller extends ODataController {
 }
 
 @odata.namespace("Controller")
-@odata.type(EmptyEntity)
+@odata.type(EmptyEntity5)
 export class EmptyEntity5Controller extends ODataController {
     @odata.GET
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
@@ -693,7 +713,7 @@ export class EmptyEntity5Controller extends ODataController {
 }
 
 @odata.namespace("Controller")
-@odata.type(EmptyEntity)
+@odata.type(EmptyEntity6)
 export class EmptyEntity6Controller extends ODataController {
     @odata.GET
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
@@ -720,7 +740,7 @@ export class SimpleEntityController extends ODataController {
 }
 
 @odata.namespace("Controller")
-@odata.type(EmptyEntity)
+@odata.type(HiddenEmptyEntity)
 export class HiddenEmptyController extends ODataController { }
 
 @odata.type(Index)
@@ -806,8 +826,8 @@ EnumServer.create(4011);
 
 MetaTestServer.addController(HiddenEmptyController);
 MetaTestServer.addController(EmptyEntity4Controller, true);
-MetaTestServer.addController(EmptyEntity5Controller, true, EmptyEntity);
-MetaTestServer.addController(EmptyEntity6Controller, 'EmptyEntity6', EmptyEntity);
+MetaTestServer.addController(EmptyEntity5Controller, true, EmptyEntity5);
+MetaTestServer.addController(EmptyEntity6Controller, 'EmptyEntity6', EmptyEntity6);
 
 MetaTestServer.create();
 MetaTestServer.create(4001);
@@ -818,25 +838,25 @@ if (typeof describe == "function") {
     describe("Metadata test", () => {
         it("should return metadata xml", () => {
             expect(beautify(MetaTestServer.$metadata().document())).to.equal(
-                beautify(`<?xml version="1.0" encoding="UTF-8"?><edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0"><edmx:DataServices><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Controller"><EntityContainer Name="Default"><EntitySet Name="SimpleEntity" EntityType="Default.SimpleEntity"/><EntitySet Name="EmptyEntity3" EntityType="Server.EmptyEntity"/><EntitySet Name="EmptyEntity2" EntityType="Server.EmptyEntity"/><EntitySet Name="EmptyEntity" EntityType="Server.EmptyEntity"/><EntitySet Name="TestEntity" EntityType="Server.Test2"/><EntitySet Name="CompoundKey" EntityType="Server.CompoundKey"/><EntitySet Name="Media" EntityType="Media.Media"/><EntitySet Name="Meta" EntityType="Meta.BaseMeta"/><EntitySet Name="EmptyEntity4" EntityType="Server.EmptyEntity"/><EntitySet Name="EmptyEntity5" EntityType="Server.EmptyEntity"/><EntitySet Name="EmptyEntity6" EntityType="Server.EmptyEntity"/></EntityContainer></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Default"><EntityType Name="SimpleEntity"><Key><PropertyRef Name="MongoId"/></Key><Property Name="MongoId" Type="Server.ObjectID2" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/></Property></EntityType></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Functions"><Function Name="f0" IsBound="true"><Parameter Name="bindingParameter" Type="Meta.Meta"/><ReturnType Type="Edm.String"/></Function><Function Name="f2" IsBound="true"><Parameter Name="bindingParameter" Type="Meta.Meta"/><Parameter Name="message" Type="Edm.String"/><ReturnType Type="Edm.String"/></Function><Function Name="ControllerFunction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Media.Media)"/><ReturnType Type="Edm.String"/></Function><Function Name="ControllerFunction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Meta.BaseMeta)"/><Parameter Name="str" Type="Edm.String"/><ReturnType Type="Edm.String"/></Function><Function Name="FunctionImport" IsBound="false"><Parameter Name="value" Type="Collection(Edm.Int32)" Nullable="false"/><Parameter Name="message" Type="Edm.String" Nullable="false"/><ReturnType Type="Edm.String"/></Function><Function Name="FunctionImport2" IsBound="false"><Parameter Name="message" Type="Edm.String" Nullable="true"/><ReturnType Type="Edm.String"/></Function><EntityContainer Name="Default"><FunctionImport Name="FunctionImport" Function="Functions.FunctionImport"/><FunctionImport Name="FunctionImport2" Function="Functions.FunctionImport2"/></EntityContainer></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Media"><EntityType Name="Media" HasStream="true"><Key><PropertyRef Name="Id"/></Key><Property Name="Id" Type="Edm.Int32" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/></Property><Property Name="StringId" Type="Edm.String" Nullable="false"/><NavigationProperty Name="Meta" Type="Media.Meta" Partner="MediaList"/><Annotation Term="UI.DisplayName" String="Media"/></EntityType><Action Name="ControllerAction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Media.Media)"/><Parameter Name="value" Type="Edm.Int32"/></Action></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Meta"><EntityType Name="BaseMeta"><Key><PropertyRef Name="MongoId"/></Key><Property Name="MongoId" Type="Server.ObjectID2" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/></Property><Property Name="b0" Type="Edm.String"/></EntityType><EntityType Name="Meta" BaseType="Meta.BaseMeta"><Key><PropertyRef Name="Id"/></Key><Property Name="Id" Type="Edm.Int32" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/><Annotation Term="UI.DisplayName" String="Identifier"/><Annotation Term="UI.ControlHint" String="ReadOnly"/></Property><Property Name="Meta.MongoId" Type="Server.ObjectID2"/><Property Name="myType" Type="Server.myType"/><Property Name="p0" Type="Edm.Binary" Nullable="true"/><Property Name="p1" Type="Edm.Boolean"/><Property Name="p2" Type="Edm.Byte"/><Property Name="p3" Type="Edm.Date"/><Property Name="p4" Type="Edm.DateTimeOffset"/><Property Name="p5" Type="Edm.Decimal"/><Property Name="p6" Type="Edm.Double"/><Property Name="p7" Type="Edm.Duration"/><Property Name="p8" Type="Edm.Guid"/><Property Name="p9" Type="Edm.Int16" Nullable="false"/><Property Name="p10" Type="Edm.Int32" Nullable="false"/><Property Name="p11" Type="Edm.Int64"/><Property Name="p12" Type="Edm.SByte"/><Property Name="p13" Type="Edm.Single"/><Property Name="p14" Type="Edm.Stream"/><Property Name="p15" Type="Edm.String"/><Property Name="p16" Type="Edm.TimeOfDay"/><Property Name="p17" Type="Edm.Geography"/><Property Name="p18" Type="Edm.GeographyPoint"/><Property Name="p19" Type="Edm.GeographyLineString"/><Property Name="p20" Type="Edm.GeographyPolygon"/><Property Name="p21" Type="Edm.GeographyMultiPoint"/><Property Name="p22" Type="Edm.GeographyMultiLineString"/><Property Name="p23" Type="Edm.GeographyMultiPolygon"/><Property Name="p24" Type="Edm.GeographyCollection"/><Property Name="p25" Type="Edm.Geometry"/><Property Name="p26" Type="Edm.GeometryPoint"/><Property Name="p27" Type="Edm.GeometryLineString"/><Property Name="p28" Type="Edm.GeometryPolygon"/><Property Name="p29" Type="Edm.GeometryMultiPoint"/><Property Name="p30" Type="Edm.GeometryMultiLineString"/><Property Name="p31" Type="Edm.GeometryMultiPolygon"/><Property Name="p32" Type="Edm.GeometryCollection"/><Property Name="p33" Type="Collection(Edm.Binary)" Nullable="true"/><Property Name="p34" Type="Collection(Edm.Boolean)"/><Property Name="p35" Type="Collection(Edm.Byte)"/><Property Name="p36" Type="Collection(Edm.Date)"/><Property Name="p37" Type="Collection(Edm.DateTimeOffset)"/><Property Name="p38" Type="Collection(Edm.Decimal)"/><Property Name="p39" Type="Collection(Edm.Double)"/><Property Name="p40" Type="Collection(Edm.Duration)"/><Property Name="p41" Type="Collection(Edm.Guid)"/><Property Name="p42" Type="Collection(Edm.Int16)"/><Property Name="p43" Type="Collection(Edm.Int32)"/><Property Name="p44" Type="Collection(Edm.Int64)"/><Property Name="p45" Type="Collection(Edm.SByte)"/><Property Name="p46" Type="Collection(Edm.Single)"/><Property Name="p47" Type="Collection(Edm.Stream)"/><Property Name="p48" Type="Collection(Edm.String)"/><Property Name="p49" Type="Collection(Edm.TimeOfDay)"/><Property Name="p50" Type="Collection(Edm.Geography)"/><Property Name="p51" Type="Collection(Edm.GeographyPoint)"/><Property Name="p52" Type="Collection(Edm.GeographyLineString)"/><Property Name="p53" Type="Collection(Edm.GeographyPolygon)"/><Property Name="p54" Type="Collection(Edm.GeographyMultiPoint)"/><Property Name="p55" Type="Collection(Edm.GeographyMultiLineString)"/><Property Name="p56" Type="Collection(Edm.GeographyMultiPolygon)"/><Property Name="p57" Type="Collection(Edm.GeographyCollection)"/><Property Name="p58" Type="Collection(Edm.Geometry)"/><Property Name="p59" Type="Collection(Edm.GeometryPoint)"/><Property Name="p60" Type="Collection(Edm.GeometryLineString)"/><Property Name="p61" Type="Collection(Edm.GeometryPolygon)"/><Property Name="p62" Type="Collection(Edm.GeometryMultiPoint)"/><Property Name="p63" Type="Collection(Edm.GeometryMultiLineString)"/><Property Name="p64" Type="Collection(Edm.GeometryMultiPolygon)"/><Property Name="p65" Type="Collection(Edm.GeometryCollection)"/><Property Name="p66" Type="Edm.Stream"/><Property Name="Complex" Type="Meta.Complex"/><Property Name="ComplexList" Type="Collection(Meta.Complex)"/><Property Name="Genre" Type="Meta.undefined"/><Property Name="Color" Type="Server.Color2"/><NavigationProperty Name="MediaList" Type="Collection(Media.Media)" Partner="Meta"/></EntityType><ComplexType Name="Complex"></ComplexType><ComplexType Name="fwd"></ComplexType><EnumType Name="undefined" UnderlyingType="Edm.Int32"><Member Name="__forward__ref__" Value="true"/></EnumType><Action Name="a0" IsBound="true"><Parameter Name="bindingParameter" Type="Meta.Meta"/></Action><Action Name="ControllerAction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Meta.BaseMeta)"/></Action><Function Name="useOdataType" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Meta.BaseMeta)"/><ReturnType Type="Meta.BaseMeta"/></Function></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Server"><EntityType Name="CompoundKey"><Key><PropertyRef Name="bc0"/></Key><Property Name="bc0" Type="Edm.Decimal" Nullable="false"/><Property Name="bc1" Type="Edm.Binary" Nullable="false"/><Property Name="bc2" Type="Edm.Boolean" Nullable="false"/><Property Name="bc3" Type="Edm.Byte" Nullable="false"/><Property Name="bc4" Type="Edm.Guid" Nullable="false"/><Property Name="bc5" Type="Edm.Double" Nullable="false"/></EntityType><EntityType Name="EmptyEntity"></EntityType><EntityType Name="ObjectID2"></EntityType><EntityType Name="Test2"><Key><PropertyRef Name="test"/></Key><Property Name="test" Type="Edm.Int32" Nullable="false"/><Property Name="Genre" Type="Server.Genre2"/></EntityType><EnumType Name="Color2" UnderlyingType="Edm.Int32"><Member Name="Red" Value="0"/><Member Name="Green" Value="1"/><Member Name="Blue" Value="2"/></EnumType><EnumType Name="Genre2" UnderlyingType="Edm.Int64" IsFlags="true"><Member Name="Unknown" Value="0"/><Member Name="Pop" Value="1"/><Member Name="Rock" Value="2"/><Member Name="Metal" Value="3"/><Member Name="Classic" Value="4"/></EnumType><Action Name="emptyEntityAction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Server.EmptyEntity)"/><Parameter Name="value" Type="Server.Genre2"/></Action><Action Name="ActionImport" IsBound="false"/><Action Name="ActionImportParams" IsBound="false"><Parameter Name="value" Type="Collection(Edm.Int32)"/></Action><Function Name="emptyEntityFunction" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(Server.EmptyEntity)"/><Parameter Name="value" Type="Server.Genre2"/><ReturnType Type="Server.Genre2"/></Function><Function Name="ObjId" IsBound="false"><Parameter Name="v" Type="Server.ObjectID2"/><ReturnType Type="Server.ObjectID2"/></Function><EntityContainer Name="ActionImportContainer"><ActionImport Name="ActionImport" Action="Server.ActionImport"/></EntityContainer><EntityContainer Name="Default"><ActionImport Name="ActionImportParams" Action="Server.ActionImportParams"/><FunctionImport Name="ObjId" Function="Server.ObjId"/></EntityContainer></Schema></edmx:DataServices></edmx:Edmx>`)
+                beautify(fs.readFileSync(path.join(__dirname, "$metadata.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
 
         it("should return SchemaJsonServer metadata xml", () => {
             expect(beautify(SchemaJsonServer.$metadata().document())).to.equal(
-                beautify(`<?xml version="1.0" encoding="UTF-8"?><edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0"><edmx:DataServices><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="SchemJsonTest"><EntityType Name="Index"><Key><PropertyRef Name="id"/></Key><Property Name="id" Type="Edm.Int64" Nullable="false"/></EntityType><EntityContainer Name="SchemJsonTestContext"><EntitySet Name="SchemJsonTest" EntityType="SchemJsonTest.Index"/></EntityContainer></Schema></edmx:DataServices></edmx:Edmx>`)
+                beautify(fs.readFileSync(path.join(__dirname, "$schemajson.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
 
         it("should return TypeDefServer metadata xml", () => {
             expect(beautify(TypeDefServer.$metadata().document())).to.equal(
-                beautify(`<?xml version="1.0" encoding="UTF-8"?><edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0"><edmx:DataServices><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Container"></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Controller"><EntityContainer Name="Default"><EntitySet Name="SimpleEntity" EntityType="Default.SimpleEntity"/></EntityContainer></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Default"><EntityType Name="SimpleEntity"><Key><PropertyRef Name="MongoId"/></Key><Property Name="MongoId" Type="Container.ObjectID2" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/></Property></EntityType></Schema></edmx:DataServices></edmx:Edmx>`)
+                beautify(fs.readFileSync(path.join(__dirname, "$typedefserver.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
 
         it("should return EnumServer metadata xml", () => {
             expect(beautify(EnumServer.$metadata().document())).to.equal(
-                beautify(`<?xml version="1.0" encoding="UTF-8"?><edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0"><edmx:DataServices><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Container"></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Controller"><EntityContainer Name="Default"><EntitySet Name="SimpleEntity" EntityType="Default.SimpleEntity"/></EntityContainer></Schema><Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Default"><EntityType Name="SimpleEntity"><Key><PropertyRef Name="MongoId"/></Key><Property Name="MongoId" Type="Container.MongoId" Nullable="false"><Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/></Property></EntityType></Schema></edmx:DataServices></edmx:Edmx>`)
+                beautify(fs.readFileSync(path.join(__dirname, "$enumserver.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
     });
@@ -907,3 +927,7 @@ if (typeof describe == "function") {
         });
     });
 }
+
+process.on("warning", warning => {
+    console.log(warning.stack);
+});

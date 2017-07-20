@@ -279,7 +279,8 @@ describe("OData HTTP", () => {
                     "Color@odata.type": "#Color2",
                     "Complex@odata.type": "#Meta.Complex",
                     "ComplexList@odata.type": "#Collection(Meta.Complex)",
-                    "Genre@odata.type": "#Meta.undefined",
+                    "Genre@odata.type": "#Server.Genre2",
+                    "Genre": "Server.Genre2'0'",
                     "Id": 1,
                     "Id@odata.type": "#Int32",
                     "MediaList": [
@@ -297,10 +298,10 @@ describe("OData HTTP", () => {
                     ],
                     "MediaList@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList/$ref",
                     "MediaList@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList",
-                    "Meta.MongoId@odata.type": "#Server.ObjectID2",
                     "MongoId": "578f2b8c12eaebabec4af242",
                     "MongoId@odata.type": "#Server.ObjectID2",
                     "b0": "b0",
+                    "myType@odata.type": "#Server.MyType",
                     "p0@odata.type": "#Binary",
                     "p10": 10,
                     "p10@odata.type": "#Int32",
@@ -419,6 +420,7 @@ describe("OData HTTP", () => {
                             "StringId": "two"
                         }
                     ],
+                    "Genre": "Server.Genre2'0'",
                     "MongoId": "578f2b8c12eaebabec4af242",
                     "b0": "b0",
                     "p10": 10,

@@ -2,7 +2,7 @@
 import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer, Product2, Category2, CategoryPromise, ProductPromise } from './test.model';
 import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity, BaseMeta } from './metadata.spec';
+import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity, BaseMeta, Genre } from './metadata.spec';
 import { ObjectID } from "mongodb";
 const { expect } = require("chai");
 const extend = require("extend");
@@ -808,6 +808,7 @@ export function testFactory(createTest: any) {
                     {
                         "@odata.id": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)",
                         "@odata.type": "#Meta.Meta",
+                        "Genre": "Server.Genre2'0'",
                         "MongoId": new ObjectID("5968aad95eb7eb3a94a264f6"),
                         "Id": 1,
                         "p0": 1,
@@ -843,6 +844,7 @@ export function testFactory(createTest: any) {
                 "@odata.type": "#Meta.Meta",
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
+                "Genre": "Server.Genre2'0'",
                 "b0": "b0",
                 "Id": 1,
                 "p9": 9,
@@ -865,6 +867,7 @@ export function testFactory(createTest: any) {
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
                 "@odata.type": "#Meta.Meta",
+                "Genre": "Server.Genre2'0'",
                 "MongoId": new ObjectID("578f2b8c12eaebabec4af242"),
                 "b0": "b0",
                 "Id": 1,
@@ -894,6 +897,7 @@ export function testFactory(createTest: any) {
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
                 "@odata.type": "#Meta.Meta",
+                "Genre": "Server.Genre2'0'",
                 "MongoId": new ObjectID("578f2b8c12eaebabec4af242"),
                 "b0": "b0",
                 "Id": 1,
@@ -923,6 +927,7 @@ export function testFactory(createTest: any) {
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
                 "@odata.type": "#Meta.Meta",
+                "Genre": "Server.Genre2'0'",
                 "MongoId": new ObjectID("578f2b8c12eaebabec4af242"),
                 "b0": "b0",
                 "Id": 1,
@@ -960,6 +965,7 @@ export function testFactory(createTest: any) {
                         {
                             "@odata.id": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)",
                             "@odata.type": "#Meta.Meta",
+                            "Genre": "Server.Genre2'0'",
                             "MongoId": new ObjectID("5968aad95eb7eb3a94a264f6"),
                             "Id": 1,
                             "p0": 1,
@@ -1076,7 +1082,12 @@ export function testFactory(createTest: any) {
         describe("use enum type action/function parameter", () => {
             createTest("should return ", MetaTestServer, "GET /EmptyEntity/Server.emptyEntityFunction(value=Server.Genre2'0')", {
                 statusCode: 200,
-                body: 'Unknow'
+                body: {
+                    "@odata.context": "http://localhost/$metadata#Server.Genre2",
+                    value: 0
+                },
+                elementType: Genre,
+                contentType: "application/json"
             });
         });
     });
@@ -1086,7 +1097,7 @@ export function testFactory(createTest: any) {
         createTest("shuld return objectId to hex string", MetaTestServer, `GET /ObjId(v='${objId}')`, {
             statusCode: 200,
             body: {
-                "@odata.context": "http://localhost/$metadata#Server.ObjectID",
+                "@odata.context": "http://localhost/$metadata#Server.ObjectID2",
                 "value": "578f2b8c12eaebabec4af288"
             },
             elementType: ObjectID,

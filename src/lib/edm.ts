@@ -243,9 +243,9 @@ export function Collection(elementType:Function):Decorator{
 }
 /** ?????????? */
 export function getTypeName(target:Function, propertyKey:string, container?: ContainerBase):string{
-    let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey) || Reflect.getMetadata(EdmType, target.prototype);
-    let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey) || Reflect.getMetadata(EdmElementType, target.prototype);
-    type = (type && type["@odata.type"]) || type;
+    let type = Reflect.getMetadata(EdmType, target) || Reflect.getMetadata(EdmType, target.prototype, propertyKey) || Reflect.getMetadata(EdmType, target.prototype);
+    let elementType = Reflect.getMetadata(EdmElementType, target) || Reflect.getMetadata(EdmElementType, target.prototype, propertyKey) || Reflect.getMetadata(EdmElementType, target.prototype);
+    type = (type && type["@odata.type"]) || (type && type.prototype && type.prototype["@odata.type"]) || type;
     if (container && container instanceof ContainerBase){
         let containerType = container.resolve(type);
         if (containerType){
@@ -289,8 +289,8 @@ export function getTypeName(target:Function, propertyKey:string, container?: Con
 }
 /** ?????????? */
 export function getType(target:Function, propertyKey:string, container?: ContainerBase):Function | string{
-    let type = Reflect.getMetadata(EdmType, target.prototype, propertyKey);
-    let elementType = Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);
+    let type = !propertyKey ? Reflect.getMetadata(EdmType, target) : Reflect.getMetadata(EdmType, target.prototype, propertyKey);
+    let elementType = !propertyKey ? Reflect.getMetadata(EdmElementType, target) : Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);
     let hasEntityType = isEntityType(target, propertyKey);
     if (!elementType) elementType = type;
     if (hasEntityType){
@@ -325,7 +325,11 @@ export function isCollection(target:Function, propertyKey:string):boolean{
 }
 /** ?????????? */
 export function getProperties(target:Function):string[]{
-    return Reflect.getOwnMetadata(EdmProperties, target) || [];
+    try{
+        return Reflect.getOwnMetadata(EdmProperties, target) || [];
+    }catch(err){
+        return [];
+    }
 }
 /** ?????????? */
 export function getParameters(target:Function, targetKey:string):any[]{
@@ -523,8 +527,9 @@ export function getReturnType(target:Function, propertyKey:string, container?:Co
     return getType(returnType, EdmReturnType, container) || getType(target, propertyKey, container);
 }
 /** ?????????? */
-export function isReturnTypeDefinition(target:Function, propertyKey:string):boolean{
+export function isReturnTypeDefinition(target:Function, propertyKey:string, container?:ContainerBase):boolean{
     let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
+    console.log(getTypeName(returnType, EdmReturnType, container));
     return isTypeDefinition(returnType, EdmReturnType);
 }
 
@@ -616,7 +621,11 @@ export function EntityType(type?:Function | string){
 }
 /** Returns true if property is an EntityType (decorated by Edm.EntityType) */
 export function isEntityType(target:Function, propertyKey?:string):boolean{
-    return Reflect.hasMetadata(EdmEntityType, target.prototype, propertyKey);
+    try{
+        return Reflect.hasMetadata(EdmEntityType, target.prototype, propertyKey);
+    }catch(err){
+        return false;
+    }
 }
 
 export function Flags(target, targetKey){

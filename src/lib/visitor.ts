@@ -196,7 +196,9 @@ export class ResourcePathVisitor{
     };
 
     protected async VisitCollectionNavigation(node:Token, context:any, type: any){
+        context.isCollection = true;
         await this.Visit(node.value.path, context, type);
+        delete context.isCollection;
     }
 
     protected async VisitCollectionNavigationPath(node:Token, context:any, type: any){
@@ -256,8 +258,10 @@ export class ResourcePathVisitor{
     }
 
     protected async VisitSingleNavigation(node:Token, context:any, type: any){
+        context.isCollection = false;
         if (node.value.name) this.Visit(node.value.name, context, type);
         await this.Visit(node.value.path, context, type);
+        delete context.isCollection;
     }
 
     protected async VisitPropertyPath(node:Token, context:any, type: any){
@@ -292,9 +296,9 @@ export class ResourcePathVisitor{
         this.path += "/$ref";
     }
 
-    protected async VisitBoundOperation(node:Token, context:any){
-        await this.Visit(node.value.operation, context);
-        await this.Visit(node.value.navigation, context);
+    protected async VisitBoundOperation(node:Token, context:any, type:any){
+        await this.Visit(node.value.operation, context, type);
+        await this.Visit(node.value.navigation, context, type);
     }
 
     protected VisitBoundActionCall(node:Token){
@@ -307,7 +311,7 @@ export class ResourcePathVisitor{
         this.path += "/" + part.name;
     }
 
-    protected async VisitBoundFunctionCall(node:Token, context:any){
+    protected async VisitBoundFunctionCall(node:Token, context:any, type:any){
         let part = {
             type: node.type,
             name: node.value.call.value.namespace + "." + node.value.call.value.name,
@@ -317,7 +321,10 @@ export class ResourcePathVisitor{
         this.navigation.push(part);
         this.path += "/" + part.name;
         this.path += "(\\(";
-        context.parameters = Edm.getParameters(node[ODATA_TYPE], part.name);
+        if (context.isCollection){
+            type = this.serverType.getController(type);
+        }
+        context.parameters = Edm.getParameters(type, part.name.split(".").pop());
         await Promise.all(node.value.params.value.map(async (param, i) => {
             await this.Visit(param, context);
             if (i < node.value.params.value.length - 1) this.path += ",";
@@ -325,7 +332,7 @@ export class ResourcePathVisitor{
         delete context.parameters;
         this.path += "\\))";
     }
-    
+
     protected async VisitFunctionImportCall(node:Token, context:any){
         let part = {
             type: node.type,
@@ -341,12 +348,13 @@ export class ResourcePathVisitor{
         delete context.parameters;
         this.path += "\\))";
     }
-    
+
     protected async VisitFunctionParameter(node:Token, context:any){
         let edmParam = context.parameters.find(p => p.name == [node.value.name.value.name]);
         let deserializer = (edmParam && Edm.getURLDeserializer(node[ODATA_TYPE], edmParam.name, edmParam.type, this.serverType.container)) || (_ => _);
 
-        await this.Visit(node.value.value, context = Object.assign({}, context));
+        context = Object.assign({}, context);
+        await this.Visit(node.value.value, context);
 
         let params = this.navigation[this.navigation.length - 1].params;
         params[node.value.name.value.name] = (literal => _ => deserializer(typeof literal == "function" ? literal() : literal))(context.literal);
@@ -363,12 +371,20 @@ export class ResourcePathVisitor{
         this.navigation.push(part);
         this.path += "/" + part.name;
     }
-    
+
     protected VisitParameterAlias(node:Token, context:any){
         context.literal = (name => _ => this.alias[name])(node.value.name);
     }
     
     protected VisitLiteral(node:Token, context:any){
         context.literal = Literal.convert(node.value, node.raw);
+    }
+
+    protected VisitEnum(node:Token, context:any){
+        this.Visit(node.value.value, context);
+    }
+
+    protected VisitEnumValue(node:Token, context:any){
+        context.literal = Literal.convert(node.value.values[0].value, node.value.values[0].raw);
     }
 }

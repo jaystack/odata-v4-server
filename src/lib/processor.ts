@@ -52,8 +52,8 @@ const createODataContext = function(context: ODataHttpContext, entitySets, serve
                 let target = prevType || entitySets[prevResource.name];
                 if (!target) return;
                 let propertyKey = baseResource.name.split(".").pop();
-                let returnType = Edm.getReturnType(target, propertyKey);
-                let returnTypeName = Edm.getReturnTypeName(target, propertyKey);
+                let returnType = Edm.getReturnType(target, propertyKey, server.container);
+                let returnTypeName = Edm.getReturnTypeName(target, propertyKey, server.container);
                 if (typeof returnType == "function"){
                     prevType = returnType;
                     let ctrl = server.getController(returnType);
@@ -69,8 +69,8 @@ const createODataContext = function(context: ODataHttpContext, entitySets, serve
                 return odataContext += returnType;
             }else{
                 let call = baseResource.name;
-                let returnType = Edm.getReturnType(server, call);
-                let returnTypeName = Edm.getReturnTypeName(server, call);
+                let returnType = Edm.getReturnType(server, call, server.container);
+                let returnTypeName = Edm.getReturnTypeName(server, call, server.container);
                 if (typeof returnType == "function"){
                     prevType = returnType;
                     let ctrl = server.getController(returnType);
@@ -976,7 +976,7 @@ export class ODataProcessor extends Transform{
                 try{
                     this.__enableStreaming(part);
 
-                    let returnType = <Function>Edm.getReturnType(this.serverType, part.name);
+                    let returnType = <Function>Edm.getReturnType(this.serverType, part.name, this.serverType.container);
                     let isAction = false;
                     let schemas = this.serverType.$metadata().edmx.dataServices.schemas;
                     if (Edm.isActionImport(this.serverType, part.name) || 
@@ -1034,7 +1034,7 @@ export class ODataProcessor extends Transform{
                 let schemas = this.serverType.$metadata().edmx.dataServices.schemas;
                 if (entityBoundOp){
                     scope = result.body;
-                    returnType = <Function>Edm.getReturnType(elementType, boundOpName);
+                    returnType = <Function>Edm.getReturnType(elementType, boundOpName, this.serverType.container);
                     if (Edm.isAction(elementType, boundOpName) ||
                         schemas.some(schema => 
                             schema.actions.some(action => 
@@ -1047,7 +1047,7 @@ export class ODataProcessor extends Transform{
                     this.__applyParams(elementType, boundOpName, part.params, null, result);
                 }else if (ctrlBoundOp){
                     scope = this.instance;
-                    returnType = <Function>Edm.getReturnType(this.ctrl, boundOpName);
+                    returnType = <Function>Edm.getReturnType(this.ctrl, boundOpName, this.serverType.container);
                     if (Edm.isAction(elementType, boundOpName) ||
                         schemas.some(schema => 
                             schema.actions.some(action => 
@@ -1101,6 +1101,7 @@ export class ODataProcessor extends Transform{
                         }else{
                             try{
                                 this.__appendODataContext(result, returnType, this.resourcePath.includes).then(() => {
+                                    if (typeof result.body.value == "undefined") result.body.value = opResult;
                                     resolve(result);
                                 });
                             }catch(err){
@@ -1290,7 +1291,7 @@ export class ODataProcessor extends Transform{
     }
 
     private async __convertEntity(context, result, elementType, includes?){
-        if (elementType === Object || this.options.disableEntityConversion) return Object.assign(context, result || {});
+        if (!(elementType.prototype instanceof Object) || elementType === Object || this.options.disableEntityConversion) return Object.assign(context, result || {});
         let resultType = Object.getPrototypeOf(result).constructor;
         if (resultType != Object && resultType != this.ctrl.prototype.elementType){
             elementType = resultType;

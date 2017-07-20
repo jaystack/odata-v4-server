@@ -25,17 +25,21 @@ export function createMetadataJSON(server:typeof ODataServer){
     };
     let propNames = getAllPropertyNames(server.prototype).filter(it => it != "constructor");
     let entitySets = odata.getPublicControllers(server);
-    let resolveTypeDefinition = (elementType, prop, namespace) => {
-        let defType = Edm.getType(elementType, prop, server.container);
+    let resolveTypeDefinition = (elementType, prop, namespace, getType = Edm.getType, getTypeName = Edm.getTypeName) => {
+        let defType = getType(elementType, prop, server.container);
         let defName = server.container.resolve(defType);
         let defNamespace = containerType.namespace || namespace;
         let defDefinition;
 
         if (!defName){
-            defName = defType["@odata.type"] || prop;
+            defName = defType["@odata.type"] || (defType["prototype"] && defType["prototype"]["@odata.type"]) || prop;
+            if (defName.indexOf(".") > 0){
+                defNamespace = defName.slice(0, defName.lastIndexOf("."));
+                defName = defName.slice(defName.lastIndexOf(".") + 1);
+            }
             defDefinition = {
                 name: defName,
-                underlyingType: Edm.getTypeName(elementType, prop, server.container)
+                underlyingType: Edm.getTypeName(<Function>defType, undefined, server.container) || "System.Object"
             };
         }else{
             if (defName.indexOf(".") > 0){
@@ -482,10 +486,8 @@ export function createMetadataJSON(server:typeof ODataServer){
 
             if (Edm.isFunctionImport(server, i)){
                 let type = Edm.getReturnType(server, i, server.container);
-                //console.log(i, Edm.isReturnTypeDefinition(server, i));
-                if (Edm.isReturnTypeDefinition(server, i)){
-                    console.log('TODO:type definition');
-                    //type = resolveTypeDefinition(type, i, )
+                if (Edm.isTypeDefinition(server, i)){
+                    type = resolveTypeDefinition(server, i, operationNamespace, Edm.getReturnType, Edm.getReturnTypeName);
                 }else if (typeof type == "function"){
                     let definitionContainer = Edm.isComplexType(server, i) ? "complexType" : "entityType";
                     let resolvedType = resolveType(type, server, i);
