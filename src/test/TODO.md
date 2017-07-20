@@ -12,7 +12,7 @@
 * Entity and entity collection bound function with enum and type definition parameters
 * Entity and entity collection bound action with parameters
 * More enum types and type definitions
-* @odata.type as action/function parameter
+* ~~@odata.type as action/function parameter~~
 * ~~Use @odata.method('methodname', 'navprop')~~
 * ~~Use @odata.link('keyname')~~
 * ~~Use @odata.id~~

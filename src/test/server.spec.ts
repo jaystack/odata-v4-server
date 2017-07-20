@@ -931,6 +931,45 @@ export function testFactory(createTest: any) {
             elementType: Meta,
             contentType: "application/json"
         });
+        describe("use odata type in action/function", () => {
+            createTest("should return namespace and Meta, BaseMeta entities", MetaTestServer, "GET /Meta/Meta.useOdataType()", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#Meta/$entity",
+                    "value": [
+                        {
+                            "@odata.id": "http://localhost/Meta('5968aad95eb7eb3a94a264f7')",
+                            "@odata.type": "#Meta.BaseMeta",
+                            "MongoId": new ObjectID("5968aad95eb7eb3a94a264f7"),
+                            "b0": "basemeta"
+                        },
+                        {
+                            "@odata.id": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)",
+                            "@odata.type": "#Meta.Meta",
+                            "MongoId": new ObjectID("5968aad95eb7eb3a94a264f6"),
+                            "Id": 1,
+                            "p0": 1,
+                            "p1": true,
+                            "p9": 9,
+                            "p10": 10,
+                            "p14@odata.mediaReadLink": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)/p14",
+                            "p14@odata.mediaContentType": "test",
+                            "p47@odata.mediaReadLink": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)/p47",
+                            "p66@odata.mediaReadLink": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)/p66"
+                        },
+                        "Meta"
+                    ]
+                },
+                elementType: BaseMeta,
+                contentType: "application/json"
+            });
+
+            createTest("call action what use odata type", MetaTestServer, "POST /EmptyEntity/Server.emptyEntityAction", {
+                statusCode: 204
+            },
+                { value: "Server.Genre2'0'" }
+            );
+        });
     });
 
     describe("Test entity", () => {
@@ -1019,6 +1058,12 @@ export function testFactory(createTest: any) {
             statusCode: 200,
             body: 0,
             contentType: "text/plain"
+        });
+        describe("use enum type action/function parameter", () => {
+            createTest("should return ", MetaTestServer, "GET /EmptyEntity/Server.emptyEntityFunction(value=Server.Genre2'0')", {
+                statusCode: 200,
+                body: 'Unknow'
+            });
         });
     });
 
