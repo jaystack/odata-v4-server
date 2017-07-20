@@ -9,10 +9,10 @@ import * as fs from "fs";
 import * as path from "path";
 import * as streamBuffers from "stream-buffers";
 const extend = require("extend");
-let categories = require("../example/categories");
-let products = require("../example/products");
-let categories2 = require("./model/categories");
-let products2 = require("./model/products");
+let categories = require("../example/categories").slice();
+let products = require("../example/products").slice();
+let categories2 = require("./model/categories").slice();
+let products2 = require("./model/products").slice();
 
 export class Foobar {
     @Edm.Key

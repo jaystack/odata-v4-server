@@ -562,26 +562,17 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af242')?$expand=Category", {
+        createTest("should return entity navigation property result", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')?$expand=Category", {
             statusCode: 200,
-            body: {
-                "@odata.context": "http://localhost:5005/$metadata#Products/$entity",
-                "@odata.id": "http://localhost:5005/Products('578f2b8c12eaebabec4af242')",
-                "Discontinued": false,
-                "Name": "Ikura",
-                "QuantityPerUnit": "12 - 200 ml jars",
-                "UnitPrice": 31,
-                "_id": "578f2b8c12eaebabec4af242",
-                "CategoryId": "578f2baa12eaebabec4af28d",
-                "Category": {
-                    "@odata.context": "http://localhost:5005/$metadata#Categories/$entity",
-                    "@odata.id": "http://localhost:5005/Categories('578f2baa12eaebabec4af28d')",
-                    "Description": "Seaweed and fish",
-                    "Name": "Seafood",
-                    "_id": "578f2baa12eaebabec4af28d"
-                }
-            },
-            elementType: products,
+            body: Object.assign({
+                "@odata.context": "http://localhost/$metadata#Products/$entity",
+                "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')",
+            }, products.find(product => product._id.toString() == "578f2b8c12eaebabec4af23c"), {
+                Category: Object.assign({
+                    "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af289')",
+                }, categories.find(category => category._id.toString() == "578f2baa12eaebabec4af289"))
+            }),
+            elementType: Product,
             contentType: "application/json"
         });
 

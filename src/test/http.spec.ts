@@ -18,51 +18,56 @@ const { expect } = require("chai");
 let serverCache = new WeakMap<typeof ODataServer, number>();
 let serverPort = 5000;
 
-function createTest(testcase: string, server: typeof ODataServer, command: string, compare: any, body?: any) {
-    it(`${testcase} (${command})`, () => {
-        let test = command.split(" ");
-        let method = test[0].toLowerCase();
-        let path = test.slice(1).join(" ");
-        let port: number;
-        if (!serverCache.has(server)) {
-            port = serverPort++;
-            server.create(port);
-            serverCache.set(server, port);
-        } else {
-            port = serverCache.get(server);
-        }
-        return new Promise((resolve, reject) => {
-            request[method](`http://localhost:${port}${path}`, { json: body }, (err, response, result) => {
-                if (err) return reject(err);
-                try {
-                    if (result) {
-                        if (typeof result == "object") {
-                            result = JSON.stringify(result);
+function createTestFactory(it) {
+    return function createTest(testcase: string, server: typeof ODataServer, command: string, compare: any, body?: any) {
+        it(`${testcase} (${command})`, () => {
+            let test = command.split(" ");
+            let method = test[0].toLowerCase();
+            let path = test.slice(1).join(" ");
+            let port: number;
+            if (!serverCache.has(server)) {
+                port = serverPort++;
+                server.create(port);
+                serverCache.set(server, port);
+            } else {
+                port = serverCache.get(server);
+            }
+            return new Promise((resolve, reject) => {
+                request[method](`http://localhost:${port}${path}`, { json: body }, (err, response, result) => {
+                    if (err) return reject(err);
+                    try {
+                        if (result) {
+                            if (typeof result == "object") {
+                                result = JSON.stringify(result);
+                            }
+                            try { result = result.replace(new RegExp(`http:\\/\\/localhost:${port}\\/`, 'gi'), 'http://localhost/'); } catch (err) { }
+                            try { result = JSON.parse(result); } catch (err) { }
                         }
-                        try { result = result.replace(new RegExp(`http:\\/\\/localhost:${port}\\/`, 'gi'), 'http://localhost/'); } catch (err) { }
-                        try { result = JSON.parse(result); } catch (err) { }
-                    }
-                    if (compare.body) {
-                        if (typeof compare.body == "object") {
-                            expect(result).to.deep.equal(JSON.parse(JSON.stringify(compare.body)));
-                        } else {
-                            expect(result).to.equal(compare.body);
+                        if (compare.body) {
+                            if (typeof compare.body == "object") {
+                                expect(result).to.deep.equal(JSON.parse(JSON.stringify(compare.body)));
+                            } else {
+                                expect(result).to.equal(compare.body);
+                            }
                         }
+                        if (compare.statusCode) {
+                            expect(response.statusCode).to.equal(compare.statusCode);
+                        }
+                        if (compare.contentType) {
+                            expect(response.headers["content-type"].indexOf(compare.contentType)).to.be.above(-1);
+                        }
+                        resolve();
+                    } catch (err) {
+                        reject(err);
                     }
-                    if (compare.statusCode) {
-                        expect(response.statusCode).to.equal(compare.statusCode);
-                    }
-                    if (compare.contentType) {
-                        expect(response.headers["content-type"].indexOf(compare.contentType)).to.be.above(-1);
-                    }
-                    resolve();
-                } catch (err) {
-                    reject(err);
-                }
+                });
             });
         });
-    });
+    };
 }
+
+const createTest: any = createTestFactory(it);
+createTest.only = createTestFactory(it.only);
 
 describe("OData HTTP", () => {
     TestServer.create(3002);

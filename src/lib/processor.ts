@@ -1519,7 +1519,7 @@ export class ODataProcessor extends Transform{
         let typeParam = odata.getTypeParameter(container, name);
 
         queryString = queryString || this.url.query;
-        let queryAst = queryString ? (typeof queryString == "string" ? ODataParser.query(queryString, { metadata: this.serverType.$metadata().edmx }) : queryString) : null;
+        let queryAst = queryString ? (typeof queryString == "string" ? ODataParser.query(queryString, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx }) : queryString) : null;
         if (queryParam){
             params[queryParam] = queryAst;
         }
