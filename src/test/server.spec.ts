@@ -2,7 +2,7 @@
 import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer, Product2, Category2 } from './test.model';
 import { Edm, odata } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { ProductPromise, CategoryPromise } from "./model/ProductPromise";
+import { ProductPromise, CategoryPromise } from "./model/ModelsForPromise";
 import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity, BaseMeta } from './metadata.spec';
 import { ObjectID } from "mongodb";
 const { expect } = require("chai");

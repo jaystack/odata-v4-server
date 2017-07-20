@@ -3,7 +3,7 @@ import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream, ODataEntity } from "../lib/index";
 import { Product, Category } from "../example/model";
-import { ProductPromise, CategoryPromise } from "./model/ProductPromise";
+import { ProductPromise, CategoryPromise } from "./model/ModelsForPromise";
 import { Readable, PassThrough, Writable } from "stream";
 import { ObjectID } from "mongodb";
 import * as fs from "fs";
