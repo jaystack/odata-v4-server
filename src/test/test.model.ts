@@ -723,6 +723,65 @@ export class ProductsAdvancedGeneratorController extends ODataController {
     }
 }
 
+export class Image2 {
+    @Edm.Key
+    @Edm.Computed
+    @Edm.Int32
+    Id: number
+
+    @Edm.String
+    Filename: string
+
+    @Edm.Stream("image/png")
+    Data: ODataStream
+
+    @Edm.Stream("image/png")
+    Data2: ODataStream
+}
+
+@odata.type(Image2)
+export class Images2Controller extends ODataController {
+    @odata.GET
+    entitySet( @odata.query _: Token, @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+        let image = new Image2();
+        image.Id = 1;
+        image.Filename = "tmp.png";
+        return [image];
+    }
+
+    @odata.GET()
+    entity( @odata.key() key: number) {
+        let image = new Image2();
+        image.Id = key;
+        image.Filename = "tmp.png";
+        return image;
+    }
+
+    @odata.GET("Data")
+    getData( @odata.key _: number, @odata.context context: ODataHttpContext) {
+        let globalReadableImgStrBuffer = new streamBuffers.ReadableStreamBuffer();
+        globalReadableImgStrBuffer.put("tmp.png");
+        globalReadableImgStrBuffer.stop();
+        return globalReadableImgStrBuffer;
+    }
+
+    @odata.POST("Data")
+    postData( @odata.key _: number, @odata.body data: Readable) {
+        let globalWritableImgStrBuffer = new streamBuffers.WritableStreamBuffer();
+        return data.pipe(globalWritableImgStrBuffer);
+    }
+
+    @odata.GET("Data2")
+    getData2( @odata.key _: number, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
+        return new ODataStream(fs.createReadStream(path.join(__dirname, "..", "..", "src", "test", "fixtures", "logo_jaystack.png"))).pipe(context.response);
+    }
+
+    @odata.POST("Data2")
+    postData2( @odata.key _: number, @odata.body data: Readable) {
+        return new ODataStream(fs.createWriteStream(path.join(__dirname, "..", "..", "src", "test", "fixtures", "tmp.png"))).write(data);
+    }
+}
+
 const getAllCategories = async () => {
     return await categories2;
 }

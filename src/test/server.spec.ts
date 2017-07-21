@@ -529,17 +529,17 @@ export function testFactory(createTest: any) {
  * 
  */
 
-        // createTest("should return products using generator that calls another generator", TestServer, "GET /GeneratorProducts", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#GeneratorProducts",
-        //         value: products.map((product) => {
-        //             return Object.assign({ "@odata.id": `http://localhost/ProductsGenerator('${product._id}')` }, product)
-        //         })
-        //     },
-        //     elementType: GeneratorProduct,
-        //     contentType: "application/json"
-        // });
+        createTest("should return products using generator that calls another generator", TestServer, "GET /GeneratorProducts", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#GeneratorProducts",
+                value: products.map((product) => {
+                    return Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${product._id}')` }, product)
+                })
+            },
+            elementType: GeneratorProduct,
+            contentType: "application/json"
+        });
 
         // createTest("should return categories using generator that calls another generator", TestServer, "GET /GeneratorCategories", {
         //     statusCode: 200,
@@ -553,64 +553,64 @@ export function testFactory(createTest: any) {
         //     contentType: "application/json"
         // });
 
-        // createTest("should return single product using generator function that calls another generator function", TestServer, "GET /GeneratorProducts('578f2b8c12eaebabec4af23c')", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#GeneratorProducts/$entity",
-        //         "@odata.id": "http://localhost/GeneratorProducts('578f2b8c12eaebabec4af23c')",
-        //         "Discontinued": false,
-        //         "Name": "Chai",
-        //         "QuantityPerUnit": "10 boxes x 20 bags",
-        //         "UnitPrice": 39,
-        //         "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
-        //         "CategoryId": new ObjectID("578f2baa12eaebabec4af289")
-        //     },
-        //     elementType: GeneratorProduct,
-        //     contentType: "application/json"
-        // });
+        createTest("should return single product using generator function that calls another generator function", TestServer, "GET /GeneratorProducts('578f2b8c12eaebabec4af23c')", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#GeneratorProducts/$entity",
+                "@odata.id": "http://localhost/GeneratorProducts('578f2b8c12eaebabec4af23c')",
+                "Discontinued": false,
+                "Name": "Chai",
+                "QuantityPerUnit": "10 boxes x 20 bags",
+                "UnitPrice": 39,
+                "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
+                "CategoryId": new ObjectID("578f2baa12eaebabec4af289")
+            },
+            elementType: GeneratorProduct,
+            contentType: "application/json"
+        });
 
-        // createTest("should return single category using generator function that calls another generator function", TestServer, "GET /GeneratorCategories('578f2baa12eaebabec4af289')", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#GeneratorCategories/$entity",
-        //         "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af289')",
-        //         "Description": "Soft drinks",
-        //         "Name": "Beverages",
-        //         "_id": new ObjectID("578f2baa12eaebabec4af289")
-        //     },
-        //     elementType: GeneratorCategory,
-        //     contentType: "application/json"
-        // });
+        createTest("should return single category using generator function that calls another generator function", TestServer, "GET /GeneratorCategories('578f2baa12eaebabec4af289')", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#GeneratorCategories/$entity",
+                "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af289')",
+                "Description": "Soft drinks",
+                "Name": "Beverages",
+                "_id": new ObjectID("578f2baa12eaebabec4af289")
+            },
+            elementType: GeneratorCategory,
+            contentType: "application/json"
+        });
 
-        // createTest("should return single category referenced to product using generator function that calls another generator function", TestServer,
-        //     "GET /GeneratorProducts('578f2b8c12eaebabec4af23c')/GeneratorCategories", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#GeneratorCategories/$entity",
-        //         "value": [{
-        //             "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af289')",
-        //             "Description": "Soft drinks",
-        //             "Name": "Beverages",
-        //             "_id": new ObjectID("578f2baa12eaebabec4af289")
-        //         }]
-        //     },
-        //     elementType: GeneratorCategory,
-        //     contentType: "application/json"
-        // });
+        createTest("should return single category referenced to product using generator function that calls another generator function", TestServer,
+            "GET /GeneratorProducts('578f2b8c12eaebabec4af23c')/GeneratorCategory", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#GeneratorCategories/$entity",
+                "value": [{
+                    "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af289')",
+                    "Description": "Soft drinks",
+                    "Name": "Beverages",
+                    "_id": new ObjectID("578f2baa12eaebabec4af289")
+                }]
+            },
+            elementType: GeneratorCategory,
+            contentType: "application/json"
+        });
 
-        // createTest("should return products referenced to category using generator function that calls another generator function",
-        //     TestServer, "GET /GeneratorCategories('578f2baa12eaebabec4af289')/GeneratorProducts", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#GeneratorCategories('578f2baa12eaebabec4af289')/GeneratorProducts",
-        //         "value": products.filter((product) => product && product.CategoryId.toString() === "578f2baa12eaebabec4af289")
-        //             .map(product => {
-        //                 return Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${product._id}')` }, product)
-        //             })
-        //     },
-        //     elementType: GeneratorProduct,
-        //     contentType: "application/json"
-        // });
+        createTest("should return products referenced to category using generator function that calls another generator function",
+            TestServer, "GET /GeneratorCategories('578f2baa12eaebabec4af289')/GeneratorProducts", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#GeneratorCategories('578f2baa12eaebabec4af289')/GeneratorProducts",
+                "value": products.filter((product) => product && product.CategoryId.toString() === "578f2baa12eaebabec4af289")
+                    .map(product => {
+                        return Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${product._id}')` }, product)
+                    })
+            },
+            elementType: GeneratorProduct,
+            contentType: "application/json"
+        });
 
         // createTest("should return product reference on category", TestServer, "GET /Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", {
         //     statusCode: 200,
