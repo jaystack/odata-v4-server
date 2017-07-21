@@ -5,9 +5,9 @@ const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFro
 
 @Edm.Annotate({
     term: "UI.DisplayName",
-    string: "ProductPromise"
+    string: "GeneratorProduct"
 })
-export class ProductPromise {
+export class GeneratorProduct {
     @Edm.Key
     @Edm.Computed
     @Edm.String
@@ -27,9 +27,9 @@ export class ProductPromise {
     CategoryId:ObjectID
 
     @Edm.ForeignKey("CategoryId")
-    @Edm.EntityType(Edm.ForwardRef(() => CategoryPromise))
-    @Edm.Partner("ProductPromise")
-    CategoryPromise:CategoryPromise
+    @Edm.EntityType(Edm.ForwardRef(() => GeneratorCategory))
+    @Edm.Partner("GeneratorProduct")
+    GeneratorCategory:GeneratorCategory
 
     @Edm.Boolean
     Discontinued:boolean
@@ -37,7 +37,7 @@ export class ProductPromise {
     @Edm.String
     @Edm.Annotate({
         term: "UI.DisplayName",
-        string: "ProductPromise title"
+        string: "GeneratorProduct title"
     }, {
         term: "UI.ControlHint",
         string: "ShortText"
@@ -47,7 +47,7 @@ export class ProductPromise {
     @Edm.String
     @Edm.Annotate({
         term: "UI.DisplayName",
-        string: "ProductPromise English name"
+        string: "GeneratorProduct English name"
     }, {
         term: "UI.ControlHint",
         string: "ShortText"
@@ -57,7 +57,7 @@ export class ProductPromise {
     @Edm.Decimal
     @Edm.Annotate({
         term: "UI.DisplayName",
-        string: "Unit price of ProductPromise"
+        string: "Unit price of GeneratorProduct"
     }, {
         term: "UI.ControlHint",
         string: "Decimal"
@@ -68,16 +68,16 @@ export class ProductPromise {
 @Edm.OpenType
 @Edm.Annotate({
     term: "UI.DisplayName",
-    string: "CategoryPromise"
+    string: "GeneratorCategory"
 })
-export class CategoryPromise {
+export class GeneratorCategory {
     @Edm.Key
     @Edm.Computed
     @Edm.String
     @Edm.Convert(toObjectID)
     @Edm.Annotate({
         term: "UI.DisplayName",
-        string: "CategoryPromise identifier"
+        string: "GeneratorCategory identifier"
     },
     {
         term: "UI.ControlHint",
@@ -91,7 +91,7 @@ export class CategoryPromise {
     @Edm.String
     @Edm.Annotate({
         term: "UI.DisplayName",
-        string: "CategoryPromise name"
+        string: "GeneratorCategory name"
     },
     {
         term: "UI.ControlHint",
@@ -100,9 +100,9 @@ export class CategoryPromise {
     Name:string
 
     @Edm.ForeignKey("CategoryId")
-    @Edm.Collection(Edm.EntityType(ProductPromise))
-    @Edm.Partner("CategoryPromise")
-    ProductPromises:ProductPromise[]
+    @Edm.Collection(Edm.EntityType(GeneratorProduct))
+    @Edm.Partner("GeneratorCategory")
+    GeneratorProducts:GeneratorProduct[]
 
     @Edm.Collection(Edm.String)
     @Edm.Function

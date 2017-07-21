@@ -4,6 +4,7 @@ import { createFilter } from "odata-v4-inmemory";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream, ODataEntity } from "../lib/index";
 import { Product, Category } from "../example/model";
 import { ProductPromise, CategoryPromise } from "./model/ModelsForPromise";
+import { GeneratorProduct, GeneratorCategory } from "./model/ModelsForGenerator";
 import { Readable, PassThrough, Writable } from "stream";
 import { ObjectID } from "mongodb";
 import * as fs from "fs";
@@ -663,9 +664,9 @@ export class CategoriesPromiseGeneratorController extends ODataController {
             return yield Promise.resolve(categories2
                 .map((category) => Object.assign({}, category, { _id: category._id.toString() }))
                 .filter(createFilter(filter)));
-        } else {
-            return yield Promise.resolve(categories2)
         }
+
+        return yield Promise.resolve(categories2)
     }
 
     @odata.GET
@@ -684,6 +685,84 @@ export class CategoriesPromiseGeneratorController extends ODataController {
     @odata.GET("ProductPromises")
     *findProducts( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: CategoryPromise) {
         return yield Promise.resolve(products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString()));
+    }
+}
+
+const getAllProducts = async () => {
+    return await products2;
+}
+const getProductsByFilter = async (filter: Token) => {
+    return await products2
+            .map((product) => Object.assign({}, product, { _id: product._id.toString() }))
+            .filter(createFilter(filter));
+}
+const getProductByKey = async (key: string) => {
+    return await products2.filter(p => p._id.toString() == key)[0] || null;
+}
+const getCategoryOfProduct = async (result: GeneratorProduct) => {
+    return await categories2.filter((c) => c && c._id.toString() === result.CategoryId.toString());
+}
+
+@odata.type(GeneratorProduct)
+export class ProductsAdvancedGeneratorController extends ODataController {
+    @odata.GET
+    *find( @odata.filter filter: Token) {
+        if (filter) return yield getProductsByFilter(filter);
+        return yield getAllProducts();
+    }
+
+    @odata.GET
+    @odata.parameters({ key: odata.key })
+    *findOne(key: string) {
+        return yield getProductByKey(key);
+    }
+
+    @odata.GET("GeneratorCategory")
+    *findCategories( @odata.filter filter: Token, @odata.result result: GeneratorProduct) {
+        return yield getCategoryOfProduct(result);
+    }
+}
+
+const getAllCategories = async () => {
+    return await categories2;
+}
+const getCategoriesByFilter = async (filter: Token) => {
+    return await categories2
+        .map((category) => Object.assign({}, category, { _id: category._id.toString() }))
+        .filter(createFilter(filter));
+}
+const getCategoryByKey = async (key: string) => {
+    return await categories2.find(category => category._id.toString() === key) || null;
+}
+const getProductOfCategory = async (key: string, result: GeneratorCategory) => {
+    return await products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString() && product._id.toString() === key.toString());
+}
+const getProductsOfCategory = async (result: GeneratorCategory) => {
+    return await products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString());
+}
+
+@odata.type(GeneratorCategory)
+export class CategoriesAdvancedGeneratorController extends ODataController {
+    @odata.GET
+    *find( @odata.filter filter: Token) {
+        if (filter) yield getCategoriesByFilter(filter);
+        return yield getAllCategories()
+    }
+
+    @odata.GET
+    @odata.parameters({ key: odata.key })
+    *findOne(key: string) {
+        return yield getCategoryByKey(key)
+    }
+
+    @odata.GET("GeneratorProducts")
+    *findProduct( @odata.key key: string, @odata.result result: GeneratorCategory) {
+        return yield getProductOfCategory(key, result);
+    }
+
+    @odata.GET("GeneratorProducts")
+    *findProducts( @odata.result result: GeneratorCategory) {
+        return yield getProductsOfCategory(result);
     }
 }
 
@@ -807,8 +886,10 @@ export class HiddenController extends ODataController { }
 @odata.controller(CategoriesStreamingController, "CategoriesStream")
 @odata.controller(CategoriesGeneratorController)
 @odata.controller(ProductsGeneratorController)
-@odata.controller(CategoriesPromiseGeneratorController, "AdvancedCategories")
 @odata.controller(ProductsPromiseGeneratorController, "AdvancedProducts")
+@odata.controller(CategoriesPromiseGeneratorController, "AdvancedCategories")
+@odata.controller(ProductsAdvancedGeneratorController, "GeneratorProducts")
+@odata.controller(CategoriesAdvancedGeneratorController, "GeneratorCategories")
 @odata.controller(HeaderTestEntityController, "HeaderTestEntity")
 @odata.container("TestContainer")
 export class TestServer extends ODataServer {
