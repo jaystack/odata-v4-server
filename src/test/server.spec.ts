@@ -451,17 +451,17 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        // createTest("should return promise of categories using generator function", TestServer, "GET /AdvancedCategories", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#AdvancedCategories",
-        //         value: categories.map((category) => {
-        //             return Object.assign({ "@odata.id": `http://localhost/AdvancedCategories('${category._id}')` }, category)
-        //         })
-        //     },
-        //     elementType: CategoryPromise,
-        //     contentType: "application/json"
-        // });
+        createTest("should return promise of categories using generator function", TestServer, "GET /AdvancedCategories", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#AdvancedCategories",
+                value: categories.map((category) => {
+                    return Object.assign({ "@odata.id": `http://localhost/AdvancedCategories('${category._id}')` }, category)
+                })
+            },
+            elementType: CategoryPromise,
+            contentType: "application/json"
+        });
 
         createTest("should return promise of product using generator function", TestServer, "GET /AdvancedProducts('578f2b8c12eaebabec4af23c')", {
             statusCode: 200,
@@ -541,17 +541,17 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        // createTest("should return categories using generator that calls another generator", TestServer, "GET /GeneratorCategories", {
-        //     statusCode: 200,
-        //     body: {
-        //         "@odata.context": "http://localhost/$metadata#GeneratorCategories",
-        //         value: categories.map((category) => {
-        //             return Object.assign({ "@odata.id": `http://localhost/GeneratorCategories('${category._id}')` }, category)
-        //         })
-        //     },
-        //     elementType: GeneratorCategory,
-        //     contentType: "application/json"
-        // });
+        createTest("should return categories using generator that calls another generator", TestServer, "GET /GeneratorCategories", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#GeneratorCategories",
+                value: categories.map((category) => {
+                    return Object.assign({ "@odata.id": `http://localhost/GeneratorCategories('${category._id}')` }, category)
+                })
+            },
+            elementType: GeneratorCategory,
+            contentType: "application/json"
+        });
 
         createTest("should return single product using generator function that calls another generator function", TestServer, "GET /GeneratorProducts('578f2b8c12eaebabec4af23c')", {
             statusCode: 200,

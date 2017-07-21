@@ -1245,7 +1245,7 @@ export class ODataProcessor extends Transform{
             if (!result.body["@odata.context"]){
                 let ctrl = this.ctrl && this.ctrl.prototype.elementType == ctrlType ? this.ctrl : this.serverType.getController(ctrlType);
                 if (result.body.value && Array.isArray(result.body.value)){
-                    context.value = result.body.value;
+                    context.value = [];
                     await Promise.all(result.body.value.map((entity, i) => {
                         return (async (entity, i) => {
                             if (typeof entity == "object"){
@@ -1253,6 +1253,8 @@ export class ODataProcessor extends Transform{
                                 if (ctrl) await this.__appendLinks(ctrl, elementType, item, entity);
                                 await this.__convertEntity(item, entity, elementType, includes);
                                 context.value[i] = item;
+                            }else{
+                                context.value[i] = entity;
                             }
                         })(entity, i);
                     }));
