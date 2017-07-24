@@ -587,12 +587,10 @@ export function testFactory(createTest: any) {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#GeneratorCategories/$entity",
-                "value": [{
-                    "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af289')",
-                    "Description": "Soft drinks",
-                    "Name": "Beverages",
-                    "_id": new ObjectID("578f2baa12eaebabec4af289")
-                }]
+                "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af289')",
+                "Description": "Soft drinks",
+                "Name": "Beverages",
+                "_id": new ObjectID("578f2baa12eaebabec4af289")
             },
             elementType: GeneratorCategory,
             contentType: "application/json"

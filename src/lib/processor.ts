@@ -1441,7 +1441,17 @@ export class ODataProcessor extends Transform{
                 }
                 if (fn){
                     this.__applyParams(ctrl, fn.call, params, include.ast, result, include);
-                    let fnResult = await fnCaller.call(ctrl, ctrl.prototype[fn.call], params);
+                    let fnCall = ctrl.prototype[fn.call];
+                    let fnResult = fnCaller.call(ctrl, fnCall, params);
+
+                    if (isIterator(fnCall)){
+                        fnResult = await run(fnResult, defaultHandlers);
+                    }
+
+                    if (isPromise(fnResult)){
+                        fnResult = await fnResult;
+                    }
+
                     if (isStream(fnResult) && stream && streamPromise) navigationResult = await ODataResult.Ok(streamPromise);
                     else navigationResult = await ODataResult.Ok(fnResult);
                     await this.__appendODataContext(navigationResult, navigationType, include.includes);
@@ -1528,7 +1538,7 @@ export class ODataProcessor extends Transform{
         }
 
         if (filterParam){
-            let filter = queryString ? (typeof queryString == "string" ? qs.parse(queryString).$filter : (<Token[]>queryString.value.options).find(t => t.type == TokenType.Filter)) : null;
+            let filter = queryString ? (typeof queryString == "string" ? qs.parse(queryString).$filter : (queryString && queryString.value && queryString.value.options && (<Token[]>queryString.value.options).find(t => t.type == TokenType.Filter))) : null;
             let filterAst = filter ? (typeof filter == "string" ? ODataParser.filter(filter, { metadata: this.serverType.$metadata().edmx }) : filter) : null;
             params[filterParam] = filterAst;
         }

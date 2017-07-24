@@ -698,10 +698,10 @@ const getProductsByFilter = async (filter: Token) => {
             .filter(createFilter(filter));
 }
 const getProductByKey = async (key: string) => {
-    return await products2.filter(p => p._id.toString() == key)[0] || null;
+    return await products2.find(p => p._id.toString() == key) || null;
 }
 const getCategoryOfProduct = async (result: GeneratorProduct) => {
-    return await categories2.filter((c) => c && c._id.toString() === result.CategoryId.toString());
+    return await categories2.find((c) => c && c._id.toString() === result.CategoryId.toString()) || null;
 }
 
 @odata.type(GeneratorProduct)
