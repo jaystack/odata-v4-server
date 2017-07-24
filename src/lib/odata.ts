@@ -647,17 +647,17 @@ export function ODataBase<T, C>(Base: C): IODataBase<T, C> & C{
                                         if (typeof paramDecorator == 'function'){
                                             paramDecorator(this.prototype, prop, parameterNames.indexOf(param));
                                         }else{
-                                            console.log('Unsupported parameter decorator on', this.name || this, prop, param, paramDecorator);
+                                            throw new Error(`Unsupported parameter decorator on ${this.name || this} at ${prop}.${param} using ${paramDecorator}`);
                                         }
                                     });
                                 });
                             }else{
-                                console.log('Unsupported member decorator on', this.name || this, prop, propDecorator);
+                                throw new Error(`Unsupported member decorator on ${this.name || this} at ${prop} using ${propDecorator}`);
                             }
                         });
                     });
                 }else{
-                    console.log('Unsupported decorator on', this.name || this, decorator);
+                    throw new Error(`Unsupported decorator on ${this.name || this} using ${decorator}`);
                 }
             });
 
