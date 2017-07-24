@@ -354,7 +354,7 @@ export class ResourcePathVisitor{
         let deserializer = (edmParam && Edm.getURLDeserializer(node[ODATA_TYPE], edmParam.name, edmParam.type, this.serverType.container)) || (_ => _);
 
         context = Object.assign({}, context);
-        await this.Visit(node.value.value, context);
+        await this.Visit(node.value.value, context, edmParam && edmParam.type);
 
         let params = this.navigation[this.navigation.length - 1].params;
         params[node.value.name.value.name] = (literal => _ => deserializer(typeof literal == "function" ? literal() : literal))(context.literal);
@@ -380,11 +380,19 @@ export class ResourcePathVisitor{
         context.literal = Literal.convert(node.value, node.raw);
     }
 
-    protected VisitEnum(node:Token, context:any){
-        this.Visit(node.value.value, context);
+    protected VisitEnum(node:Token, context:any, type:any){
+        this.Visit(node.value.value, context, type);
     }
 
-    protected VisitEnumValue(node:Token, context:any){
-        context.literal = Literal.convert(node.value.values[0].value, node.value.values[0].raw);
+    protected VisitEnumValue(node:Token, context:any, type:any){
+        this.Visit(node.value.values[0], context, type);
+    }
+
+    protected VisitEnumerationMember(node:Token, context:any, type:any){
+        context.literal = (type && type[node.value.name]) || node.value.name;
+    }
+
+    protected VisitEnumMemberValue(node:Token, context:any, type:any){
+        context.literal = Literal.convert(node.value, node.raw);
     }
 }

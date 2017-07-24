@@ -1216,6 +1216,16 @@ export function testFactory(createTest: any) {
                 elementType: Genre,
                 contentType: "application/json"
             });
+
+            createTest("should return ", MetaTestServer, "GET /EmptyEntity/Server.emptyEntityFunction(value=Server.Genre2'Rock')", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#Server.Genre2",
+                    value: 2
+                },
+                elementType: Genre,
+                contentType: "application/json"
+            });
         });
     });
 

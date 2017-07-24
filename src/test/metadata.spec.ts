@@ -858,25 +858,25 @@ if (typeof describe == "function") {
     describe("Metadata test", () => {
         it("should return metadata xml", () => {
             expect(beautify(MetaTestServer.$metadata().document())).to.equal(
-                beautify(fs.readFileSync(path.join(__dirname, "$metadata.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
+                beautify(fs.readFileSync(path.join(__dirname, "metadata", "$metadata.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
 
         it("should return SchemaJsonServer metadata xml", () => {
             expect(beautify(SchemaJsonServer.$metadata().document())).to.equal(
-                beautify(fs.readFileSync(path.join(__dirname, "$schemajson.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
+                beautify(fs.readFileSync(path.join(__dirname, "metadata", "$schemajson.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
 
         it("should return TypeDefServer metadata xml", () => {
             expect(beautify(TypeDefServer.$metadata().document())).to.equal(
-                beautify(fs.readFileSync(path.join(__dirname, "$typedefserver.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
+                beautify(fs.readFileSync(path.join(__dirname, "metadata", "$typedefserver.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
 
         it("should return EnumServer metadata xml", () => {
             expect(beautify(EnumServer.$metadata().document())).to.equal(
-                beautify(fs.readFileSync(path.join(__dirname, "$enumserver.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
+                beautify(fs.readFileSync(path.join(__dirname, "metadata", "$enumserver.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
     });
