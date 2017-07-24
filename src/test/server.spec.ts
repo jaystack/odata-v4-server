@@ -908,6 +908,22 @@ export function testFactory(createTest: any) {
             elementType: Product,
             contentType: "application/json"
         });
+        createTest("should create product with navigation property", TestServer, "POST /Categories('578f2baa12eaebabec4af290')/Products", {
+            statusCode: 201,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af290')/Products/$entity",
+                "@odata.id": "http://localhost/Products('578e1a7c12eaebabec4af23c')",
+                "CategoryId": new ObjectID("578f2baa12eaebabec4af28b"),
+                "Name": "New product",
+                "_id": new ObjectID("578e1a7c12eaebabec4af23c")
+            },
+            elementType: Product,
+            contentType: "application/json"
+        }, {
+                Name: "New product",
+                CategoryId: categories[2]._id
+            }
+        );
     });
 
     describe("Compound key", () => {

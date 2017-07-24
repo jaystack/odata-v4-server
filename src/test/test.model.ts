@@ -370,6 +370,12 @@ export class CategoriesController extends ODataController {
         return categories.filter(category => category._id.toString() == key)[0] || null;
     }
 
+    @odata.POST("Products")
+    insertProduct( @odata.key key: string, @odata.link link: string, @odata.body body: Product) {
+        body._id = new ObjectID('578e1a7c12eaebabec4af23c')
+        return body;
+    }
+
     @odata.GET("Products").$ref
     @odata.parameter("key", odata.key)
     @odata.parameter("link", odata.link)
@@ -1024,7 +1030,7 @@ export class AuthenticationServer extends ODataServer {
 
 @odata.cors
 @odata.controller(ProductsController, true)
- @odata.controller(CategoriesController, false)
+@odata.controller(CategoriesController, false)
 export class ProductServer extends ODataServer { }
 ProductServer.create(7001);
 

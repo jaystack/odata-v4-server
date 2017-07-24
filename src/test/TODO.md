@@ -52,8 +52,8 @@
 * Use navigation property on stream result
 * ~~Use HTTP Accept header including odata.metadata=full|none~~
 * ~~Implement navigation property with @odata.GET('navprop')~~
-* Implement navigation property POST (to insert into a navigation property set)
-* Implement unexposed controllers (without a public entity set, available on a navigation property)
+* ~~Implement navigation property POST (to insert into a navigation property set)~~
+* ~~Implement unexposed controllers (without a public entity set, available on a navigation property)~~
 * Implement primitive property DELETE with PATCH handler
 * More Edm.Stream properties test cases, like /Data/$value
 * Test $expand with subquery, multiple cases
