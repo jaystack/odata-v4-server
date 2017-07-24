@@ -694,6 +694,34 @@ describe("OData HTTP", () => {
                 done();
             });
         });
+
+        it("should return 204 after POST Data2 using generator function that yields stream", (done) => {
+            let req = request.post(`http://localhost:3002/Images2ControllerEntitySet(1)/Data2`);
+            fs.createReadStream(path.join(__dirname, "fixtures", "logo_jaystack.png")).pipe(req);
+            req.on('error', (err) => {
+                done(err);
+            });
+            req.on('complete', (resp, body) => {
+                expect(resp.statusCode).to.equal(204);
+                expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
+                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))) {
+                    fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                }
+                done();
+            });
+        });
+
+        it("should return 200 after GET Data2 using generator function that yields stream", (done) => {
+            request.get(`http://localhost:3002/Images2ControllerEntitySet(1)/Data2`).on("response", resp => {
+                expect(resp.statusCode).to.equal(200);
+            }).on("error", done).pipe(fs.createWriteStream(path.join(__dirname, "fixtures", "tmp.png"))).on("finish", _ => {
+                expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
+                if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))) {
+                    fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                }
+                done();
+            });
+        });
     });
 
     describe("Media entity", () => {
