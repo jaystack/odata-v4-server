@@ -445,15 +445,37 @@ describe("OData HTTP", () => {
             });
         });
 
-        // it(">>>>>>", () => {
-        //     return request.get(`http://localhost:3002/HeaderTestEntity`, (err, response, result) => {
-        //         expect(JSON.parse(result)).to.deep.equal({
-        //             value: [{
-        //                 "Id": 1
-        //             }]
-        //         });
-        //     });
-        // });
+        it("set status code 403 in controller", () => {
+            return request.get(`http://localhost:3002/HeaderTestEntity`, (err, response, result) => {
+                expect(response.statusCode).to.equal(403);
+            }).catch(ex => {
+                if (ex) return expect(ex.statusCode).to.equal(403);
+            });
+        });
+
+        it("set status code 500 in controller", () => {
+            return request.get(`http://localhost:3002/HeaderTestEntity(2)`, (err, response, result) => {
+                expect(response.statusCode).to.equal(500);
+            }).catch(ex => {
+                if (ex) return expect(ex.statusCode).to.equal(500);
+            });
+        });
+
+        xit("set status code 403 in FunctionImport", () => {
+            return request.get(`http://localhost:3002/SetStatusCode()`, (err, response, result) => {
+                expect(response.statusCode).to.equal(403);
+            }).catch(ex => {
+                if (ex) return expect(ex.statusCode).to.equal(403);
+            });
+        });
+
+        xit("set status code 500 in ActionImport", () => {
+            return request.post(`http://localhost:3002/SetStatusCode2`, (err, response, result) => {
+                expect(response.statusCode).to.equal(500);
+            }).catch(ex => {
+                if (ex) return expect(ex.statusCode).to.equal(500);
+            });
+        });
     });
 
     it("should update foobar's foo property ", () => {

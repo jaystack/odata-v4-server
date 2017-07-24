@@ -909,17 +909,12 @@ export class HeaderTestEntity {
 export class HeaderTestEntityController extends ODataController {
     @odata.GET
     findAll( @odata.context ctx: ODataHttpContext, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
-        // ctx.response.status(403)
-        let te = new HeaderTestEntity();
-        te.Id = 1;
-        return [te];
+        ctx.response.status(403);
     }
 
     @odata.GET
-    findOneByKeys( @odata.id id: number, @odata.context ctx: ODataHttpContext) {
-        let te = new HeaderTestEntity();
-        te.Id = id;
-        return te;
+    findOneByKeys( @odata.key key: number, @odata.context ctx: ODataHttpContext) {
+        ctx.response.status(500);
     }
 }
 
@@ -1012,6 +1007,17 @@ export class TestServer extends ODataServer {
     @Edm.FunctionImport(Edm.String)
     FunctionImportMore( @Edm.String message: string, @Edm.Int64 value: number) {
         return `The number is ${value} and your message was ${message}.`;
+    }
+
+    @Edm.FunctionImport(Edm.String)
+    SetStatusCode( @odata.context ctx: ODataHttpContext) {
+        ctx.response.status(403);
+        return `The status code is ${ctx.response.statusCode}.`;
+    }
+
+    @Edm.ActionImport
+    SetStatusCode2( @odata.context ctx: ODataHttpContext) {
+        ctx.response.status(500);
     }
 }
 
