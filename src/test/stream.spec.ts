@@ -574,5 +574,26 @@ if (typeof describe == "function") {
             })
         });
 
+        describe("Non existent entity", () => {
+            it("should return cannot read property node error", () => {
+                let testServer = new TestServer();
+                
+                return new Promise((resolve, reject) => {
+                    let context: any = {};
+                    context.url = `/NonExistent`;
+                    context.method = 'GET';
+
+                    testServer.write(context);
+                    testServer.on("data", data => { resolve(data) })
+                    testServer.on("error", err => { reject(err) })
+                })
+                .then(result => {
+                    expect(result).to.deep.equal({ statusCode: 204 });
+                })
+                .catch((error) => {
+                    expect(error.message).to.equal("Cannot read property 'node' of undefined");
+                })
+            })
+        });
     });
 }

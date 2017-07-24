@@ -1,6 +1,6 @@
 /// <reference types="mocha" />
 import { TestServer, Foobar } from './test.model';
-import { ODataServer } from "../lib/index";
+import { ODataServer, NotImplementedError } from "../lib/index";
 import { testFactory } from './server.spec'
 import { Product, Category } from "../example/model";
 import * as fs from "fs";
@@ -381,4 +381,26 @@ describe("OData execute", () => {
             });
         });
     });
-})
+
+    describe("Not implemented error", () => {
+        it("should return not implemented error", () => {
+            return TestServer.execute("/EntitySet", "GET").then(() => {
+                try {
+                    throw new NotImplementedError();
+                } catch (err) {
+                    expect(err.message).to.equal("Not implemented.");
+                }
+            });
+        });
+    });
+
+    describe("Non existent entity", () => {
+        it('should return cannot read property node error', () => {
+            return TestServer.execute("/NonExistent", "GET")
+            .then((result) => {})
+            .catch(err => {
+                expect(err.message).to.equal("Cannot read property 'node' of undefined");
+            });
+        });
+    });
+});
