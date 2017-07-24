@@ -1,5 +1,6 @@
 /// <reference types="mocha" />
-import { ODataController, ODataServer, ODataProcessor, Edm, odata, ODataStream, createODataServer } from "../lib/index";
+import { ODataController, ODataServer, ODataProcessor, Edm, odata, ODataStream, createODataServer, ODataQuery } from "../lib/index";
+import { createFilter } from "odata-v4-mongodb";
 import { PassThrough } from "stream";
 import { ObjectID } from "mongodb";
 import * as fs from "fs";
@@ -666,7 +667,8 @@ export class BaseTestEntityController extends ODataController {
 @odata.namespace("Controller")
 @odata.type(TestEntity)
 export class TestEntityController extends BaseTestEntityController {
-    findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+    findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor, @odata.filter $filter?:ODataQuery) {
+        console.log($filter, createFilter($filter));
         let te = new TestEntity();
         te.test = 1;
         return [te];

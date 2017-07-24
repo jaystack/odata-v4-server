@@ -461,7 +461,7 @@ describe("OData HTTP", () => {
             });
         });
 
-        xit("set status code 403 in FunctionImport", () => {
+        it("set status code 403 in FunctionImport", () => {
             return request.get(`http://localhost:3002/SetStatusCode()`, (err, response, result) => {
                 expect(response.statusCode).to.equal(403);
             }).catch(ex => {
@@ -469,7 +469,7 @@ describe("OData HTTP", () => {
             });
         });
 
-        xit("set status code 500 in ActionImport", () => {
+        it("set status code 500 in ActionImport", () => {
             return request.post(`http://localhost:3002/SetStatusCode2`, (err, response, result) => {
                 expect(response.statusCode).to.equal(500);
             }).catch(ex => {
