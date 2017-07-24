@@ -13,7 +13,6 @@ import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions, ODataMetadataType } from "./processor";
 import { HttpRequestError, UnsupportedMediaTypeError } from "./error";
 import { ContainerBase } from "./edm";
-export { Request, Response } from "express";
 import { Readable, Writable } from "stream";
 
 /** HTTP context interface when using the server HTTP request handler */
@@ -23,8 +22,8 @@ export interface ODataHttpContext{
     protocol:"http"|"https"
     host:string
     base:string
-    request:Request & Readable
-    response:Response & Writable
+    request:express.Request & Readable
+    response:express.Response & Writable
 }
 
 function ensureODataMetadataType(req, res){
@@ -77,7 +76,7 @@ export class ODataServerBase extends Transform{
     private serverType:typeof ODataServer
 
     static requestHandler(){
-        return (req, res, next) => {
+        return (req:express.Request, res:express.Response, next:express.NextFunction) => {
             try{
                 ensureODataHeaders(req, res);
                 let processor = this.createProcessor({
