@@ -1024,6 +1024,18 @@ export class AuthenticationServer extends ODataServer {
     }
 }
 
+@odata.cors
+@odata.controller(ProductsController, true)
+// @odata.controller(CategoriesController, false)
+export class ProductServer extends ODataServer { }
+ProductServer.create(7001);
+
+@odata.cors
+// @odata.controller(ProductsController, false)
+@odata.controller(CategoriesController, true)
+export class CategoryServer extends ODataServer { }
+CategoryServer.create(7002);
+
 export class NoServer extends ODataServer { }
 
 process.on("warning", warning => {
