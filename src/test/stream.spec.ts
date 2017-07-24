@@ -552,6 +552,49 @@ if (typeof describe == "function") {
                     }
                 });
             });
+
+            it("should return 204 after POST Data2 using generator function that yields stream", () => {
+                let testServer = new TestServer();
+
+                return new Promise((resolve, reject) => {
+                    testServer.write({
+                        url: "/Images2ControllerEntitySet(1)/Data2",
+                        method: "POST",
+                        body: fs.createReadStream(path.join(__dirname, "fixtures", "logo_jaystack.png"))
+                    });
+                    testServer.on("data", data => resolve(data));
+                    testServer.on("error", reject);
+                }).then((result) => {
+                    expect(result).to.deep.equal({
+                        statusCode: 204
+                    });
+                    expect(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png")));
+                    if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                        fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                    }
+                });
+            });
+
+            it("should return 200 after GET Data2 using generator function that yields stream", () => {
+                return new Promise((resolve, reject) => {
+                    let tmp = fs.createWriteStream(path.join(__dirname, "fixtures", "tmp.png"))
+                    tmp.on("open", _ => {
+                        let testServer = new TestServer();
+                        testServer.write({
+                            url: "/Images2ControllerEntitySet(1)/Data2",
+                            method: "GET",
+                            response: tmp
+                        });
+                        testServer.on("data", data => resolve(data));
+                        testServer.on("error", reject);
+                    }).on("error", reject);
+                }).then(_ => {
+                    expect(fs.readFileSync(path.join(__dirname, "fixtures", "tmp.png"))).to.deep.equal(fs.readFileSync(path.join(__dirname, "fixtures", "logo_jaystack.png")));
+                    if (fs.existsSync(path.join(__dirname, "fixtures", "tmp.png"))){
+                        fs.unlinkSync(path.join(__dirname, "fixtures", "tmp.png"));
+                    }
+                });
+            });
         });
 
         describe("Media entity", () => {

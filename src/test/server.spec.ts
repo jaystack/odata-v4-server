@@ -1,5 +1,5 @@
 /// <reference types="mocha" />
-import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer, Product2, Category2, UpsertTestEntity } from './test.model';
+import { TestServer, Foobar, AuthenticationServer, Image, Image2, User, Location, Music, DefTest, DefTestServer, Product2, Category2, UpsertTestEntity } from './test.model';
 import { Edm, odata, NotImplementedError } from "../lib/index";
 import { Product, Category } from "../example/model";
 import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity, BaseMeta, Genre } from './metadata.spec';
@@ -612,6 +612,20 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
+        createTest("should return products referenced to category using generator function that calls another generator function",
+            TestServer, "GET /GeneratorCategories('578f2baa12eaebabec4af289')/GeneratorProducts", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#GeneratorCategories('578f2baa12eaebabec4af289')/GeneratorProducts",
+                "value": products.filter((product) => product && product.CategoryId.toString() === "578f2baa12eaebabec4af289")
+                    .map(product => {
+                        return Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${product._id}')` }, product)
+                    })
+            },
+            elementType: GeneratorProduct,
+            contentType: "application/json"
+        });
+
         // createTest("should return product reference on category", TestServer, "GET /Categories('578f2baa12eaebabec4af28e')/Products('578f2b8c12eaebabec4af242')/$ref", {
         //     statusCode: 200,
         //     body: {
@@ -795,13 +809,6 @@ export function testFactory(createTest: any) {
             elementType: Product,
             contentType: "application/json"
         });
-
-        /*createTest("should return stream result set count", TestServer,"GET /CategoriesStream('578f2baa12eaebabec4af290')/Default.Category/Products/$count", {
-            statusCode: 200,
-            body: 13,
-            elementType: Number,
-            contentType: "text/plain"
-        });*/
     });
 
     describe("Media entity", () => {
