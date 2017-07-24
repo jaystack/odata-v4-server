@@ -909,8 +909,7 @@ export class HeaderTestEntity {
 export class HeaderTestEntityController extends ODataController {
     @odata.GET
     findAll( @odata.context ctx: ODataHttpContext, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
-        // ctx.request.headers.append('odata.metadata', 'full')
-        ctx.request.headers.set('odata.metadata', 'full');
+        // ctx.response.status(403)
         let te = new HeaderTestEntity();
         te.Id = 1;
         return [te];
@@ -918,10 +917,50 @@ export class HeaderTestEntityController extends ODataController {
 
     @odata.GET
     findOneByKeys( @odata.id id: number, @odata.context ctx: ODataHttpContext) {
-        ctx.request.headers.set('odata.metadata', 'none');
         let te = new HeaderTestEntity();
         te.Id = id;
         return te;
+    }
+}
+
+export class UpsertTestEntity {
+    @Edm.Int32
+    @Edm.Key
+    @Edm.Required
+    Id: number
+
+    @Edm.String
+    name: string
+
+    constructor(id?, name?) {
+        this.Id = id;
+        this.name = name;
+    }
+}
+
+@odata.type(UpsertTestEntity)
+export class UpsertTestEntityController extends ODataController {
+    @odata.GET
+    findAll( @odata.context ctx: ODataHttpContext, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+        return [new UpsertTestEntity(1, 'upsert')];
+    }
+
+    @odata.GET
+    findOneByKeys( @odata.id id: number, @odata.context ctx: ODataHttpContext) {
+        return new UpsertTestEntity(1, 'upsert');
+    }
+
+    put( @odata.body body: any) {
+        let up = new UpsertTestEntity(1, 'upsert');
+
+        if (body.Id && body.Id === 1) {
+            up.name = body.name;
+            return null;
+        }
+        if (body.Id) {
+            return new UpsertTestEntity(body.Id, body.name);
+        }
+        return new UpsertTestEntity(9999, body.name);
     }
 }
 
@@ -950,6 +989,7 @@ export class HiddenController extends ODataController { }
 @odata.controller(ProductsAdvancedGeneratorController, "GeneratorProducts")
 @odata.controller(CategoriesAdvancedGeneratorController, "GeneratorCategories")
 @odata.controller(HeaderTestEntityController, "HeaderTestEntity")
+@odata.controller(UpsertTestEntityController, "UpsertTestEntity")
 @odata.container("TestContainer")
 export class TestServer extends ODataServer {
     @Edm.ActionImport

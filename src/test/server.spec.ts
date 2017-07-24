@@ -1,6 +1,6 @@
 /// <reference types="mocha" />
-import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer, Product2, Category2 } from './test.model';
-import { Edm, odata } from "../lib/index";
+import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music, DefTest, DefTestServer, Product2, Category2, UpsertTestEntity } from './test.model';
+import { Edm, odata, NotImplementedError } from "../lib/index";
 import { Product, Category } from "../example/model";
 import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity, BaseMeta, Genre } from './metadata.spec';
 import { ProductPromise, CategoryPromise } from "./model/ModelsForPromise";
@@ -1274,4 +1274,28 @@ export function testFactory(createTest: any) {
         });
     });
 
+    describe("Upsert", () => {
+        createTest("shuld create entity", TestServer, `PUT /UpsertTestEntity`, {
+            statusCode: 201,
+            body: {
+                "@odata.editLink": "http://localhost/UpsertTestEntity(3)",
+                "@odata.context": "http://localhost/$metadata#UpsertTestEntity",
+                "@odata.id": "http://localhost/UpsertTestEntity(3)",
+                "Id": 3,
+                "name": "test"
+            },
+            elementType: UpsertTestEntity,
+            contentType: "application/json"
+        }, {
+                Id: 3,
+                name: 'test'
+            });
+
+        createTest("shuld update entity", TestServer, `PUT /UpsertTestEntity`, {
+            statusCode: 204
+        }, {
+                Id: 1,
+                name: 'update'
+            });
+    });
 }

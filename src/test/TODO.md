@@ -18,25 +18,25 @@
 * ~~Use @odata.id~~
 * ~~Use .define() to define models, controllers, server, see es6.js example~~
 * ~~Create HTTP Accept headers tests~~
-* Throw NotImplementedError
+* ~~Throw NotImplementedError~~
 * ~~Use controller class static .on() like @odata.GET, etc.~~
 * ~~Use controller class static .enableFilter() like @odata.filter~~
 * ~~Enum type on inherited entity type~~
 * ~~Enum type as action/function parameters~~
 * ~~Type definition on inherited entity type~~
-* Multi-level inheritance for Edm.Container
+* ~~Multi-level inheritance for Edm.Container~~ 
 * ~~Use server .execute() with context object as first parameter~~
 * ~~Use server as stream~~
 * ~~Use server static .addController() like @odata.controller~~
 * ~~Use metadata JSON for public $metadata definition, like in the bigdata.ts example~~
 * ~~Use HTTP header OData-MaxVersion with less than 4.0~~
 * ~~Use HTTP Accept headers with text/html, */*, some xml and an unsupported type~~
-* Try to use OData query parameters on service document, expect 500 Unsupported query error
+* ~~Try to use OData query parameters on service document, expect 500 Unsupported query error~~
 * ~~Start server on specific hostname (localhost)~~
 * Set some HTTP headers and response status code in controller or action/function import
 * ~~Use $select OData query, expect @odata.context to be valid based on selection~~
 * ~~Use resource path like Categories(1)/Products(1)~~
-* PUT handler in ODataController implement upsert, return entity if it was an insert, return null/undefined/void if it was an update
+* ~~PUT handler in ODataController implement upsert, return entity if it was an insert, return null/undefined/void if it was an update~~
 * ~~Use $count on empty result set~~
 * ~~Use $count with bad result set~~
 * ~~Use @odata.key aliases (different key and parameter name)~~
@@ -47,7 +47,7 @@
 * ~~Use generator function and Promise result in $ref handler~~
 * Use advanced generator functions returning Promise, stream or another generator function
 * Use stream result when using $expand
-* Try to access non-existent entity set
+* ~~Try to access non-existent entity set~~
 * Implement inline count for stream result with @odata.count or inlinecount
 * Use navigation property on stream result
 * ~~Use HTTP Accept header including odata.metadata=full|none~~

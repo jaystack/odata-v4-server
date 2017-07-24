@@ -1,5 +1,5 @@
 /// <reference types="mocha" />
-import { ODataServer, createODataServer } from "../lib/index";
+import { ODataServer, createODataServer, NotImplementedError } from "../lib/index";
 import { testFactory } from './server.spec';
 import { MetaTestServer } from './metadata.spec';
 import { TestServer, Foobar } from './test.model';
@@ -687,6 +687,40 @@ describe("OData HTTP", () => {
             req.on('complete', (resp, body) => {
                 expect(resp.statusCode).to.equal(204);
                 done();
+            });
+        });
+    });
+
+    describe("Use query in service document", () => {
+        it("shuld return 'Unsupported query' error", () => {
+            return request.get(`http://localhost:3002/?$expand=Any`, (err, req, res) => {
+                expect(JSON.parse(res).error.message).to.equal("Unsupported query");
+            })
+            .catch(ex => {
+                expect(JSON.parse(ex.error).error.message).to.equal("Unsupported query");
+            });
+        });
+    });
+
+    describe("Not implemented error", () => {
+        it("should return not implemented error", () => {
+            return request.get(`http://localhost:3002/EntitySet`, () => {
+                try {
+                    throw new NotImplementedError();
+                } catch (err) {
+                    expect(err.message).to.equal("Not implemented.");
+                }
+            })
+        });
+    });
+
+    describe("Non existent entity", () => {
+        it("should return cannot read property node error", () => {
+            return request.get(`http://localhost:3002/NonExistent`, (err, req, res) => {
+                expect(JSON.parse(res).error.message).to.equal("Cannot read property 'node' of undefined");
+            })
+            .catch(ex => {
+                expect(JSON.parse(ex.error).error.message).to.equal("Cannot read property 'node' of undefined");
             });
         });
     });

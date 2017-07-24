@@ -452,32 +452,22 @@ export class EmptyEntity7 {
 export class HiddenEmptyEntity {
 }
 
-export class TestContainer extends Edm.ContainerBase {
+export class TestContainerBase extends Edm.ContainerBase {
+    Test2 = TestEntity
+}
+
+export class TestContainer extends TestContainerBase {
     @Edm.Flags
     @Edm.Int64
     @Edm.URLSerialize((value: Genre) => `Server.Genre2'${value || 0}'`)
     @Edm.Serialize(value => `Server.Genre2'${value || 0}'`)
     Genre2 = Genre
 
-    /*@Edm.Flags
-    @Edm.Int64
-    @Edm.URLSerialize((value: Genre) => `Server.Genre2'${value || 0}'`)
-    @Edm.Serialize(value => `Server.Genre2'${value || 0}'`)
-    'Genre.2' = Genre*/
-
     @Edm.String
     @Edm.URLSerialize((value: ObjectID) => `'${value.toHexString()}'`)
     @Edm.URLDeserialize((value: string) => new ObjectID(value))
     @Edm.Deserialize(value => new ObjectID(value))
     ObjectID2 = ObjectID
-
-    /*@Edm.String
-    @Edm.URLSerialize((value: ObjectID) => `'${value.toHexString()}'`)
-    @Edm.URLDeserialize((value: string) => new ObjectID(value))
-    @Edm.Deserialize(value => new ObjectID(value))
-    'Object.ID2' = ObjectID*/
-
-    Test2 = TestEntity
 }
 
 @odata.namespace("Container")
@@ -486,7 +476,7 @@ export class TypeDefContainer extends Edm.ContainerBase {
     @Edm.URLSerialize((value: ObjectID) => `'${value.toHexString()}'`)
     @Edm.URLDeserialize((value: string) => new ObjectID(value))
     @Edm.Deserialize(value => new ObjectID(value))
-    ObjectID2 = ObjectID
+    'Object.ID2' = ObjectID
 }
 
 @odata.namespace("Container")
@@ -495,7 +485,7 @@ export class EnumContainer extends Edm.ContainerBase {
     @Edm.Int64
     @Edm.URLSerialize((value: Genre) => `Server.Genre2'${value || 0}'`)
     @Edm.Serialize(value => `Server.Genre2'${value || 0}'`)
-    Genre2 = Genre
+    'Server.Genre2' = Genre
 }
 
 @odata.namespace("Controller")
