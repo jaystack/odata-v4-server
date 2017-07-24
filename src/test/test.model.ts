@@ -296,7 +296,7 @@ export class MusicController extends ODataController {
     @odata.GET.$value
     mp3( @odata.key _: number, @odata.context context: ODataHttpContext) {
         globalReadableMediaStrBuffer.put(globalWritableMediaStrBuffer.getContents());
-        return globalReadableMediaStrBuffer.pipe(context.response);
+        return globalReadableMediaStrBuffer.pipe(<Writable>context.response);
     }
 
     @odata.POST.$value

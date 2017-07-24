@@ -233,7 +233,9 @@ export function createMetadataJSON(server:typeof ODataServer){
 
             if (Edm.isFunction(operations[operation], operation)){
                 let type = Edm.getReturnType(operations[operation], operation, server.container);
-                if (typeof type == "function"){
+                if (Edm.isTypeDefinition(operations[operation], operation)){
+                    type = resolveTypeDefinition(operations[operation], operation, namespace, Edm.getReturnType, Edm.getReturnTypeName);
+                }else if (typeof type == "function"){
                     operations[operation].namespace = namespace;
                     let definitionContainer = Edm.isComplexType(operations[operation], operation) ? "complexType" : "entityType";
                     let resolvedType = resolveType(type, operations[operation], prop);
@@ -308,7 +310,6 @@ export function createMetadataJSON(server:typeof ODataServer){
     };
     propNames.forEach((i) => {
         if (i != "$metadata" && server.prototype[i]){
-            //let containerSchema = definition.dataServices.schema.filter((schema) => schema.namespace == server.namespace)[0];
             if (server.prototype[i].prototype instanceof ODataController){
                 let ctrl = server.prototype[i];
                 if (!ctrl.namespace) ctrl.namespace = server.namespace;
@@ -316,7 +317,6 @@ export function createMetadataJSON(server:typeof ODataServer){
                 let containerName = ctrl.containerName || "Default";
                 let ctrlSchema = definition.dataServices.schema.find((schema) => schema.namespace == ctrl.namespace);
 
-                // TODO: don't insert empty schema
                 if (!ctrlSchema){
                     ctrlSchema = {
                         namespace: ctrl.namespace,
@@ -380,7 +380,9 @@ export function createMetadataJSON(server:typeof ODataServer){
 
                     if (Edm.isFunction(operations[operation], operation)){
                         let type = Edm.getReturnType(operations[operation], operation, server.container);
-                        if (typeof type == "function"){
+                        if (Edm.isTypeDefinition(operations[operation], operation)){
+                            type = resolveTypeDefinition(operations[operation], operation, namespace, Edm.getReturnType, Edm.getReturnTypeName);
+                        }else if (typeof type == "function"){
                             operations[operation].namespace = namespace;
                             let definitionContainer = Edm.isComplexType(operations[operation], operation) ? "complexType" : "entityType";
                             let resolvedType = resolveType(type, operations[operation], i);

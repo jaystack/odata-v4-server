@@ -1,3 +1,5 @@
+import { ODataStream } from "./result";
+
 const patternSource = "[^(]*\\(([^)]*)\\)";
 const pattern = new RegExp(patternSource);
 export const getFunctionParameters = function(fn:Function, name?:string){
@@ -24,7 +26,7 @@ export function isPromise(value){
 }
 
 export function isStream(stream){
-    return stream !== null && typeof stream == "object" && typeof stream.pipe == "function";
+    return stream !== null && typeof stream == "object" && typeof stream.pipe == "function" && !(stream instanceof ODataStream);
 }
 
 export interface PropertyDecorator<T>{

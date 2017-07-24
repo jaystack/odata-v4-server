@@ -36,6 +36,31 @@ let schemaJson = {
     }
 };
 
+let defineEntities = {
+    namespace: 'Default',
+    containerName: 'Container',
+    entities: [
+        {
+            name: 'Kitten',
+            collectionName: 'Kittens',
+            keys: ['Id'],
+            computedKey: true,
+            properties: {
+                Id: 'Edm.String',
+                Name: 'Edm.String',
+                Age: 'Edm.Int32',
+                Lives: 'Edm.Int32',
+                Owner: 'Edm.String'
+            },
+            annotations:[
+                { name: 'UI.DisplayName', value: 'Meww' },
+                { property: 'Id', name: 'UI.ReadOnly', value: 'true' },
+                { property: 'Title', name: 'UI.DisplayName', value: 'Meww Meww' },
+            ]
+        }
+    ]
+};
+
 export enum Genre {
     Unknown,
     Pop,
@@ -761,6 +786,10 @@ class SchemaJsonServer extends ODataServer { }
 SchemaJsonServer.$metadata(schemaJson);
 SchemaJsonServer.create("/schemaJsonTest", 4004);
 
+class DefineEntitiesServer extends ODataServer{}
+DefineEntitiesServer.$metadata(defineEntities);
+DefineEntitiesServer.create("/defineEntitiesTest", 4005);
+
 @Edm.Container(TestContainer)
 @odata.namespace("Server")
 @odata.container("MetadataContainer")
@@ -865,6 +894,12 @@ if (typeof describe == "function") {
         it("should return SchemaJsonServer metadata xml", () => {
             expect(beautify(SchemaJsonServer.$metadata().document())).to.equal(
                 beautify(fs.readFileSync(path.join(__dirname, "metadata", "$schemajson.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
+            );
+        });
+
+        it("should return DefineEntitiesServer metadata xml", () => {
+            expect(beautify(DefineEntitiesServer.$metadata().document())).to.equal(
+                beautify(fs.readFileSync(path.join(__dirname, "metadata", "$defineentities.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
 

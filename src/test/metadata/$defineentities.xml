@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+    <edmx:DataServices>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Default">
+            <EntityType Name="Kitten">
+                <Key>
+                    <PropertyRef Name="Id" />
+                </Key>
+                <Property Name="Id" Type="Edm.String" />
+                <Property Name="Name" Type="Edm.String" />
+                <Property Name="Age" Type="Edm.Int32" />
+                <Property Name="Lives" Type="Edm.Int32" />
+                <Property Name="Owner" Type="Edm.String" />
+            </EntityType>
+            <EntityContainer Name="Container">
+                <EntitySet Name="Kittens" EntityType="Default.Kitten" />
+            </EntityContainer>
+            <Annotations Target="Default.Kitten">
+                <Annotation Term="UI.DisplayName" String="Meww" />
+            </Annotations>
+            <Annotations Target="Default.Kitten/Id">
+                <Annotation Term="UI.ReadOnly" String="true" />
+                <Annotation Term="Org.OData.Core.V1.Computed" Bool="true" />
+            </Annotations>
+            <Annotations Target="Default.Kitten/Title">
+                <Annotation Term="UI.DisplayName" String="Meww Meww" />
+            </Annotations>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>
