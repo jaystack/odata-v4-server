@@ -307,7 +307,6 @@ export class MusicController extends ODataController {
 }
 
 @odata.type(Product)
-@Edm.EntitySet("Products")
 export class ProductsController extends ODataController {
     @odata.GET
     find( @odata.filter filter: Token): Product[] {
@@ -356,7 +355,6 @@ export class ProductsController extends ODataController {
 ProductsController.enableFilter(ProductsController.prototype.find, 'filter');
 
 @odata.type(Category)
-@Edm.EntitySet("Categories")
 export class CategoriesController extends ODataController {
     @odata.GET
     find( @odata.filter filter: Token): Category[] {
@@ -1026,12 +1024,12 @@ export class AuthenticationServer extends ODataServer {
 
 @odata.cors
 @odata.controller(ProductsController, true)
-// @odata.controller(CategoriesController, false)
+ @odata.controller(CategoriesController, false)
 export class ProductServer extends ODataServer { }
 ProductServer.create(7001);
 
 @odata.cors
-// @odata.controller(ProductsController, false)
+@odata.controller(ProductsController, false)
 @odata.controller(CategoriesController, true)
 export class CategoryServer extends ODataServer { }
 CategoryServer.create(7002);

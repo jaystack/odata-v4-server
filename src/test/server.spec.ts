@@ -889,28 +889,24 @@ export function testFactory(createTest: any) {
             elementType: Meta,
             contentType: "application/json"
         });
-        describe.skip('skip', () => {
-            createTest("should return Category without a public Category entity set", ProductServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
-                statusCode: 200,
-                body: Object.assign({
-                    "@odata.context": "http://localhost/$metadata#Categories/$entity",
-                    "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af289')",
-                }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af289")[0]),
-                elementType: Category,
-                contentType: "application/json"
-            });
 
-            createTest("should return Products without a public Product entity set", CategoryServer, "GET /Categories('578f2baa12eaebabec4af28f')/Products", {
-                statusCode: 200,
-                body: {
-                    "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af28f')/Products",
-                    value: products.filter(product => product.CategoryId && product.CategoryId.toString() == "578f2baa12eaebabec4af28f").map(product => Object.assign({
-                        "@odata.id": `http://localhost/Products('${product._id}')`
-                    }, product))
-                },
-                elementType: Product,
-                contentType: "application/json"
-            });
+        createTest("should return Category without a public Category entity set", ProductServer, "GET /Products('578f2b8c12eaebabec4af23c')/Category", {
+            statusCode: 200,
+            body: Object.assign({
+                "@odata.context": "http://localhost/$metadata#Products('578f2b8c12eaebabec4af23c')/Category"
+            }, categories.filter(category => category._id.toString() == "578f2baa12eaebabec4af289")[0]),
+            elementType: Category,
+            contentType: "application/json"
+        });
+
+        createTest("should return Products without a public Product entity set", CategoryServer, "GET /Categories('578f2baa12eaebabec4af28f')/Products", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Categories('578f2baa12eaebabec4af28f')/Products",
+                value: products.filter(product => product.CategoryId && product.CategoryId.toString() == "578f2baa12eaebabec4af28f")
+            },
+            elementType: Product,
+            contentType: "application/json"
         });
     });
 
