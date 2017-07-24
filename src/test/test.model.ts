@@ -897,7 +897,7 @@ export class HeaderTestEntity {
 export class HeaderTestEntityController extends ODataController {
     @odata.GET
     findAll( @odata.context ctx: ODataHttpContext, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
-        ctx.response.sendStatus(403);
+        ctx.response.status(403);
         return [];
     }
 

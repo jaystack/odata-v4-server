@@ -106,16 +106,17 @@ export class ODataServerBase extends Transform{
                     }
                 });
                 let body = req.body && Object.keys(req.body).length > 0 ? req.body : req;
+                let origStatus = res.statusCode;
                 processor.execute(body).then((result:ODataResult) => {
                     try{
                         if (result){
-                            res.status(result.statusCode || 200);
+                            res.status((origStatus != res.statusCode && res.statusCode) || result.statusCode || 200);
                             if (!res.headersSent){
                                 ensureODataContentType(req, res, result.contentType || "text/plain");
                             }
                             if (typeof result.body != "undefined"){
                                 if (typeof result.body != "object") res.send("" + result.body);
-                                else res.send(result.body);
+                                else if (!res.headersSent) res.send(result.body);
                             }
                         }
                         res.end();

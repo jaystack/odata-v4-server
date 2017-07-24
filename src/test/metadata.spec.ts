@@ -668,7 +668,7 @@ export class BaseTestEntityController extends ODataController {
 @odata.type(TestEntity)
 export class TestEntityController extends BaseTestEntityController {
     findAll( @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor, @odata.filter $filter?:ODataQuery) {
-        console.log($filter, createFilter($filter));
+        // console.log($filter, createFilter($filter));
         let te = new TestEntity();
         te.test = 1;
         return [te];
