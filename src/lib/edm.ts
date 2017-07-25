@@ -526,12 +526,6 @@ export function getReturnType(target:Function, propertyKey:string, container?:Co
     let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
     return getType(returnType, EdmReturnType, container) || getType(target, propertyKey, container);
 }
-/** ?????????? */
-export function isReturnTypeDefinition(target:Function, propertyKey:string, container?:ContainerBase):boolean{
-    let returnType = Reflect.getMetadata(EdmReturnType, target.prototype, propertyKey);
-    console.log(getTypeName(returnType, EdmReturnType, container));
-    return isTypeDefinition(returnType, EdmReturnType);
-}
 
 /** Returns true if property is a statically callable action (decorated by Edm.ActionImport) */
 export function isActionImport(target:Function, propertyKey:string):boolean{

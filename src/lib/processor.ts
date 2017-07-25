@@ -405,10 +405,6 @@ class StreamWrapper{
     constructor(value){
         this.stream = value;
     }
-
-    toJSON(){
-        return undefined;
-    }
 }
 
 export enum ODataMetadataType{
@@ -1434,7 +1430,7 @@ export class ODataProcessor extends Transform{
             }else{
                 const fn = odata.findODataMethod(ctrl, `get/${include.navigationProperty}`, []);
                 let params = {};
-                let stream, streamPromise;
+                let stream:ODataStreamWrapper, streamPromise:Promise<{}>;
                 if (isCollection){
                     stream = (<any>include).stream = new ODataStreamWrapper();
                     streamPromise = (<any>include).streamPromise = stream.toPromise();
@@ -1452,7 +1448,7 @@ export class ODataProcessor extends Transform{
                         fnResult = await fnResult;
                     }
 
-                    if (isStream(fnResult) && stream && streamPromise) navigationResult = await ODataResult.Ok(streamPromise);
+                    if (isCollection && (isStream(fnResult) || !fnResult || (stream && stream.buffer && stream.buffer.length > 0)) && stream && streamPromise) navigationResult = await ODataResult.Ok((await streamPromise) || []);
                     else navigationResult = await ODataResult.Ok(fnResult);
                     await this.__appendODataContext(navigationResult, navigationType, include.includes);
                     ctrl = this.serverType.getController(navigationType);
