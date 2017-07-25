@@ -310,9 +310,18 @@ export class MusicController extends ODataController {
 @odata.type(Product)
 export class ProductsController extends ODataController {
     @odata.GET
-    find( @odata.filter filter: Token): Product[] {
+    find( @odata.filter filter: Token) {
         if (filter) return products.map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId && product.CategoryId.toString() })).filter(createFilter(filter));
-        return products;
+        (<any>products).inlinecount = products.length;
+        return ODataResult.Ok(
+            new Promise((resolve, reject) => {
+                try {
+                    resolve(products);
+                } catch (error) {
+                    reject(error);
+                }
+            })    
+        );
     }
 
     @odata.GET
@@ -374,7 +383,13 @@ export class CategoriesController extends ODataController {
     @odata.POST("Products")
     insertProduct( @odata.key key: string, @odata.link link: string, @odata.body body: Product) {
         body._id = new ObjectID('578e1a7c12eaebabec4af23c')
-        return body;
+        return ODataResult.Created(new Promise((resolve, reject) => {
+            try {
+                resolve(body);
+            } catch (err) {
+                reject(err);
+            }
+        }));
     }
 
     @odata.GET("Products").$ref
@@ -523,7 +538,7 @@ export class Category2 {
     @Edm.Key
     @Edm.Computed
     @Edm.String
-    @Edm.Convert(toObjectID)
+    @Edm.Deserialize(toObjectID)
     @Edm.Annotate({
         term: "UI.DisplayName",
         string: "Category2 identifier"

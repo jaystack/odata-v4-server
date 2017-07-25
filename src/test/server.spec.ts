@@ -634,6 +634,19 @@ export function testFactory(createTest: any) {
         //     contentType: "application/json"
         // });
 
+        createTest("should return products with inline count", TestServer, "GET /Products?$count=true", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#Products",
+                "@odata.count": 76,
+                value: products.map(product => {
+                    return Object.assign({ "@odata.id": `http://localhost/Products('${product._id}')` }, product)
+                })
+            },
+            elementType: Product,
+            contentType: "application/json"
+        });
+
         createTest("should return product with only name and category property", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')?$select=Name,CategoryId", {
             statusCode: 200,
             body: {
@@ -706,6 +719,7 @@ export function testFactory(createTest: any) {
                 statusCode: 200,
                 body: {
                     "@odata.context": "http://localhost/$metadata#Products",
+                    "@odata.count": 76,
                     "value":
                     products.map(p => {
                         const c = categories.find(c => c._id.toString() === p.CategoryId.toString());
