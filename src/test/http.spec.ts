@@ -431,17 +431,17 @@ describe("OData HTTP", () => {
 
         it("should return error if the media type is unsupported", () => {
             return request.get(`http://localhost:3003/EntitySet`, { headers: { accept: 'text/plain;odata.metadata=none' } }, (err, response, result) => {
-                expect(response.statusCode).to.equal(415);
+                expect(JSON.parse(result).error.message).to.equal("Unsupported media type.");
             }).catch(ex => {
-                if (ex) return expect(ex.statusCode).to.equal(415);
+                if (ex) expect(JSON.parse(ex.error).error.message).to.equal("Unsupported media type.");
             });
         });
 
         it("should return error if odata-maxversion less then 4.0", () => {
             return request.get(`http://localhost:3002/EntitySet`, { headers: { 'odata-maxversion': '3.0' ,accept: '*/*;odata.metadata=full' } }, (err, response, result) => {
-                expect(response.statusCode).to.equal(500);
+                expect(JSON.parse(result).error.message).to.equal("Only OData version 4.0 supported");
             }).catch(ex => {
-                if (ex) return expect(ex.statusCode).to.equal(500);
+                if (ex) expect(JSON.parse(ex.error).error.message).to.equal("Only OData version 4.0 supported");
             });
         });
 
@@ -521,6 +521,23 @@ describe("OData HTTP", () => {
                     "@odata.editLink": "http://localhost:3002/EntitySet(1)",
                     id: 1,
                     foo: "bar"
+                });
+            });
+        });
+    });
+
+    it("should delete foobar's 'a' property with PATCH handler", () => {
+        return request.delete(`http://localhost:3002/EntitySet(2)/a`, (err, response, result) => {
+            expect(response.statusCode).to.equal(204);
+        }).then(_ => {
+            return request.get(`http://localhost:3002/EntitySet(2)`, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3002/$metadata#EntitySet/$entity",
+                    "@odata.id": "http://localhost:3002/EntitySet(2)",
+                    "@odata.editLink": "http://localhost:3002/EntitySet(2)",
+                    id: 2,
+                    foo: 'bar',
+                    a: null
                 });
             });
         });

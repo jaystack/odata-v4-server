@@ -80,6 +80,7 @@ export class Music extends PassThrough {
     Title: string
 }
 let foobarObj = { id: 1, foo: 'bar' };
+let foobarObj2 = { id: 2, foo: 'bar', a: 'a' };
 @odata.type(Foobar)
 export class SyncTestController extends ODataController {
     @odata.GET
@@ -90,6 +91,7 @@ export class SyncTestController extends ODataController {
     @odata.GET()
     entity( @odata.key() key: number) {
         if (key === 1) return ODataResult.Ok(foobarObj);
+        if (key === 2) return ODataResult.Ok(foobarObj2);
         if (key === 999) return ODataResult.Ok({ id: key, foo: "999" });
         return ODataResult.Ok({ id: key, foo: "bar" });
     }
@@ -105,10 +107,11 @@ export class SyncTestController extends ODataController {
     }
 
     patch( @odata.key key: number, @odata.body delta: any) {
+        if (key === 2) return Object.assign(foobarObj2, delta);
         return Object.assign({
             id: key,
             foo: "bar",
-            bar: 'foo'
+            a: 'a'
         }, delta);
     }
 
@@ -124,8 +127,6 @@ export class SyncTestController extends ODataController {
 
     @odata.DELETE('foo')
     deleteProperty( @odata.result _: Foobar) {
-        // let fooObj = this.getFoo();
-        // if (fooObj.foo) foobarObj.foo = null;
         if (foobarObj.foo) foobarObj.foo = null;
     }
 
