@@ -714,22 +714,22 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        describe("EXPAND", () => {
+        describe("Expand tests", () => {
             createTest("should return products expanded with category", TestServer, "GET /Products?$expand=Category", {
                 statusCode: 200,
                 body: {
                     "@odata.context": "http://localhost/$metadata#Products",
                     "@odata.count": 76,
                     "value":
-                    products.map(p => {
-                        const c = categories.find(c => c._id.toString() === p.CategoryId.toString());
-                        if (!p._id || !p.CategoryId || !c._id) return
-
-                        let category = Object.assign({ "@odata.id": `http://localhost/Categories('${c._id}')` }, c)
-
-                        let product = Object.assign({ "@odata.id": `http://localhost/Products('${p._id}')` }, p);
-                        product.Category = category
-                        return product;
+                    products.map(product => {
+                        return Object.assign(
+                            { "@odata.id": `http://localhost/Products('${product._id}')` },
+                            product,
+                            {
+                                "Category": Object.assign({ "@odata.id": `http://localhost/Categories('${product.CategoryId}')` },
+                                    categories.find(c => c._id.toString() === product.CategoryId.toString()))
+                            }
+                        )
                     })
                 },
                 elementType: Product,
@@ -745,7 +745,7 @@ export function testFactory(createTest: any) {
                             return Object.assign(
                                 { "@odata.id": `http://localhost/Categories('${category._id}')` },
                                 category,
-                                { Products: products.filter(p => p.CategoryId.toString() == `${category._id}`)
+                                { Products: products.filter(p => p.CategoryId.toString() === `${category._id}`)
                                         .map(p => Object.assign({ "@odata.id": `http://localhost/Products('${p._id}')` }, p))
                                 }
                             )
@@ -760,10 +760,10 @@ export function testFactory(createTest: any) {
                 body: Object.assign({
                     "@odata.context": "http://localhost/$metadata#Products/$entity",
                     "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')",
-                }, products.find(product => product._id.toString() == "578f2b8c12eaebabec4af23c"), {
+                }, products.find(product => product._id.toString() === "578f2b8c12eaebabec4af23c"), {
                         Category: Object.assign({
                             "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af289')",
-                        }, categories.find(category => category._id.toString() == "578f2baa12eaebabec4af289"))
+                        }, categories.find(category => category._id.toString() === "578f2baa12eaebabec4af289"))
                     }),
                 elementType: Product,
                 contentType: "application/json"
@@ -776,48 +776,89 @@ export function testFactory(createTest: any) {
                         "@odata.context": "http://localhost/$metadata#Categories/$entity",
                         "@odata.id": "http://localhost/Categories('578f2baa12eaebabec4af289')",
                     },
-                    categories.find(c => c._id.toString() == "578f2baa12eaebabec4af289"),
+                    categories.find(c => c._id.toString() === "578f2baa12eaebabec4af289"),
                     {
-                        Products: products.filter(p => p.CategoryId.toString() == "578f2baa12eaebabec4af289")
+                        Products: products.filter(p => p.CategoryId.toString() === "578f2baa12eaebabec4af289")
                             .map(p => Object.assign({ "@odata.id": `http://localhost/Products('${p._id}')` }, p))
                     }
                 ),
                 elementType: Category,
                 contentType: "application/json"
             });
+            
+            createTest("should return categories expanded with products", TestServer, "GET /Categories?$expand=Products", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#Categories",
+                    "value": 
+                        categories.map(category => {
+                            return Object.assign(
+                                { "@odata.id": `http://localhost/Categories('${category._id}')` },
+                                category,
+                                { Products: products.filter(p => p.CategoryId.toString() === `${category._id}`)
+                                        .map(p => Object.assign({ "@odata.id": `http://localhost/Products('${p._id}')` }, p))
+                                }
+                            )
+                        })
+                },
+                elementType: Category,
+                contentType: "application/json"
+            });
 
-            createTest("should return products expanded with category result using generator function", TestServer, "GET /GeneratorProducts?$expand=GeneratorCategory", {
+            createTest("should return GeneratorProducts expanded with GeneratorCategory result using generator function", TestServer, "GET /GeneratorProducts?$expand=GeneratorCategory", {
                 statusCode: 200,
                 body: {
                     "@odata.context": "http://localhost/$metadata#GeneratorProducts",
                     "value":
                     products.map(product => {
-                        const _category = categories.find(c => c._id.toString() === product.CategoryId.toString());
-                        const __category = Object.assign({ "@odata.id": `http://localhost/GeneratorCategories('${_category._id}')` }, _category)
-                        let _product = Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${product._id}')` }, product);
-                        _product.GeneratorCategory = __category
-                        return _product;
+                        return Object.assign(
+                            { "@odata.id": `http://localhost/GeneratorProducts('${product._id}')` },
+                            product,
+                            {
+                                "GeneratorCategory": Object.assign({ "@odata.id": `http://localhost/GeneratorCategories('${product.CategoryId}')` },
+                                    categories.find(c => c._id.toString() === product.CategoryId.toString()))
+                            }
+                        )
                     })
                 },
                 elementType: GeneratorProduct,
                 contentType: "application/json"
             });
 
-            createTest("should return single product expanded with categories using generator function", TestServer, "GET /GeneratorProducts('578f2b8c12eaebabec4af23c')?$expand=GeneratorCategory", {
+            createTest("should return GeneratorCategories expanded with GeneratorProducts using generator function", TestServer, "GET /GeneratorCategories?$expand=GeneratorProducts", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#GeneratorCategories",
+                    "value": 
+                        categories.map(category => {
+                            return Object.assign(
+                                { "@odata.id": `http://localhost/GeneratorCategories('${category._id}')` },
+                                category,
+                                { GeneratorProducts: products.filter(p => p.CategoryId.toString() === `${category._id}`)
+                                        .map(p => Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${p._id}')` }, p))
+                                }
+                            )
+                        })
+                },
+                elementType: GeneratorCategory,
+                contentType: "application/json"
+            });
+
+            createTest("should return GeneratorProduct expanded with GeneratorCategories using generator function and navigation property", TestServer, "GET /GeneratorProducts('578f2b8c12eaebabec4af23c')?$expand=GeneratorCategory", {
                 statusCode: 200,
                 body: Object.assign({
                     "@odata.context": "http://localhost/$metadata#GeneratorProducts/$entity",
                     "@odata.id": "http://localhost/GeneratorProducts('578f2b8c12eaebabec4af23c')",
-                }, products.find(product => product._id.toString() == "578f2b8c12eaebabec4af23c"), {
+                }, products.find(product => product._id.toString() === "578f2b8c12eaebabec4af23c"), {
                         GeneratorCategory: Object.assign({
                             "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af289')",
-                        }, categories.find(category => category._id.toString() == "578f2baa12eaebabec4af289"))
+                        }, categories.find(category => category._id.toString() === "578f2baa12eaebabec4af289"))
                     }),
                 elementType: GeneratorProduct,
                 contentType: "application/json"
             });
 
-            createTest("should return category expanded with products using generator function", TestServer, "GET /GeneratorCategories('578f2baa12eaebabec4af289')?$expand=GeneratorProducts", {
+            createTest("should return GeneratorCategory expanded with GeneratorProducts using generator function and navigation property", TestServer, "GET /GeneratorCategories('578f2baa12eaebabec4af289')?$expand=GeneratorProducts", {
                 statusCode: 200,
                 body: Object.assign(
                     {
@@ -826,14 +867,96 @@ export function testFactory(createTest: any) {
                     },
                     categories.find(c => c._id.toString() == "578f2baa12eaebabec4af289"),
                     {
-                        GeneratorProducts: products.filter(p => p.CategoryId.toString() == "578f2baa12eaebabec4af289")
+                        GeneratorProducts: products.filter(p => p.CategoryId.toString() === "578f2baa12eaebabec4af289")
                             .map(p => Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${p._id}')` }, p))
                     }
                 ),
                 elementType: GeneratorCategory,
                 contentType: "application/json"
             });
-        })
+
+            createTest("should return Categories2 expanded with Products2 using generator function", TestServer, "GET /Categories2?$expand=Products2", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#Categories2",
+                    "value": 
+                        categories.map(category => {
+                            return Object.assign(
+                                { "@odata.id": `http://localhost/Categories2('${category._id}')` },
+                                category,
+                                { Products2: products.filter(p => p.CategoryId.toString() === category._id.toString())
+                                        .map(p => Object.assign({ "@odata.id": `http://localhost/Products2('${p._id}')` }, p))
+                                }
+                            )
+                        })
+                },
+                elementType: Category2,
+                contentType: "application/json"
+            });
+
+            createTest("should return stream result of Products2 expanded with Category2 using generator function", TestServer, "GET /Products2?$expand=Category2", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#Products2",
+                    "value":
+                    products.map(product => {
+                        return Object.assign(
+                            { "@odata.id": `http://localhost/Products2('${product._id}')` },
+                            product,
+                            {
+                                Category2: {
+                                    "value": categories.filter(c => c._id.toString() === product.CategoryId.toString())
+                                        .map(c => Object.assign({ "@odata.id": `http://localhost/Categories2('${c._id}')` }, c))
+                                }
+                            }
+                        )
+                    })
+                },
+                elementType: Product2,
+                contentType: "application/json"
+            });
+
+            createTest("should return stream result of Products2 expanded with Category2 using generator function and navigation property", TestServer, "GET /Products2('578f2b8c12eaebabec4af23c')?$expand=Category2", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#Products2/$entity",
+                    "@odata.id": "http://localhost/Products2('578f2b8c12eaebabec4af23c')",
+                    "Discontinued": false,
+                    "Name": "Chai",
+                    "QuantityPerUnit": "10 boxes x 20 bags",
+                    "UnitPrice": 39,
+                    "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
+                    "CategoryId": new ObjectID("578f2baa12eaebabec4af289"),
+                    "Category2": {
+                        "value": [
+                            {
+                                "@odata.id": "http://localhost/Categories2('578f2baa12eaebabec4af289')",
+                                "Description": "Soft drinks",
+                                "Name": "Beverages",
+                                "_id": new ObjectID("578f2baa12eaebabec4af289")
+                            }
+                        ]
+                    }
+                },
+                elementType: Product2,
+                contentType: "application/json"
+            });
+
+            createTest("should return stream result of Category2 and expanded with Products2 using generator function and navigation property", TestServer, "GET /Categories2('578f2baa12eaebabec4af289')?$expand=Products2", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#Categories2/$entity",
+                    "@odata.id": "http://localhost/Categories2('578f2baa12eaebabec4af289')",
+                    "Description": "Soft drinks",
+                    "Name": "Beverages",
+                    "_id": new ObjectID("578f2baa12eaebabec4af289"),
+                    "Products2": products.filter(p => p.CategoryId.toString() === "578f2baa12eaebabec4af289")
+                                    .map(p => Object.assign({ "@odata.id": `http://localhost/Products2('${p._id}')` }, p))
+                },
+                elementType: Category2,
+                contentType: "application/json"
+            });
+        });
 
         createTest("should return product name property", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Name", {
             statusCode: 200,

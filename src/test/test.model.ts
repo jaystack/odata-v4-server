@@ -641,13 +641,7 @@ export class ProductsGeneratorController extends ODataController {
 
     @odata.GET("Category2")
     *findCategories( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: any) {
-        let response = [];
-        response = categories2.filter((c) => c && c._id.toString() === result.CategoryId.toString());
-        for (let c of response) {
-            stream.write(c);
-            yield delay(1);
-        }
-        stream.end();
+        return yield categories2.filter((c) => c && c._id.toString() === result.CategoryId.toString());
     }
 }
 
