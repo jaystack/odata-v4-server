@@ -45,7 +45,7 @@
 * ~~Use @odata.GET.$ref~~
 * ~~Use @odata.link aliases~~
 * ~~Use generator function and Promise result in $ref handler~~
-* Use advanced generator functions returning Promise, stream or another generator function
+* ~~Use advanced generator functions returning Promise, stream or another generator function~~
 * Use stream result when using $expand
 * ~~Try to access non-existent entity set~~
 * Implement inline count for stream result with @odata.count or inlinecount
@@ -57,12 +57,12 @@
 * ~~Implement primitive property DELETE with PATCH handler~~
 * More Edm.Stream properties test cases, like /Data/$value
 * Test $expand with subquery, multiple cases
-* POST new entity to entity set using inheritance
-* Implement deserializer using @Edm.Deserializer to deserialize POST body
-* Include @odata field in POST body
-* Implement action/function with generator function and stream as result (like Fetch in stream.ts example)
+* ~~POST new entity to entity set using inheritance~~
+* ~~Implement deserializer using @Edm.Deserializer to deserialize POST body~~
+* ~~Include @odata field in POST body~~
+* ~~Implement action/function with generator function and stream as result (like Fetch in stream.ts example)~~
 * ~~Use $count after stream result set (Categories(1)/Products/$count)~~
-* Use @odata.type as function pointer in inheritance result set
+* ~~Use @odata.type as function pointer in inheritance result set~~
 * ~~Use $expand with single entity~~
 * ~~Use $expand with HTTP Accept header odata.metadata=full, expect @odata.associationLink and @odata.navigationLink in result~~
 * Use ODataStream class for Edm.Stream property implementation

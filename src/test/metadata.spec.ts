@@ -7,7 +7,7 @@ import * as fs from "fs";
 import * as path from "path";
 const { expect } = require("chai");
 const beautify = require("xml-beautifier");
-
+const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFromHexString(_id) : _id;
 let schemaJson = {
     version: "4.0",
     dataServices: {
@@ -168,6 +168,7 @@ export class BaseMeta {
     @Edm.Key
     @Edm.Computed
     @Edm.TypeDefinition(ObjectID)
+    @Edm.Deserialize(toObjectID)
     MongoId: ObjectID
 
     @Edm.String
@@ -536,10 +537,10 @@ export class MetaController extends ODataController {
         return meta;
     }
 
-    // @odata.POST
-    // insert( @odata.body body: any, @odata.type type: string) {
-    //     console.log(type, body);
-    // }
+    @odata.POST
+    insert( @odata.body body: Meta ) {
+        return body;
+    }
 
     @odata.GET("MediaList")
     getMedia( @odata.result result: Meta) {

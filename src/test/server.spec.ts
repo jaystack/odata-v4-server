@@ -42,7 +42,7 @@ export function testFactory(createTest: any) {
             elementType: Foobar,
             contentType: "application/json"
         });
-
+        
         createTest("should return entity set result using async function", TestServer, "GET /AsyncEntitySet", {
             statusCode: 200,
             body: {
@@ -52,6 +52,17 @@ export function testFactory(createTest: any) {
                     id: 1,
                     a: 1
                 }]
+            },
+            elementType: Foobar,
+            contentType: "application/json"
+        });
+
+        createTest("should return entity set result using async function", TestServer, "GET /AsyncEntitySet(1)", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#AsyncEntitySet/$entity",
+                "@odata.id": "http://localhost/AsyncEntitySet(1)",
+                id: 1
             },
             elementType: Foobar,
             contentType: "application/json"
@@ -1236,17 +1247,23 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        // createTest("should create BaseMeta entity", MetaTestServer, "POST /Meta", {
-        //     statusCode: 204
-        // }, { 
-        //     Id : 2, 
-        //     p0 : 2, 
-        //     p1 : false, 
-        //     p9 : 29, 
-        //     p10 : 30, 
-        //     MongoId : new ObjectID('5968aad95eb7eb3a94a264f6')
-        //     // "@odata.type" : Meta
-        // });
+        createTest("should create BaseMeta entity", MetaTestServer, "POST /Meta", {
+            statusCode: 201,
+            "body": {
+                "@odata.context": "http://localhost/$metadata#Meta/$entity",
+                "@odata.id": "http://localhost/Meta('5968aad95eb7eb3a94a264f6')",
+                "MongoId": new ObjectID('5968aad95eb7eb3a94a264f6'),
+                "b0": 'basemeta',
+            },
+            contentType: "application/json",
+            elementType: BaseMeta
+        },
+            {
+                MongoId: new ObjectID('5968aad95eb7eb3a94a264f6'),
+                b0: 'basemeta',
+                "@odata.type": BaseMeta
+            }
+        );
 
         createTest("should return Meta result by keys", MetaTestServer, "GET /Meta(Id=1,MongoId='578f2b8c12eaebabec4af242',p9=9,p10=10)", {
             statusCode: 200,

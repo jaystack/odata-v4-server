@@ -167,7 +167,10 @@ export class AsyncTestController extends ODataController {
         return ODataResult.Ok(new Promise((resolve, reject) => {
             try {
                 setTimeout(() => {
-                    resolve({ id: key });
+                    const a: number = 1;
+                    let result = { id: key };
+                    (<any>result).inlinecount = a;
+                    resolve(result);
                 });
             } catch (err) {
                 reject(err);
