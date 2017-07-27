@@ -507,7 +507,7 @@ export class TypeDefContainer extends Edm.ContainerBase {
 }
 
 @odata.namespace("Container")
-export class EnumContainer extends Edm.ContainerBase {
+export class EnumContainer {
     @Edm.Flags
     @Edm.Int64
     @Edm.URLSerialize((value: Genre) => `Server.Genre2'${value || 0}'`)

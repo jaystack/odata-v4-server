@@ -865,7 +865,9 @@ export interface IEdmContainer{
     namespace:string
     new(server?:typeof ODataServer):IEdmContainerInstance
 }
-export function Container(type:IEdmContainer){
+export function Container(type:IEdmContainer);
+export function Container(type:Function);
+export function Container(type:any){
     return function(server:typeof ODataServer){
         if (!(type.prototype instanceof ContainerBase)){
             util.inherits(type, ContainerBase);
