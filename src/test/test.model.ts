@@ -323,7 +323,7 @@ export class ProductsController extends ODataController {
                 } catch (error) {
                     reject(error);
                 }
-            })    
+            })
         );
     }
 
@@ -625,7 +625,9 @@ export class ProductsGeneratorController extends ODataController {
     @odata.GET
     *find( @odata.filter filter: Token, @odata.stream stream: Writable) {
         let response = products2;
-        if (filter) response = yield products2.map((product) => Object.assign({}, product, { _id: product._id.toString() })).filter(createFilter(filter));
+        if (filter) response = yield products2
+            .map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId && product.CategoryId.toString() }))
+            .filter(createFilter(filter));
         
         for (let category of response) {
             stream.write(category);
@@ -706,20 +708,25 @@ export class CategoriesPromiseGeneratorController extends ODataController {
         return yield Promise.resolve(products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString()));
     }
 }
-
 const getAllProducts = async () => {
     return await products2;
 }
 const getProductsByFilter = async (filter: Token) => {
     return await products2
-            .map((product) => Object.assign({}, product, { _id: product._id.toString() }))
-            .filter(createFilter(filter));
+        .map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId && product.CategoryId.toString() }))
+        .filter(createFilter(filter));
 }
 const getProductByKey = async (key: string) => {
     return await products2.find(p => p._id.toString() == key) || null;
 }
 const getCategoryOfProduct = async (result: GeneratorProduct) => {
     return await categories2.find((c) => c && c._id.toString() === result.CategoryId.toString()) || null;
+}
+const getCategoryByFilterOfProduct = async (filter: Token, result: GeneratorProduct) => {
+    return await categories2
+        .filter(c => c._id.toString() === result.CategoryId.toString())
+        .map((category) => Object.assign({}, category, { _id: category._id.toString() }))
+        .filter(createFilter(filter));
 }
 
 @odata.type(GeneratorProduct)
@@ -738,6 +745,7 @@ export class ProductsAdvancedGeneratorController extends ODataController {
 
     @odata.GET("GeneratorCategory")
     *findCategories( @odata.filter filter: Token, @odata.result result: GeneratorProduct) {
+        if(filter) return yield getCategoryByFilterOfProduct(filter, result);
         return yield getCategoryOfProduct(result);
     }
 }
@@ -759,12 +767,18 @@ const getProductOfCategory = async (key: string, result: GeneratorCategory) => {
 const getProductsOfCategory = async (result: GeneratorCategory) => {
     return await products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString());
 }
+const getProductsByFilterOfCategory = async (filter: Token, result: GeneratorCategory) => {
+    return await products2
+        .filter(p => p.CategoryId.toString() === result._id.toString())
+        .map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId && product.CategoryId.toString() }))
+        .filter(createFilter(filter));
+}
 
 @odata.type(GeneratorCategory)
 export class CategoriesAdvancedGeneratorController extends ODataController {
     @odata.GET
     *find( @odata.filter filter: Token) {
-        if (filter) yield getCategoriesByFilter(filter);
+        if (filter) return yield getCategoriesByFilter(filter);
         return yield getAllCategories()
     }
 
@@ -775,12 +789,8 @@ export class CategoriesAdvancedGeneratorController extends ODataController {
     }
 
     @odata.GET("GeneratorProducts")
-    *findProduct( @odata.key key: string, @odata.result result: GeneratorCategory) {
-        return yield getProductOfCategory(key, result);
-    }
-
-    @odata.GET("GeneratorProducts")
-    *findProducts( @odata.result result: GeneratorCategory) {
+    *filterProducts( @odata.filter filter: Token, @odata.result result: GeneratorCategory) {
+        if(filter) return yield getProductsByFilterOfCategory(filter, result);
         return yield getProductsOfCategory(result);
     }
 }
