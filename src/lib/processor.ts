@@ -526,6 +526,12 @@ export class ODataProcessor extends Transform{
                     if (chunk instanceof Object){
                         if (chunk["@odata.count"] || chunk.inlinecount){
                             this.streamInlineCount = chunk["@odata.count"] || chunk.inlinecount;
+                            if (Object.keys(chunk).length == 1){
+                                return typeof done == "function" ? done() : null;
+                            }else{
+                                delete chunk["@odata.count"];
+                                delete chunk.inlinecount;
+                            }
                         }
                         let entity = {};
                         let defer;
