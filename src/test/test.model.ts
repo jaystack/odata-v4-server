@@ -429,19 +429,19 @@ export class CategoriesController extends ODataController {
 }
 CategoriesController.enableFilter('find');
 
-class CategoryStream extends Category{}
+export class CategoryStream extends Category{}
 @odata.type(CategoryStream)
 @Edm.EntitySet("Categories")
 export class CategoriesStreamingController extends ODataController {
     @odata.GET
     find( @odata.filter filter: Token, @odata.stream stream: Writable) {
         let response = [];
-        if (filter) response = categories.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
         response = categories;
-        categories.forEach(c => {
-            stream.write(c);
+        if (filter) response = categories.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
+        response.forEach(c => {
+            stream.write(c)
         });
-        stream.end()
+        stream.end();
     }
 
     @odata.GET
@@ -585,7 +585,7 @@ export class CategoriesGeneratorController extends ODataController {
     *find( @odata.filter filter: Token, @odata.stream stream: Writable) {
         let response = categories2;
         if (filter) response = yield categories2.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
-
+        stream.write({"@odata.count": response.length});
         for (let category of response) {
             stream.write(category);
             yield delay(1);
@@ -659,6 +659,7 @@ export class ProductsPromiseGeneratorController extends ODataController {
                 .map((product) => Object.assign({}, product, { _id: product._id.toString() }))
                 .filter(createFilter(filter)));
         } else {
+            (<any>products2).inlinecount = products2.length;
             return yield Promise.resolve(products2)
         }
     }

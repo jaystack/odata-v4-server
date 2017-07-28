@@ -48,7 +48,7 @@
 * ~~Use advanced generator functions returning Promise, stream or another generator function~~
 * Use stream result when using $expand
 * ~~Try to access non-existent entity set~~
-* Implement inline count for stream result with @odata.count or inlinecount
+* ~~Implement inline count for stream result with @odata.count or inlinecount~~
 * Use navigation property on stream result
 * ~~Use HTTP Accept header including odata.metadata=full|none~~
 * ~~Implement navigation property with @odata.GET('navprop')~~
