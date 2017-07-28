@@ -118,7 +118,7 @@
     "mssql": "^3.3.0",
     "npm-watch": "^0.1.6",
     "nyc": "^11.1.0",
-    "odata-v4-inmemory": "^0.1.7",
+    "odata-v4-inmemory": "^0.1.9",
     "odata-v4-mongodb": "^0.1.10",
     "remap-istanbul": "^0.9.5",
     "request": "^2.81.0",

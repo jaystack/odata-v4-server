@@ -1,5 +1,5 @@
 /// <reference types="mocha" />
-import { TestServer, Foobar, AuthenticationServer, Image, Image2, User, Location, Music, DefTest, DefTestServer, Product2, Category2, UpsertTestEntity, ProductServer, CategoryServer } from './test.model';
+import { TestServer, Foobar, AuthenticationServer, Image, Image2, User, Location, Music, DefTest, DefTestServer, Product2, Category2, UpsertTestEntity, ProductServer, CategoryServer, CategoryStream } from './test.model';
 import { Edm, odata, NotImplementedError } from "../lib/index";
 import { Product, Category } from "../example/model";
 import { Meta, Media, TestEntity, MetaTestServer, CompoundKey, EmptyEntity, BaseMeta, Genre } from './metadata.spec';
@@ -57,7 +57,7 @@ export function testFactory(createTest: any) {
             contentType: "application/json"
         });
 
-        createTest("should return entity set result using async function", TestServer, "GET /AsyncEntitySet(1)", {
+        createTest("should return entity set result by key using async function", TestServer, "GET /AsyncEntitySet(1)", {
             statusCode: 200,
             body: {
                 "@odata.context": "http://localhost/$metadata#AsyncEntitySet/$entity",
@@ -363,8 +363,10 @@ export function testFactory(createTest: any) {
         createTest("should return stream result set of Categories using generator function", TestServer, "GET /Categories2", {
             statusCode: 200,
             body: {
+                "@odata.count": 8,
                 "@odata.context": "http://localhost/$metadata#Categories2",
-                value: categories.map(category => {
+                value:
+                categories.map(category => {
                     return Object.assign({ "@odata.id": `http://localhost/Categories2('${category._id}')` }, category)
                 })
             },
@@ -453,6 +455,7 @@ export function testFactory(createTest: any) {
         createTest("should return promise of products using generator function", TestServer, "GET /AdvancedProducts", {
             statusCode: 200,
             body: {
+                "@odata.count": 76,                
                 "@odata.context": "http://localhost/$metadata#AdvancedProducts",
                 value: products.map((product) => {
                     return Object.assign({ "@odata.id": `http://localhost/AdvancedProducts('${product._id}')` }, product)
@@ -894,6 +897,7 @@ export function testFactory(createTest: any) {
                 statusCode: 200,
                 body: {
                     "@odata.context": "http://localhost/$metadata#Categories2",
+                    "@odata.count": 8,
                     "value":
                     categories.map(category => {
                         return Object.assign(
@@ -1002,6 +1006,7 @@ export function testFactory(createTest: any) {
                 statusCode: 200,
                 body: {
                     "@odata.context": "http://localhost/$metadata#Categories2",
+                    "@odata.count": 1,
                     "value": [
                         {
                             "@odata.id": "http://localhost/Categories2('578f2baa12eaebabec4af289')",
@@ -1077,6 +1082,7 @@ export function testFactory(createTest: any) {
                 statusCode: 200,
                 body: {
                     "@odata.context": "http://localhost/$metadata#Categories2",
+                    "@odata.count": 1,
                     "value": [
                         {
                             "@odata.id": "http://localhost/Categories2('578f2baa12eaebabec4af289')",
@@ -1243,6 +1249,18 @@ export function testFactory(createTest: any) {
                 }, product))
             },
             elementType: Product,
+            contentType: "application/json"
+        });
+
+        createTest("should return CategoriesStream result", TestServer, "GET /CategoriesStream", {
+            statusCode: 200,
+            body: {
+                "@odata.context": "http://localhost/$metadata#CategoriesStream",
+                value: categories.map(category => Object.assign({
+                    "@odata.id": `http://localhost/CategoriesStream('${category._id}')`
+                }, category))
+            },
+            elementType: CategoryStream,
             contentType: "application/json"
         });
     });
