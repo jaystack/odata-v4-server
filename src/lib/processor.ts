@@ -522,7 +522,7 @@ export class ODataProcessor extends Transform{
                         }
                         this.push('"value":[');
                     }
-                }else if (!this.options.objectMode) this.push(',');
+                }else if (!this.options.objectMode && this.resultCount > 0) this.push(',');
                 try{
                     this.streamStart = true;
                     if (chunk instanceof Object){
@@ -543,6 +543,7 @@ export class ODataProcessor extends Transform{
                         defer.then(() => {
                             chunk = this.options.objectMode ? entity : JSON.stringify(entity);
                             this.push(chunk);
+                            this.resultCount++;
                             if (typeof done == "function") done();
                         }, (err) => {
                             console.log(err);
@@ -550,6 +551,7 @@ export class ODataProcessor extends Transform{
                         });
                     }else{
                         this.push(JSON.stringify(chunk));
+                        this.resultCount++;
                         if (typeof done == "function") done();
                     }
                 }catch(err){
@@ -558,6 +560,7 @@ export class ODataProcessor extends Transform{
                 }
             }else{
                 this.push(chunk);
+                this.resultCount++;
                 if (typeof done == "function") done();
             }
         }else{
