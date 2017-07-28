@@ -313,8 +313,13 @@ export class MusicController extends ODataController {
 @odata.type(Product)
 export class ProductsController extends ODataController {
     @odata.GET
-    find( @odata.filter filter: Token) {
-        if (filter) return products.map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId && product.CategoryId.toString() })).filter(createFilter(filter));
+    find( @odata.query query: Token) {
+        const filter = query && query.value && query.value.options && query.value.options.find(t => t.type == "Filter");
+        if (filter){
+            return products
+                .map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId && product.CategoryId.toString() }))
+                .filter(createFilter(filter));
+        }
         (<any>products).inlinecount = products.length;
         return ODataResult.Ok(
             new Promise((resolve, reject) => {

@@ -115,6 +115,98 @@ export class ResourcePathVisitor{
         await Promise.all(node.value.options.map(async (option) => await this.Visit(option, Object.assign({}, context), type)));
     }
 
+    protected async VisitFilter(node:Token, context:any, type:any){
+        context = Object.assign({ filter: true }, context);
+        await this.Visit(node.value, context, type);
+    }
+
+    protected async VisitAndExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value.left, context, type);
+        await this.Visit(node.value.right, context, type);
+    }
+
+    protected async VisitOrExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value.left, context, type);
+        await this.Visit(node.value.right, context, type);
+    }
+
+    protected async VisitBoolParenExpression(node:Token, context:any, type:any){
+		await this.Visit(node.value, context, type);
+	}
+
+	protected async VisitCommonExpression(node:Token, context:any, type:any){
+		await this.Visit(node.value, context, type);
+	}
+
+	protected async VisitFirstMemberExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value, context, type);
+        context.type = Edm.getType(type, node.raw, this.serverType.container);
+        context.typeName = Edm.getTypeName(type, node.raw, this.serverType.container);
+        if (Edm.isEnumType(type, node.raw)){
+            const containerType = Object.getPrototypeOf(this.serverType.container).constructor;
+            const enumType = context.type;
+            const prop = node.raw;
+            let enumName = context.typeName;
+            let enumNamespace = containerType.namespace;
+
+            if (enumName.indexOf(".") > 0){
+                enumNamespace = enumName.slice(0, enumName.lastIndexOf("."));
+                enumName = enumName.slice(enumName.lastIndexOf(".") + 1);
+            }
+            context.typeName = Edm.getTypeName(containerType, enumName, this.serverType.container) || "Edm.Int32";
+        }
+	}
+
+	protected async VisitMemberExpression(node:Token, context:any, type:any){
+		await this.Visit(node.value, context, type);
+    }
+    
+    protected async VisitPropertyPathExpression(node:Token, context:any, type:any){
+        if (node.value.current && node.value.next){
+            await this.Visit(node.value.current, context, type);
+            await this.Visit(node.value.next, context, type);
+        }else await this.Visit(node.value, context, type);
+    }
+    
+    protected async VisitNotExpression(node:Token, context:any, type:any){
+		await this.Visit(node.value, context, type);
+    }
+
+    protected async VisitEqualsExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value.left, context, type);
+        await this.Visit(node.value.right, context, type);
+    }
+
+    protected async VisitNotEqualsExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value.left, context, type);
+        await this.Visit(node.value.right, context, type);
+    }
+
+    protected async VisitLesserThanExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value.left, context, type);
+        await this.Visit(node.value.right, context, type);
+    }
+
+    protected async VisitLesserOrEqualsExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value.left, context, type);
+        await this.Visit(node.value.right, context, type);
+    }
+
+    protected async VisitGreaterThanExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value.left, context, type);
+        await this.Visit(node.value.right, context, type);
+    }
+
+    protected async VisitGreaterOrEqualsExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value.left, context, type);
+        await this.Visit(node.value.right, context, type);
+    }
+
+    protected async VisitHasExpression(node:Token, context:any, type:any){
+        await this.Visit(node.value.left, context, type);
+        await this.Visit(node.value.right, context, context.type || type);
+    }
+
     protected async VisitExpand(node: Token, context: any, type: any) {
         await Promise.all(node.value.items.map(async (item) => {
             let expandPath = item.value.path.raw;
@@ -389,7 +481,13 @@ export class ResourcePathVisitor{
     }
 
     protected VisitEnumerationMember(node:Token, context:any, type:any){
-        context.literal = (type && type[node.value.name]) || node.value.name;
+        if (context.filter && type){
+            node.type = TokenType.EnumMemberValue;
+            node.raw = `${type && type[node.value.name]}`;
+            node.value = context.typeName;
+        }else{
+            context.literal = (type && type[node.value.name]) || node.value.name;
+        }
     }
 
     protected VisitEnumMemberValue(node:Token, context:any, type:any){

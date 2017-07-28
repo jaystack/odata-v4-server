@@ -3,6 +3,7 @@ import * as ODataParser from "odata-v4-parser";
 import * as url from "url";
 import * as qs from "qs";
 import * as util from "util";
+import * as deepmerge from "deepmerge";
 import { Transform, TransformOptions, Readable } from "stream";
 import { getFunctionParameters, isIterator, isPromise, isStream } from "./utils";
 import { ODataResult } from "./result";
@@ -456,6 +457,7 @@ export class ODataProcessor extends Transform{
         let method = this.method = context.method.toLowerCase();
         if (ODataRequestMethods.indexOf(method) < 0) throw new MethodNotAllowedError();
         
+        context.url = decodeURIComponent(context.url);
         this.url = url.parse(context.url);
         this.query = qs.parse(this.url.query);
         let ast = ODataParser.odataUri(context.url, { metadata: this.serverType.$metadata().edmx });
@@ -1533,15 +1535,30 @@ export class ODataProcessor extends Transform{
         bodyParam = odata.getBodyParameter(container, name);
         let typeParam = odata.getTypeParameter(container, name);
 
-        queryString = queryString || this.url.query;
-        let queryAst = queryString ? (typeof queryString == "string" ? ODataParser.query(queryString, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx }) : queryString) : null;
         if (queryParam){
+            let queryAst = queryString || this.resourcePath.ast.value.query || null;
+            if (typeof queryAst == "string"){
+                queryAst = ODataParser.query(queryAst, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx });
+                if (!include) queryAst = deepmerge(queryAst, this.resourcePath.ast.value.query || {});
+            }
             params[queryParam] = queryAst;
         }
 
         if (filterParam){
-            let filter = queryString ? (typeof queryString == "string" ? qs.parse(queryString).$filter : (queryString && queryString.value && queryString.value.options && (<Token[]>queryString.value.options).find(t => t.type == TokenType.Filter))) : null;
-            let filterAst = filter ? (typeof filter == "string" ? ODataParser.filter(filter, { metadata: this.serverType.$metadata().edmx }) : filter) : null;
+            let filterAst = queryString;
+            let resourceFilterAst = this.resourcePath.ast.value.query && this.resourcePath.ast.value.query.value.options && this.resourcePath.ast.value.query.value.options.find(t => t.type == TokenType.Filter);
+            if (typeof filterAst == "string"){
+                filterAst = qs.parse(filterAst).$filter;
+                if (typeof filterAst == "string"){
+                    filterAst = ODataParser.filter(filterAst, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx });
+                }
+            }else{
+                let token = <Token>queryString;
+                filterAst = token && token.value && token.value.options && (<Token[]>token.value.options).find(t => t.type == TokenType.Filter);
+            }
+            if (filterAst && !include){
+                filterAst = deepmerge(filterAst, (resourceFilterAst || {}).value || {});
+            }
             params[filterParam] = filterAst;
         }
 

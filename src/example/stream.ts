@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { Writable } from "stream";
 import { MongoClient, Db, ObjectID } from "mongodb";
-import { createQuery } from "odata-v4-mongodb";
+import { createQuery, createFilter } from "odata-v4-mongodb";
 import { Readable, PassThrough } from "stream";
 import { ODataServer, ODataController, Edm, odata, ODataStream, ODataQuery, ODataHttpContext } from "../lib";
 import { Category, Product } from "./model";
@@ -151,7 +151,8 @@ class NorthwindTypes extends Edm.ContainerBase{
 @odata.container("Media")
 class MusicController extends ODataController{
     @odata.GET
-    find(){
+    find(@odata.filter filter:ODataQuery, @odata.query query:ODataQuery){
+        console.log(JSON.stringify(createQuery(query).query, null, 2), JSON.stringify(createFilter(filter), null, 2));
         let music = new Music();
         music.Id = new ObjectID;
         music.Artist = "Dream Theater";
@@ -285,7 +286,7 @@ class StreamServer extends ODataServer{
         });
     }
 }
-console.dir(createMetadataJSON(StreamServer).dataServices.schema[0]["function"][1].parameter);
+//console.dir(createMetadataJSON(StreamServer).dataServices.schema[0]["function"][1].parameter);
 //console.log(createMetadataJSON(StreamServer).dataServices.schema[0].entityType[2]);
 //console.log(StreamServer.$metadata().edmx.dataServices.schemas[0].typeDefinitions);
 StreamServer.create("/odata", 3000);
