@@ -8,6 +8,7 @@ import { GeneratorProduct, GeneratorCategory } from "./model/ModelsForGenerator"
 import { StreamProduct, StreamCategory } from "./model/ModelsForStream";
 import { Readable, PassThrough, Writable } from "stream";
 import { ObjectID } from "mongodb";
+import { processQueries, doOrderby, doSkip, doTop } from "./utils/queryOptions"
 import * as fs from "fs";
 import * as path from "path";
 import * as streamBuffers from "stream-buffers";
@@ -783,9 +784,17 @@ const getProductsByFilterOfCategory = async (filter: Token, result: GeneratorCat
 @odata.type(GeneratorCategory)
 export class CategoriesAdvancedGeneratorController extends ODataController {
     @odata.GET
-    *find( @odata.filter filter: Token) {
-        if (filter) return yield getCategoriesByFilter(filter);
-        return yield getAllCategories()
+    *find(@odata.query query: Token, @odata.filter filter: Token) {
+        let options = yield processQueries(query);
+
+        let response: Category[] = yield getAllCategories()
+        if (filter) response = yield getCategoriesByFilter(filter);
+
+        response = yield doOrderby(response, options);
+        response = yield doSkip(response, options);
+        response = yield doTop(response, options);
+
+        return response;
     }
 
     @odata.GET
@@ -795,9 +804,17 @@ export class CategoriesAdvancedGeneratorController extends ODataController {
     }
 
     @odata.GET("GeneratorProducts")
-    *filterProducts( @odata.filter filter: Token, @odata.result result: GeneratorCategory) {
-        if(filter) return yield getProductsByFilterOfCategory(filter, result);
-        return yield getProductsOfCategory(result);
+    *filterProducts( @odata.query query: Token, @odata.filter filter: Token, @odata.result result: GeneratorCategory) {
+        let options = yield processQueries(query);
+
+        let response: GeneratorProduct[] = yield getProductsOfCategory(result);
+        if (filter) response = yield getProductsByFilterOfCategory(filter, result);
+
+        response = yield doOrderby(response, options);
+        response = yield doSkip(response, options);
+        response = yield doTop(response, options);
+
+        return response
     }
 }
 

@@ -845,16 +845,16 @@ export function testFactory(createTest: any) {
                     statusCode: 200,
                     body: {
                         "@odata.context": "http://localhost/$metadata#GeneratorCategories",
-                        "value": 
-                            categories.map(category => {
-                                return Object.assign(
-                                    { "@odata.id": `http://localhost/GeneratorCategories('${category._id}')` },
-                                    category,
-                                    { GeneratorProducts: products.filter(p => p.CategoryId.toString() === `${category._id}`)
-                                            .map(p => Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${p._id}')` }, p))
-                                    }
-                                )
-                            })
+                        "value": categories.map(category => {
+                            return Object.assign(
+                                { "@odata.id": `http://localhost/GeneratorCategories('${category._id}')` },
+                                category,
+                                {
+                                    GeneratorProducts: products.filter(p => p.CategoryId.toString() === `${category._id}`)
+                                        .map(p => Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${p._id}')` }, p))
+                                }
+                            )
+                        })
                     },
                 elementType: GeneratorCategory,
                 contentType: "application/json"
@@ -1156,6 +1156,62 @@ export function testFactory(createTest: any) {
                 elementType: GeneratorCategory,
                 contentType: "application/json"
             });
+
+            createTest("should return GeneratorCategories expanded with GeneratorProduct using $top,$filter,$expand subqueries",
+                TestServer, "GET /GeneratorCategories?$expand=GeneratorProducts($top=1)&$top=1&$orderby=Name desc", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#GeneratorCategories",
+                    "value": [
+                        {
+                            "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af28d')",
+                            "Description": "Seaweed and fish",
+                            "Name": "Seafood",
+                            "_id": new ObjectID("578f2baa12eaebabec4af28d"),
+                            "GeneratorProducts": [
+                                {
+                                    "@odata.id": "http://localhost/GeneratorProducts('578f2b8c12eaebabec4af242')",
+                                    "Discontinued": false,
+                                    "Name": "Ikura",
+                                    "QuantityPerUnit": "12 - 200 ml jars",
+                                    "UnitPrice": 31,
+                                    "_id": new ObjectID("578f2b8c12eaebabec4af242"),
+                                    "CategoryId": new ObjectID("578f2baa12eaebabec4af28d")
+                                }
+                            ]
+                        }
+                    ]
+                },
+                elementType: GeneratorCategory,
+                contentType: "application/json"
+                });
+
+            createTest("should return GeneratorCategories expanded with GeneratorProduct using $top,$filter,$expand subqueries",
+                TestServer, "GET /GeneratorCategories?$expand=GeneratorProducts($orderby=Name desc)&$top=1&$orderby=Name desc", {
+                statusCode: 200,
+                body: {
+                    "@odata.context": "http://localhost/$metadata#GeneratorCategories",
+                    "value": [
+                        {
+                            "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af28d')",
+                            "Description": "Seaweed and fish",
+                            "Name": "Seafood",
+                            "_id": new ObjectID("578f2baa12eaebabec4af28d"),
+                            "GeneratorProducts": products
+                                .filter(p => p.CategoryId.toString() === "578f2baa12eaebabec4af28d")
+                                .map(p => Object.assign({ "@odata.id": `http://localhost/GeneratorProducts('${p._id}')` }, p))
+                                .sort((a, b) => {
+                                    if (a.Name > b.Name) return -1;
+                                    if (a.Name < b.Name) return 1;
+                                    return 0;
+                                })
+                        }
+                    ]
+                },
+                elementType: GeneratorCategory,
+                contentType: "application/json"
+                });
+
 
         });
 
