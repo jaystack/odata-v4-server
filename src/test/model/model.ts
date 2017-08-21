@@ -1,5 +1,5 @@
 import { ObjectID } from "mongodb";
-import { Edm } from "../lib/index";
+import { Edm } from "../../lib/index";
 
 const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFromHexString(_id) : _id;
 
@@ -10,7 +10,8 @@ const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFro
 export class Product{
     @Edm.Key
     @Edm.Computed
-    @Edm.TypeDefinition(ObjectID)
+    @Edm.String
+    @Edm.Convert(toObjectID)
     @Edm.Annotate({
         term: "UI.DisplayName",
         string: "Product identifier"
@@ -20,8 +21,9 @@ export class Product{
     })
     _id:ObjectID
 
-    @Edm.TypeDefinition(ObjectID)
+    @Edm.String
     @Edm.Required
+    @Edm.Convert(toObjectID)
     CategoryId:ObjectID
 
     @Edm.ForeignKey("CategoryId")
@@ -71,7 +73,8 @@ export class Product{
 export class Category{
     @Edm.Key
     @Edm.Computed
-    @Edm.TypeDefinition(ObjectID)
+    @Edm.String
+    @Edm.Convert(toObjectID)
     @Edm.Annotate({
         term: "UI.DisplayName",
         string: "Category identifier"
@@ -106,11 +109,4 @@ export class Category{
     echo(){
         return ["echotest"];
     }
-}
-
-export class NorthwindTypes extends Edm.ContainerBase{
-    @Edm.String
-    @Edm.URLDeserialize((value:string) => new ObjectID(value))
-    @Edm.Deserialize(value => new ObjectID(value))
-    ObjectID = ObjectID
 }

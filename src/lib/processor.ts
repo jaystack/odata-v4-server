@@ -160,7 +160,7 @@ const expCalls = {
     $count: function(this:ODataResult){
         return this.body && this.body.value ? (this.body.value.length || 0) : 0;
     },
-    $value: function(this:ODataResult, processor){
+    $value: async function(this:ODataResult, processor){
         let prevPart = processor.resourcePath.navigation[processor.resourcePath.navigation.length - 2];
 
         let fn = odata.findODataMethod(processor.ctrl, `${processor.method}/${prevPart.name}/$value`, prevPart.key || []);
@@ -173,7 +173,7 @@ const expCalls = {
             if (prevPart.key) prevPart.key.forEach((key) => params[key.name] = key.value);
 
             let fnDesc = fn;
-            processor.__applyParams(ctrl, fnDesc.call, params, processor.url.query, this);
+            await processor.__applyParams(ctrl, fnDesc.call, params, processor.url.query, this);
 
             fn = ctrl.prototype[fnDesc.call];
             if (fnDesc.key.length == 1 && prevPart.key.length == 1 && fnDesc.key[0].to != prevPart.key[0].name){
@@ -242,7 +242,7 @@ const expCalls = {
         if (routePart.key) routePart.key.forEach((key) => params[key.name] = key.value);
 
         let fnDesc = fn;
-        processor.__applyParams(ctrl, fnDesc.call, params, processor.url.query, this);
+        await processor.__applyParams(ctrl, fnDesc.call, params, processor.url.query, this);
 
         fn = ctrl.prototype[fnDesc.call];
         if (fnDesc.key.length == 1 && routePart.key.length == 1 && fnDesc.key[0].to != routePart.key[0].name){
@@ -559,6 +559,7 @@ export class ODataProcessor extends Transform{
                     if (typeof done == "function") done(err);
                 }
             }else{
+                this.streamStart = true;
                 this.push(chunk);
                 this.resultCount++;
                 if (typeof done == "function") done();
@@ -589,12 +590,18 @@ export class ODataProcessor extends Transform{
                         this.push(`],"@odata.count":${this.streamInlineCount}}`);
                     }else this.push("]}");
                 }else{
-                    if (this.options.metadata != ODataMetadataType.none){
+                    if (this.options.metadata == ODataMetadataType.none){
                         this.push('{"value":[]}');
                     }else{
                         this.push(`{"@odata.context":"${this.odataContext}","value":[]}`);
                     }
                 }
+            }
+        }else if (this.streamEnabled && !this.streamStart){
+            if (this.options.metadata == ODataMetadataType.none){
+                this.push('{"value":[]}');
+            }else{
+                this.push(`{"@odata.context":"${this.odataContext}","value":[]}`);
             }
         }
         this.streamEnd = true;
@@ -622,7 +629,7 @@ export class ODataProcessor extends Transform{
                 let fnDesc = fn;
                 let params = {};
                 if (part.key) part.key.forEach((key) => params[key.name] = key.value);
-                this.__applyParams(ctrl, fnDesc.call, params, this.url.query, result);
+                await this.__applyParams(ctrl, fnDesc.call, params, this.url.query, result);
                 fn = ctrl.prototype[fnDesc.call];
                 if (fnDesc.key.length == 1 && part.key.length == 1 && fnDesc.key[0].to != part.key[0].name){
                     params[fnDesc.key[0].to] = params[part.key[0].name];
@@ -658,7 +665,7 @@ export class ODataProcessor extends Transform{
     }
 
     private __EntityNavigationProperty(part:NavigationPart):Function{
-        return (result) => {
+        return async (result) => {
             let resultType = result.elementType;
             let elementType = <Function>Edm.getType(resultType, part.name, this.serverType.container);
             let partIndex = this.resourcePath.navigation.indexOf(part);
@@ -671,7 +678,7 @@ export class ODataProcessor extends Transform{
                 let fnDesc = fn;
                 let params = {};
                 if (part.key) part.key.forEach((key) => params[key.name] = key.value);
-                this.__applyParams(ctrl, fnDesc.call, params, this.url.query, result);
+                await this.__applyParams(ctrl, fnDesc.call, params, this.url.query, result);
                 fn = ctrl.prototype[fnDesc.call];
                 if (fnDesc.key.length == 1 && part.key.length == 1 && fnDesc.key[0].to != part.key[0].name){
                     params[fnDesc.key[0].to] = params[part.key[0].name];
@@ -708,8 +715,8 @@ export class ODataProcessor extends Transform{
     }
 
     private __PrimitiveProperty(part:NavigationPart):Function{
-        return (result) => {
-            return new Promise((resolve, reject) => {
+        return async (result) => {
+            return new Promise(async (resolve, reject) => {
                 this.__enableStreaming(part);
 
                 let currentResult;
@@ -733,7 +740,7 @@ export class ODataProcessor extends Transform{
                     if (prevPart.key) prevPart.key.forEach((key) => params[key.name] = key.value);
 
                     let fnDesc = fn;
-                    this.__applyParams(ctrl, fnDesc.call, params, this.url.query, result);
+                    await this.__applyParams(ctrl, fnDesc.call, params, this.url.query, result);
 
                     fn = ctrl.prototype[fnDesc.call];
                     if (fnDesc.key.length == 1 && prevPart.key.length == 1 && fnDesc.key[0].to != prevPart.key[0].name){
@@ -856,8 +863,8 @@ export class ODataProcessor extends Transform{
                             }
                         }
                     }
-                    this.__applyParams(ctrl, fnDesc.call, params, queryString, undefined, include);
-                }else this.__applyParams(ctrl, method, params, queryString, undefined, include);
+                    await this.__applyParams(ctrl, fnDesc.call, params, queryString, undefined, include);
+                }else await this.__applyParams(ctrl, method, params, queryString, undefined, include);
             }else fn = filter;
 
             if (!include) this.__enableStreaming(part);
@@ -979,7 +986,7 @@ export class ODataProcessor extends Transform{
     private __actionOrFunctionImport(part:NavigationPart):Function{
         let fn = this.serverType.prototype[part.name];
         return (data) => {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 try{
                     this.__enableStreaming(part);
 
@@ -992,7 +999,7 @@ export class ODataProcessor extends Transform{
                         isAction = true;
                         part.params = Object.assign(part.params || {}, this.body || {});
                     }
-                    this.__applyParams(this.serverType, part.name, part.params);
+                    await this.__applyParams(this.serverType, part.name, part.params);
                     let result = fnCaller.call(data, fn, part.params);
 
                     if (isIterator(fn)){
@@ -1026,7 +1033,7 @@ export class ODataProcessor extends Transform{
 
     private __actionOrFunction(part:NavigationPart):Function{
         return (result:ODataResult) => {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 this.__enableStreaming(part);
                 if (!result) return resolve();
 
@@ -1051,7 +1058,7 @@ export class ODataProcessor extends Transform{
                         isAction = true;
                         part.params = Object.assign(part.params || {}, this.body || {});
                     }
-                    this.__applyParams(elementType, boundOpName, part.params, null, result);
+                    await this.__applyParams(elementType, boundOpName, part.params, null, result);
                 }else if (ctrlBoundOp){
                     scope = this.instance;
                     returnType = <Function>Edm.getReturnType(this.ctrl, boundOpName, this.serverType.container);
@@ -1064,7 +1071,7 @@ export class ODataProcessor extends Transform{
                         isAction = true;
                         part.params = Object.assign(part.params || {}, this.body || {});
                     }
-                    this.__applyParams(this.ctrl, boundOpName, part.params, null, result);
+                    await this.__applyParams(this.ctrl, boundOpName, part.params, null, result);
                 }else if (expOp){
                     scope = result;
                     part.params["processor"] = this;
@@ -1447,7 +1454,7 @@ export class ODataProcessor extends Transform{
                     streamPromise = (<any>include).streamPromise = stream.toPromise();
                 }
                 if (fn){
-                    this.__applyParams(ctrl, fn.call, params, include.ast, result, include);
+                    await this.__applyParams(ctrl, fn.call, params, include.ast, result, include);
                     let fnCall = ctrl.prototype[fn.call];
                     let fnResult = fnCaller.call(ctrl, fnCall, params);
 
@@ -1526,7 +1533,7 @@ export class ODataProcessor extends Transform{
         if (!this.streamEnabled) this.resultCount = 0;
     }
 
-    private __applyParams(container:any, name:string, params:any, queryString?:string | Token, result?:any, include?){
+    private async __applyParams(container:any, name:string, params:any, queryString?:string | Token, result?:any, include?){
         let queryParam, filterParam, contextParam, streamParam, resultParam, idParam, bodyParam;
 
         queryParam = odata.getQueryParameter(container, name);
@@ -1543,6 +1550,7 @@ export class ODataProcessor extends Transform{
             if (typeof queryAst == "string"){
                 queryAst = ODataParser.query(queryAst, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx });
                 if (!include) queryAst = deepmerge(queryAst, this.resourcePath.ast.value.query || {});
+                await new ResourcePathVisitor(this.serverType, this.entitySets).Visit(queryAst, {}, (result || this.ctrl.prototype).elementType);
             }
             params[queryParam] = queryAst;
         }
@@ -1554,6 +1562,7 @@ export class ODataProcessor extends Transform{
                 filterAst = qs.parse(filterAst).$filter;
                 if (typeof filterAst == "string"){
                     filterAst = ODataParser.filter(filterAst, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx });
+                    await new ResourcePathVisitor(this.serverType, this.entitySets).Visit(<Token>filterAst, {}, (result || this.ctrl.prototype).elementType);
                 }
             }else{
                 let token = <Token>queryString;

@@ -2,7 +2,7 @@
 import { Token } from "odata-v4-parser/lib/lexer";
 import { createFilter } from "odata-v4-inmemory";
 import { ODataController, ODataServer, ODataProcessor, ODataMethodType, ODataResult, Edm, odata, ODataHttpContext, ODataStream, ODataEntity } from "../lib/index";
-import { Product, Category } from "../example/model";
+import { Product, Category } from "./model/model";
 import { ProductPromise, CategoryPromise } from "./model/ModelsForPromise";
 import { GeneratorProduct, GeneratorCategory } from "./model/ModelsForGenerator";
 import { StreamProduct, StreamCategory } from "./model/ModelsForStream";
@@ -13,8 +13,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as streamBuffers from "stream-buffers";
 const extend = require("extend");
-let categories = require("../example/categories").slice();
-let products = require("../example/products").slice();
+let categories = require("./model/categories").slice();
+let products = require("./model/products").slice();
 let categories2 = require("./model/categories").slice();
 let products2 = require("./model/products").slice();
 

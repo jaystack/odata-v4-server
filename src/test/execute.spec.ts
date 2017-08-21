@@ -2,15 +2,15 @@
 import { TestServer, Foobar } from './test.model';
 import { ODataServer, NotImplementedError } from "../lib/index";
 import { testFactory } from './server.spec'
-import { Product, Category } from "../example/model";
+import { Product, Category } from "./model/model";
 import * as fs from "fs";
 import * as path from "path";
 import * as streamBuffers from "stream-buffers";
 
 const { expect } = require("chai");
 const extend = require("extend");
-let categories = require("../example/categories");
-let products = require("../example/products");
+let categories = require("./model/categories");
+let products = require("./model/products");
 
 function createTestFactory(it) {
     return function createTest(testcase: string, server: typeof ODataServer, command: string, compare: any, body?: any) {

@@ -142,6 +142,7 @@ export class ResourcePathVisitor{
         await this.Visit(node.value, context, type);
         context.type = Edm.getType(type, node.raw, this.serverType.container);
         context.typeName = Edm.getTypeName(type, node.raw, this.serverType.container);
+        context.deserializer = Edm.getURLDeserializer(type, node.raw, context.type, this.serverType.container);
         if (Edm.isEnumType(type, node.raw)){
             const containerType = Object.getPrototypeOf(this.serverType.container).constructor;
             const enumType = context.type;
@@ -351,7 +352,7 @@ export class ResourcePathVisitor{
 
     protected async VisitSingleNavigation(node:Token, context:any, type: any){
         context.isCollection = false;
-        if (node.value.name) this.Visit(node.value.name, context, type);
+        if (node.value.name) await this.Visit(node.value.name, context, type);
         await this.Visit(node.value.path, context, type);
         delete context.isCollection;
     }
@@ -468,8 +469,14 @@ export class ResourcePathVisitor{
         context.literal = (name => _ => this.alias[name])(node.value.name);
     }
     
-    protected VisitLiteral(node:Token, context:any){
-        context.literal = Literal.convert(node.value, node.raw);
+    protected async VisitLiteral(node:Token, context:any, type:any){
+        let literal = Literal.convert(node.value, node.raw);
+        if (node.value != context.typeName){
+            node.raw = await (context.deserializer || (_ => _))(literal);
+            node.value = context.typeName;
+            literal = node.raw;
+        }
+        context.literal = literal;
     }
 
     protected VisitEnum(node:Token, context:any, type:any){

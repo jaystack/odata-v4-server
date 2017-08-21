@@ -1,6 +1,6 @@
 /// <reference types="mocha" />
 import { TestServer, Foobar, AuthenticationServer, Image, User, Location, Music } from './test.model';
-import { Product, Category } from "../example/model";
+import { Product, Category } from "./model/model";
 import { ODataServer } from "../lib/index";
 import { testFactory } from "./server.spec";
 import * as fs from "fs";
@@ -8,7 +8,7 @@ import * as path from "path";
 import * as streamBuffers from "stream-buffers";
 const { expect } = require("chai");
 const extend = require("extend");
-let categories = require("../example/categories");
+let categories = require("./model/categories");
 
 function createTest(testcase: string, server: typeof ODataServer, command: string, compare: any, body?: any) {
     let test = command.split(" ");

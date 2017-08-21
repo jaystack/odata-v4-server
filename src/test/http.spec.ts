@@ -3,7 +3,7 @@ import { ODataServer, createODataServer, NotImplementedError } from "../lib/inde
 import { testFactory } from './server.spec';
 import { MetaTestServer } from './metadata.spec';
 import { TestServer, Foobar } from './test.model';
-import { Product, Category } from "../example/model";
+import { Product, Category } from "./model/model";
 import { ObjectID } from "mongodb";
 import * as request from 'request-promise';
 import * as streamBuffers from "stream-buffers";
@@ -11,8 +11,8 @@ import * as fs from "fs";
 import * as path from "path";
 
 const extend = require("extend");
-let categories = require("../example/categories");
-let products = require("../example/products");
+let categories = require("./model/categories");
+let products = require("./model/products");
 const { expect } = require("chai");
 
 let serverCache = new WeakMap<typeof ODataServer, number>();
