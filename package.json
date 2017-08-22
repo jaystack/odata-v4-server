@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-server",
-  "version": "0.1.38",
+  "version": "0.2.0",
   "description": "OData V4 Server",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
@@ -19,7 +19,7 @@
     "test:execute": "nyc mocha --reporter mochawesome --reporter-options reportDir=report,reportName=odata-v4-server,reportTitle=\"OData V4 Server\" src/test/**/execute.spec.ts",
     "test:stream": "nyc mocha --reporter mochawesome --reporter-options reportDir=report,reportName=odata-v4-server,reportTitle=\"OData V4 Server\" src/test/**/stream.spec.ts",
     "test:metadata": "nyc mocha --reporter mochawesome --reporter-options reportDir=report,reportName=odata-v4-server,reportTitle=\"OData V4 Server\" src/test/**/metadata.spec.ts",
-    "prepublish": "npm test && npm run build",
+    "prepare": "npm test && npm run build",
     "typedoc": "rimraf docs && typedoc --name \"JayStack OData v4 Server\" --exclude \"**/?(utils|index).ts\" --excludeExternals --excludeNotExported --hideGenerator --excludePrivate --out docs src/lib/*.ts"
   },
   "watch": {
@@ -102,7 +102,6 @@
     "@types/mocha": "^2.2.32",
     "@types/mongodb": "^2.2.8",
     "@types/node": "^7.0.39",
-    "@types/node-uuid": "^0.0.28",
     "@types/request": "0.0.45",
     "@types/request-promise": "^4.1.36",
     "@types/stream-buffers": "^3.0.2",
