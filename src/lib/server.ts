@@ -74,6 +74,25 @@ export class ODataServerBase extends Transform{
     static namespace:string
     static container = new ContainerBase();
     private serverType:typeof ODataServer
+	
+	static function errorHandler(){
+		return (err, _, res, next) => {
+			if (err){
+				if (res.headersSent) {
+					return next(err);
+				}
+				let statusCode = err.statusCode || err.status || (res.statusCode < 400 ? 500 : res.statusCode);
+				if (!res.statusCode || res.statusCode < 400) res.status(statusCode);
+				res.send({
+					error: {
+						code: statusCode,
+						message: err.message,
+						stack: err.stack
+					}
+				});
+			}else next();
+		}		
+	}
 
     static requestHandler(){
         return (req:express.Request, res:express.Response, next:express.NextFunction) => {
@@ -274,7 +293,7 @@ export class ODataServerBase extends Transform{
         }, server.document().requestHandler());
         router.get("/\\$metadata", server.$metadata().requestHandler());
         router.use(server.requestHandler());
-        router.use(ODataErrorHandler);
+        router.use(server.errorHandler());
 
         if (typeof path == "number"){
             if (typeof port == "string"){
@@ -296,20 +315,7 @@ export class ODataServer extends ODataBase<ODataServerBase, typeof ODataServerBa
 /** ?????????? */
 /** Create Express middleware for OData error handling */
 export function ODataErrorHandler(err, _, res, next){
-    if (err){
-        if (res.headersSent) {
-            return next(err);
-        }
-        let statusCode = err.statusCode || err.status || (res.statusCode < 400 ? 500 : res.statusCode);
-        if (!res.statusCode || res.statusCode < 400) res.status(statusCode);
-        res.send({
-            error: {
-                code: statusCode,
-                message: err.message,
-                stack: err.stack
-            }
-        });
-    }else next();
+    return ODataServerBase.errorHandler()(err, _, res, next);
 }
 
 /** Create Express server for OData Server
