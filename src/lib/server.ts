@@ -1,6 +1,7 @@
 import { ServiceMetadata } from "odata-v4-service-metadata";
 import { ServiceDocument } from "odata-v4-service-document";
 import { Edm as Metadata } from "odata-v4-metadata";
+import * as ODataParser from "odata-v4-parser";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
@@ -8,7 +9,7 @@ import { Transform, TransformOptions } from "stream";
 import { ODataResult } from "./result";
 import { ODataController } from "./controller";
 import * as odata from "./odata";
-import { ODataBase } from "./odata";
+import { ODataBase, IODataConnector } from "./odata";
 import { createMetadataJSON } from "./metadata";
 import { ODataProcessor, ODataProcessorOptions, ODataMetadataType } from "./processor";
 import { HttpRequestError, UnsupportedMediaTypeError } from "./error";
@@ -73,6 +74,8 @@ export class ODataServerBase extends Transform{
     private static _metadataCache:any
     static namespace:string
     static container = new ContainerBase();
+    static parser = ODataParser;
+    static connector:IODataConnector;
     private serverType:typeof ODataServer
 
     static requestHandler(){

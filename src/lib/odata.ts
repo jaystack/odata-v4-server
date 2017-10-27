@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import { Token, TokenType } from "odata-v4-parser/lib/lexer";
 import { ODataServer } from "./server";
 import { ODataController } from "./controller";
 import { EntityType } from "./edm";
@@ -60,6 +61,47 @@ export function container(name: string) {
     return function (target: any, targetKey?: string) {
         if (targetKey) target[targetKey].containerName = name;
         else target.containerName = name;
+    };
+}
+
+/** Set parser
+ * @param parser Parser to use (odata-v4-parser compatible functional parser)
+ */
+export function parser(parser: any) {
+    return function (target: typeof ODataServer) {
+        target.parser = parser;
+    };
+}
+
+/** OData v4 connector interface
+ * odata-v4-server compatible connector
+ */
+export interface IODataConnector {
+    /**
+     * Creates compiled query object from an OData URI string
+     * @param {string} queryString - An OData query string
+     * @return {Visitor} Visitor instance
+     */
+    createQuery(odataQuery:string);
+    createQuery(odataQuery:Token);
+    createQuery(odataQuery:string | Token);
+
+    /**
+     * Creates a query object from an OData filter expression string
+     * @param {string} odataFilter - A filter expression in OData $filter format
+     * @return {Object}  query object
+     */
+    createFilter(odataFilter:string);
+    createFilter(odataFilter:Token);
+    createFilter(odataFilter:string | Token):Object;
+}
+
+/** Attach connector
+ * @param connector Connector to use
+ */
+export function connector(connector: IODataConnector) {
+    return function (target: typeof ODataServer) {
+        target.connector = connector;
     };
 }
 

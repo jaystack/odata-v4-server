@@ -1,5 +1,4 @@
 import { Token, TokenType } from "odata-v4-parser/lib/lexer";
-import * as ODataParser from "odata-v4-parser";
 import * as url from "url";
 import * as qs from "qs";
 import * as util from "util";
@@ -232,7 +231,7 @@ const expCalls = {
         if (linkUrl){
             linkUrl = decodeURIComponent(linkUrl);
             processor.emit("header", { "OData-EntityId": linkUrl });
-            linkAst = ODataParser.odataUri(linkUrl, { metadata: processor.serverType.$metadata().edmx });
+            linkAst = processor.serverType.parser.odataUri(linkUrl, { metadata: processor.serverType.$metadata().edmx });
             linkPath = await new ResourcePathVisitor(processor.serverType, processor.entitySets).Visit(linkAst);
             linkPart = linkPath.navigation[linkPath.navigation.length - 1];
         }else linkPart = prevPart;
@@ -460,7 +459,7 @@ export class ODataProcessor extends Transform{
         context.url = decodeURIComponent(context.url);
         this.url = url.parse(context.url);
         this.query = qs.parse(this.url.query);
-        let ast = ODataParser.odataUri(context.url, { metadata: this.serverType.$metadata().edmx });
+        let ast = this.serverType.parser.odataUri(context.url, { metadata: this.serverType.$metadata().edmx });
         let entitySets = this.entitySets = odata.getPublicControllers(this.serverType);
 
         this.workflow = [async (body) => {
@@ -1238,7 +1237,7 @@ export class ODataProcessor extends Transform{
                     });
                 }
             }
-            if (keys.length > 0){
+            if (keys.length > 0 && typeof id != "undefined"){
                 if (odata.findODataMethod(ctrl, "put", keys) ||
                     odata.findODataMethod(ctrl, "patch", keys)){
                         context["@odata.editLink"] = `${getODataRoot(this.context)}${this.context.url}(${id})`;
@@ -1548,11 +1547,11 @@ export class ODataProcessor extends Transform{
         if (queryParam){
             let queryAst = queryString || this.resourcePath.ast.value.query || null;
             if (typeof queryAst == "string"){
-                queryAst = ODataParser.query(queryAst, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx });
+                queryAst = this.serverType.parser.query(queryAst, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx });
                 if (!include) queryAst = deepmerge(queryAst, this.resourcePath.ast.value.query || {});
                 await new ResourcePathVisitor(this.serverType, this.entitySets).Visit(queryAst, {}, (result || this.ctrl.prototype).elementType);
             }
-            params[queryParam] = queryAst;
+            params[queryParam] = this.serverType.connector ? this.serverType.connector.createQuery(queryAst) : queryAst;
         }
 
         if (filterParam){
@@ -1561,7 +1560,7 @@ export class ODataProcessor extends Transform{
             if (typeof filterAst == "string"){
                 filterAst = qs.parse(filterAst).$filter;
                 if (typeof filterAst == "string"){
-                    filterAst = ODataParser.filter(filterAst, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx });
+                    filterAst = this.serverType.parser.filter(filterAst, { metadata: this.resourcePath.ast.metadata || this.serverType.$metadata().edmx });
                     await new ResourcePathVisitor(this.serverType, this.entitySets).Visit(<Token>filterAst, {}, (result || this.ctrl.prototype).elementType);
                 }
             }else{
@@ -1571,7 +1570,7 @@ export class ODataProcessor extends Transform{
             if (filterAst && !include){
                 filterAst = deepmerge(filterAst, (resourceFilterAst || {}).value || {});
             }
-            params[filterParam] = filterAst;
+            params[filterParam] = this.serverType.connector ? this.serverType.connector.createFilter(filterAst) : filterAst;
         }
 
         if (contextParam){

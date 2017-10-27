@@ -87,3 +87,5 @@ createODataServer(NorthwindODataServer, "/odata", 3000);
 process.on("warning", warning => {
     console.log(warning.stack);
 });
+
+Error.stackTraceLimit = -1;
