@@ -1555,9 +1555,6 @@ export class ODataProcessor extends Transform {
                 if (!include) queryAst = deepmerge(queryAst, this.resourcePath.ast.value.query || {});
                 await new ResourcePathVisitor(this.serverType, this.entitySets).Visit(queryAst, {}, (result || this.ctrl.prototype).elementType);
             }
-            if (this.serverType.validator) {
-                this.serverType.validator(queryAst);
-            }
             params[queryParam] = this.serverType.connector ? this.serverType.connector.createQuery(queryAst, elementType) : queryAst;
         }
 
@@ -1576,9 +1573,6 @@ export class ODataProcessor extends Transform {
             }
             if (filterAst && !include) {
                 filterAst = deepmerge(filterAst, (resourceFilterAst || {}).value || {});
-            }
-            if (this.serverType.validator) {
-                this.serverType.validator(filterAst);
             }
             params[filterParam] = this.serverType.connector ? this.serverType.connector.createFilter(filterAst, elementType) : filterAst;
         }
