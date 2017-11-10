@@ -2,6 +2,7 @@ import { ServiceMetadata } from "odata-v4-service-metadata";
 import { ServiceDocument } from "odata-v4-service-document";
 import { Edm as Metadata } from "odata-v4-metadata";
 import * as ODataParser from "odata-v4-parser";
+import { Token, TokenType } from "odata-v4-parser/lib/lexer";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
@@ -75,7 +76,8 @@ export class ODataServerBase extends Transform{
     static namespace:string
     static container = new ContainerBase();
     static parser = ODataParser;
-    static connector:IODataConnector;
+    static connector:IODataConnector
+    static validator:(odataQuery:string | Token) => null;
     private serverType:typeof ODataServer
 
     static requestHandler(){

@@ -29,15 +29,15 @@ const ODataTypeParameter: string = "odata:typeparameter";
 /** Set element type
  * @param elementType The type of element
  */
-export function type(elementType:any);
-export function type(target:any, targetKey:string, parameterIndex:number);
-export function type(elementType: Function, targetKey?, parameterIndex?):Function | void {
-    if (typeof parameterIndex == "number"){
+export function type(elementType: any);
+export function type(target: any, targetKey: string, parameterIndex: number);
+export function type(elementType: Function, targetKey?, parameterIndex?): Function | void {
+    if (typeof parameterIndex == "number") {
         let target = elementType;
         let parameterNames = getFunctionParameters(target, targetKey);
         let paramName = parameterNames[parameterIndex];
         Reflect.defineMetadata(ODataTypeParameter, paramName, target, targetKey);
-    }else{
+    } else {
         return function (constructor: Function) {
             constructor.prototype.elementType = elementType;
         };
@@ -82,18 +82,18 @@ export interface IODataConnector {
      * @param {string} queryString - An OData query string
      * @return {Visitor} Visitor instance
      */
-    createQuery(odataQuery:string);
-    createQuery(odataQuery:Token);
-    createQuery(odataQuery:string | Token);
+    createQuery(odataQuery: string);
+    createQuery(odataQuery: Token);
+    createQuery(odataQuery: string | Token, entityType?: Function);
 
     /**
      * Creates a query object from an OData filter expression string
      * @param {string} odataFilter - A filter expression in OData $filter format
      * @return {Object}  query object
      */
-    createFilter(odataFilter:string);
-    createFilter(odataFilter:Token);
-    createFilter(odataFilter:string | Token):Object;
+    createFilter(odataFilter: string): Object;
+    createFilter(odataFilter: Token): Object;
+    createFilter(odataFilter: string | Token, entityType?: Function): Object;
 }
 
 /** Attach connector
@@ -102,6 +102,32 @@ export interface IODataConnector {
 export function connector(connector: IODataConnector) {
     return function (target: typeof ODataServer) {
         target.connector = connector;
+    };
+}
+
+export interface IODataValidatorOptions {
+    [option: string]: any;
+}
+
+export interface IODataValidator {
+    /**
+     * Validates OData query AST using validator options parameter
+     * @param {string} odataQuery - An OData query string
+     * @return {null} If validation succeeds, returns null, otherwise throws a ValidationError
+     */
+    validate(odataQuery: string, options: IODataValidatorOptions);
+    validate(odataQuery: Token, options: IODataValidatorOptions);
+    validate(odataQuery: string | Token, options: IODataValidatorOptions);
+}
+
+/** Attach validator
+ * @param connector Connector to use
+ */
+export function validation(validator: IODataValidator, options: IODataValidatorOptions) {
+    return function (target: typeof ODataServer) {
+        target.validator = function (odataQuery: string | Token) {
+            return validator.validate(odataQuery, options);
+        };
     };
 }
 
@@ -161,14 +187,14 @@ export const cors = (function cors() {
     };
 })();
 
-function odataMethodFactory(type: string, navigationProperty?: string):ODataMethodDecorator | RefExpressionDecorator {
+function odataMethodFactory(type: string, navigationProperty?: string): ODataMethodDecorator | RefExpressionDecorator {
     if (type.indexOf("/") < 0) type = type.toLowerCase();
     let decorator: any = function (target, targetKey) {
         let existingMethods: any[] = Reflect.getMetadata(ODataMethod, target, targetKey) || [];
         existingMethods.unshift(type);
         Reflect.defineMetadata(ODataMethod, existingMethods, target, targetKey);
     }
-    let createRefFn = function(navigationProperty){
+    let createRefFn = function (navigationProperty) {
         let fn = odataMethodFactory(`${type}/${navigationProperty}`);
         (<RefExpressionDecorator>fn).$ref = function (target, targetKey) {
             let existingMethods: any[] = Reflect.getMetadata(ODataMethod, target, targetKey) || [];
@@ -178,7 +204,7 @@ function odataMethodFactory(type: string, navigationProperty?: string):ODataMeth
         return <RefExpressionDecorator>fn;
     };
     if (typeof navigationProperty == "string") return createRefFn(navigationProperty);
-    let fn:any = <ExpressionDecorator>function (target: any, targetKey?: string): any {
+    let fn: any = <ExpressionDecorator>function (target: any, targetKey?: string): any {
         if (typeof target == "string") return createRefFn(target);
         if (arguments.length == 0) return fn;
         else decorator(target, targetKey);
@@ -192,116 +218,116 @@ function odataMethodFactory(type: string, navigationProperty?: string):ODataMeth
     return <ODataMethodDecorator>fn;
 }
 
-export interface ExpressionDecorator extends PropertyDecorator<ExpressionDecorator>, TypedPropertyDescriptor<any>{
+export interface ExpressionDecorator extends PropertyDecorator<ExpressionDecorator>, TypedPropertyDescriptor<any> {
     /** Annotate function for $value handler */
-    $value:PropertyDecorator<void>
+    $value: PropertyDecorator<void>
     /** Annotate function for $count handler */
-    $count:PropertyDecorator<void>
+    $count: PropertyDecorator<void>
 }
-export interface RefExpressionDecorator extends ExpressionDecorator{
-    $ref:PropertyDecorator<void>
+export interface RefExpressionDecorator extends ExpressionDecorator {
+    $ref: PropertyDecorator<void>
 }
-export interface ODataMethodDecorator extends ExpressionDecorator{
-    ():ExpressionDecorator
-    (navigationProperty: string):RefExpressionDecorator
+export interface ODataMethodDecorator extends ExpressionDecorator {
+    (): ExpressionDecorator
+    (navigationProperty: string): RefExpressionDecorator
 }
 
-export interface RefExpressionGETDecorator extends ExpressionDecorator{
+export interface RefExpressionGETDecorator extends ExpressionDecorator {
     /** Create reference for OData GET operation */
-    $ref:PropertyDecorator<void>
+    $ref: PropertyDecorator<void>
 }
-export interface ODataGETMethodDecorator extends ExpressionDecorator{
+export interface ODataGETMethodDecorator extends ExpressionDecorator {
     /** Annotate function for OData GET operation */
-    ():ExpressionDecorator
+    (): ExpressionDecorator
     /** Annotate function for OData GET operation
      * @param navigationProperty Navigation property name to handle
      */
-    (navigationProperty: string):RefExpressionGETDecorator
+    (navigationProperty: string): RefExpressionGETDecorator
     /** Annotate function for OData GET operation
      * @param target    The prototype of the class for an instance member
      * @param targetKey The name of the class method
      */
-    (target?: any, targetKey?: string):ExpressionDecorator;
+    (target?: any, targetKey?: string): ExpressionDecorator;
 }
 /** Annotate function for OData GET operation */
 export const GET = <ODataGETMethodDecorator>odataMethodFactory("GET");
 
-export interface RefExpressionPOSTDecorator extends ExpressionDecorator{
+export interface RefExpressionPOSTDecorator extends ExpressionDecorator {
     /** Create reference for OData POST operation */
-    $ref:PropertyDecorator<void>
+    $ref: PropertyDecorator<void>
 }
-export interface ODataPOSTMethodDecorator extends ExpressionDecorator{
+export interface ODataPOSTMethodDecorator extends ExpressionDecorator {
     /** Annotate function for OData POST operation */
-    ():ExpressionDecorator
+    (): ExpressionDecorator
     /** Annotate function for OData POST operation
      * @param navigationProperty Navigation property name to handle
      */
-    (navigationProperty: string):RefExpressionPOSTDecorator
+    (navigationProperty: string): RefExpressionPOSTDecorator
     /** Annotate function for OData POST operation
      * @param target    The prototype of the class for an instance member
      * @param targetKey The name of the class method
      */
-    (target?: any, targetKey?: string):ExpressionDecorator;
+    (target?: any, targetKey?: string): ExpressionDecorator;
 }
 /** Annotate function for OData POST operation */
 export const POST = <ODataPOSTMethodDecorator>odataMethodFactory("POST");
 
-export interface RefExpressionPUTDecorator extends ExpressionDecorator{
+export interface RefExpressionPUTDecorator extends ExpressionDecorator {
     /** Create reference for OData PUT operation */
-    $ref:PropertyDecorator<void>
+    $ref: PropertyDecorator<void>
 }
-export interface ODataPUTMethodDecorator extends ExpressionDecorator{
+export interface ODataPUTMethodDecorator extends ExpressionDecorator {
     /** Annotate function for OData PUT operation */
-    ():ExpressionDecorator
+    (): ExpressionDecorator
     /** Annotate function for OData PUT operation
      * @param navigationProperty Navigation property name to handle
      */
-    (navigationProperty: string):RefExpressionPUTDecorator
+    (navigationProperty: string): RefExpressionPUTDecorator
     /** Annotate function for OData PUT operation
      * @param target    The prototype of the class for an instance member
      * @param targetKey The name of the class method
      */
-    (target?: any, targetKey?: string):ExpressionDecorator;
+    (target?: any, targetKey?: string): ExpressionDecorator;
 }
 /** Annotate function for OData PUT operation */
 export const PUT = <ODataPUTMethodDecorator>odataMethodFactory("PUT");
 
-export interface RefExpressionPATCHDecorator extends ExpressionDecorator{
+export interface RefExpressionPATCHDecorator extends ExpressionDecorator {
     /** Create reference for OData PATCH operation */
-    $ref:PropertyDecorator<void>
+    $ref: PropertyDecorator<void>
 }
-export interface ODataPATCHMethodDecorator extends ExpressionDecorator{
+export interface ODataPATCHMethodDecorator extends ExpressionDecorator {
     /** Annotate function for OData PATCH operation */
-    ():ExpressionDecorator
+    (): ExpressionDecorator
     /** Annotate function for OData PATCH operation
      * @param navigationProperty Navigation property name to handle
      */
-    (navigationProperty: string):RefExpressionPATCHDecorator
+    (navigationProperty: string): RefExpressionPATCHDecorator
     /** Annotate function for OData PATCH operation
      * @param target    The prototype of the class for an instance member
      * @param targetKey The name of the class method
      */
-    (target?: any, targetKey?: string):ExpressionDecorator;
+    (target?: any, targetKey?: string): ExpressionDecorator;
 }
 /** Annotate function for OData PATCH operation */
 export const PATCH = <ODataPATCHMethodDecorator>odataMethodFactory("PATCH");
 
-export interface RefExpressionDELETEDecorator extends ExpressionDecorator{
+export interface RefExpressionDELETEDecorator extends ExpressionDecorator {
     /** Create reference for OData DELETE operation */
-    $ref:PropertyDecorator<void>
+    $ref: PropertyDecorator<void>
 }
-export interface ODataDELETEMethodDecorator extends ExpressionDecorator{
+export interface ODataDELETEMethodDecorator extends ExpressionDecorator {
     /** Annotate function for OData DELETE operation */
-    ():ExpressionDecorator
+    (): ExpressionDecorator
     /** Annotate function for OData DELETE operation
      * @param navigationProperty Navigation property name to handle
      */
-    (navigationProperty: string):RefExpressionDELETEDecorator
+    (navigationProperty: string): RefExpressionDELETEDecorator
     /** Annotate function for OData DELETE operation
      * @param target    The prototype of the class for an instance member
      * @param targetKey The name of the class method
      */
-    (target?: any, targetKey?: string):ExpressionDecorator;
+    (target?: any, targetKey?: string): ExpressionDecorator;
 }
 /** Annotate function for OData DELETE operation */
 export const DELETE = <ODataDELETEMethodDecorator>odataMethodFactory("DELETE");
@@ -326,11 +352,11 @@ export function deleteRef(navigationProperty: string) {
 }
 
 /** Annotate function for a specified OData method operation */
-export function method(method: string):ODataMethodDecorator;
+export function method(method: string): ODataMethodDecorator;
 /** Annotate function for a specified OData method operation */
-export function method(method: string, navigationProperty: string):RefExpressionDecorator;
+export function method(method: string, navigationProperty: string): RefExpressionDecorator;
 /** Annotate function for a specified OData method operation */
-export function method(method: string, navigationProperty?: string):ODataMethodDecorator | RefExpressionDecorator {
+export function method(method: string, navigationProperty?: string): ODataMethodDecorator | RefExpressionDecorator {
     return odataMethodFactory(method.toUpperCase(), navigationProperty);
 }
 /** get metadata value of ODataMethod on the prototype chain of target or targetKey
@@ -660,45 +686,45 @@ export function parameters(parameters: any) {
     }
 }
 
-export interface IODataBase<T, C>{
+export interface IODataBase<T, C> {
     new(...args: any[]): T;
-    define?(...decorators:Array<Function | Object>): IODataBase<T, C> & C;
+    define?(...decorators: Array<Function | Object>): IODataBase<T, C> & C;
 }
-export function ODataBase<T, C>(Base: C): IODataBase<T, C> & C{
+export function ODataBase<T, C>(Base: C): IODataBase<T, C> & C {
     class ODataBaseClass extends (<any>Base) {
         /** Define class, properties and parameters with decorators */
-        static define(...decorators:Array<Function | Object>): IODataBase<T, C> & C{
+        static define(...decorators: Array<Function | Object>): IODataBase<T, C> & C {
             decorators.forEach(decorator => {
-                if (typeof decorator == 'function'){
+                if (typeof decorator == 'function') {
                     decorator(this);
-                }else if (typeof decorator == 'object'){
+                } else if (typeof decorator == 'object') {
                     let props = Object.keys(decorator);
                     props.forEach(prop => {
                         let propDecorators = decorator[prop];
                         if (!Array.isArray(propDecorators)) propDecorators = [propDecorators];
                         propDecorators.forEach(propDecorator => {
-                            if (typeof propDecorator == 'function'){
+                            if (typeof propDecorator == 'function') {
                                 propDecorator(this.prototype, prop);
-                            }else if (typeof propDecorator == 'object'){
+                            } else if (typeof propDecorator == 'object') {
                                 let params = Object.keys(propDecorator);
                                 let parameterNames = getFunctionParameters(this.prototype[prop]);
                                 params.forEach(param => {
                                     let paramDecorators = propDecorator[param];
                                     if (!Array.isArray(paramDecorators)) paramDecorators = [paramDecorators];
                                     paramDecorators.forEach(paramDecorator => {
-                                        if (typeof paramDecorator == 'function'){
+                                        if (typeof paramDecorator == 'function') {
                                             paramDecorator(this.prototype, prop, parameterNames.indexOf(param));
-                                        }else{
+                                        } else {
                                             throw new Error(`Unsupported parameter decorator on ${this.name || this} at ${prop}.${param} using ${paramDecorator}`);
                                         }
                                     });
                                 });
-                            }else{
+                            } else {
                                 throw new Error(`Unsupported member decorator on ${this.name || this} at ${prop} using ${propDecorator}`);
                             }
                         });
                     });
-                }else{
+                } else {
                     throw new Error(`Unsupported decorator on ${this.name || this} using ${decorator}`);
                 }
             });
@@ -709,5 +735,5 @@ export function ODataBase<T, C>(Base: C): IODataBase<T, C> & C{
     return <IODataBase<T, C> & C>ODataBaseClass;
 }
 
-export class ODataEntityBase{}
-export class ODataEntity extends ODataBase<ODataEntityBase, typeof ODataEntityBase>(ODataEntityBase){}
+export class ODataEntityBase { }
+export class ODataEntity extends ODataBase<ODataEntityBase, typeof ODataEntityBase>(ODataEntityBase) { }
