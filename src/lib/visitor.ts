@@ -506,5 +506,6 @@ export class ResourcePathVisitor {
         node.type = TokenType.Literal;
         node.value = rootValue.elementType;
         node.raw = await <any>Edm.escape(rootValue.body.value, node.value);
+        await this.Visit(node, context, type);
     }
 }
