@@ -1547,7 +1547,7 @@ export class ODataProcessor extends Transform {
         bodyParam = odata.getBodyParameter(container, name);
         let typeParam = odata.getTypeParameter(container, name);
 
-        let elementType = (result && result.elementType) || this.ctrl.prototype.elementType || null;
+        let elementType = (result && result.elementType) || (this.ctrl && this.ctrl.prototype.elementType) || null;
         if (queryParam) {
             let queryAst = queryString || this.resourcePath.ast.value.query || null;
             if (typeof queryAst == "string") {
