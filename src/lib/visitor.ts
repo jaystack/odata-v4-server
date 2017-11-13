@@ -5,43 +5,43 @@ import { ODataServer } from "./server";
 import { ODataController } from "./controller";
 import * as Edm from "./edm";
 
-export interface KeyValuePair{
-    name:string
-    value:any,
-    raw?:string
-    node:Token
+export interface KeyValuePair {
+    name: string
+    value: any,
+    raw?: string
+    node: Token
 }
 
-export interface NavigationPart{
-    name:string
-    type:TokenType
-    key?:KeyValuePair[]
-    params?:any
-    node:Token
+export interface NavigationPart {
+    name: string
+    type: TokenType
+    key?: KeyValuePair[]
+    params?: any
+    node: Token
 }
 
 export const ODATA_TYPE = "@odata.type";
 export const ODATA_TYPENAME = "@odata.type.name";
-export class ResourcePathVisitor{
+export class ResourcePathVisitor {
     private serverType: typeof ODataServer
     private entitySets: {
-        [entitySet:string]: typeof ODataController
+        [entitySet: string]: typeof ODataController
     }
 
-    navigation:NavigationPart[]
-    alias:any
-    path:string
-    singleton:string
-    inlinecount:boolean
-    id:string
-    ast:Token
-    navigationProperty:string
-    query:any
-    includes:{
+    navigation: NavigationPart[]
+    alias: any
+    path: string
+    singleton: string
+    inlinecount: boolean
+    id: string
+    ast: Token
+    navigationProperty: string
+    query: any
+    includes: {
         [navigationProperty: string]: ResourcePathVisitor
     } = {};
 
-    constructor(serverType: typeof ODataServer, entitySets: { [entitySet:string]: typeof ODataController }){
+    constructor(serverType: typeof ODataServer, entitySets: { [entitySet: string]: typeof ODataController }) {
         this.navigation = [];
         this.path = "";
         this.alias = {};
@@ -49,15 +49,15 @@ export class ResourcePathVisitor{
         this.entitySets = entitySets;
     }
 
-    async Visit(node:Token, context?:any, type?: any):Promise<ResourcePathVisitor>{
+    async Visit(node: Token, context?: any, type?: any): Promise<ResourcePathVisitor> {
         this.ast = this.ast || node;
         if (!type) type = this.serverType;
         context = context || {};
 
-        if (node){
+        if (node) {
             node[ODATA_TYPE] = type;
             let visitor;
-            switch (node.type){
+            switch (node.type) {
                 case "PrimitiveFunctionImportCall":
                 case "PrimitiveCollectionFunctionImportCall":
                 case "ComplexFunctionImportCall":
@@ -90,20 +90,20 @@ export class ResourcePathVisitor{
                 default:
                     visitor = this[`Visit${node.type}`];
             }
-            
+
             if (visitor) await visitor.call(this, node, context, type);
         }
 
         return this;
     }
 
-    protected async VisitODataUri(node:Token, context:any){
+    protected async VisitODataUri(node: Token, context: any) {
         await this.Visit(node.value.resource, context);
         await this.Visit(node.value.query, context, this.navigation[this.navigation.length - 1].node[ODATA_TYPE]);
         this.navigation.forEach(it => {
-            if (it.params){
-                for (let prop in it.params){
-                    if (typeof it.params[prop] == "function"){
+            if (it.params) {
+                for (let prop in it.params) {
+                    if (typeof it.params[prop] == "function") {
                         it.params[prop] = it.params[prop]();
                     }
                 }
@@ -111,99 +111,99 @@ export class ResourcePathVisitor{
         });
     }
 
-    protected async VisitQueryOptions(node:Token, context:any, type: any){
+    protected async VisitQueryOptions(node: Token, context: any, type: any) {
         await Promise.all(node.value.options.map(async (option) => await this.Visit(option, Object.assign({}, context), type)));
     }
 
-    protected async VisitFilter(node:Token, context:any, type:any){
+    protected async VisitFilter(node: Token, context: any, type: any) {
         context = Object.assign({ filter: true }, context);
         await this.Visit(node.value, context, type);
     }
 
-    protected async VisitAndExpression(node:Token, context:any, type:any){
+    protected async VisitAndExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
         await this.Visit(node.value.right, context, type);
     }
 
-    protected async VisitOrExpression(node:Token, context:any, type:any){
+    protected async VisitOrExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
         await this.Visit(node.value.right, context, type);
     }
 
-    protected async VisitBoolParenExpression(node:Token, context:any, type:any){
-		await this.Visit(node.value, context, type);
-	}
+    protected async VisitBoolParenExpression(node: Token, context: any, type: any) {
+        await this.Visit(node.value, context, type);
+    }
 
-	protected async VisitCommonExpression(node:Token, context:any, type:any){
-		await this.Visit(node.value, context, type);
-	}
+    protected async VisitCommonExpression(node: Token, context: any, type: any) {
+        await this.Visit(node.value, context, type);
+    }
 
-	protected async VisitFirstMemberExpression(node:Token, context:any, type:any){
+    protected async VisitFirstMemberExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value, context, type);
         context.type = Edm.getType(type, node.raw, this.serverType.container);
         context.typeName = Edm.getTypeName(type, node.raw, this.serverType.container);
         context.deserializer = Edm.getURLDeserializer(type, node.raw, context.type, this.serverType.container);
-        if (Edm.isEnumType(type, node.raw)){
+        if (Edm.isEnumType(type, node.raw)) {
             const containerType = Object.getPrototypeOf(this.serverType.container).constructor;
             const enumType = context.type;
             const prop = node.raw;
             let enumName = context.typeName;
             let enumNamespace = containerType.namespace;
 
-            if (enumName.indexOf(".") > 0){
+            if (enumName.indexOf(".") > 0) {
                 enumNamespace = enumName.slice(0, enumName.lastIndexOf("."));
                 enumName = enumName.slice(enumName.lastIndexOf(".") + 1);
             }
             context.typeName = Edm.getTypeName(containerType, enumName, this.serverType.container) || "Edm.Int32";
         }
-	}
-
-	protected async VisitMemberExpression(node:Token, context:any, type:any){
-		await this.Visit(node.value, context, type);
     }
-    
-    protected async VisitPropertyPathExpression(node:Token, context:any, type:any){
-        if (node.value.current && node.value.next){
+
+    protected async VisitMemberExpression(node: Token, context: any, type: any) {
+        await this.Visit(node.value, context, type);
+    }
+
+    protected async VisitPropertyPathExpression(node: Token, context: any, type: any) {
+        if (node.value.current && node.value.next) {
             await this.Visit(node.value.current, context, type);
             await this.Visit(node.value.next, context, type);
-        }else await this.Visit(node.value, context, type);
-    }
-    
-    protected async VisitNotExpression(node:Token, context:any, type:any){
-		await this.Visit(node.value, context, type);
+        } else await this.Visit(node.value, context, type);
     }
 
-    protected async VisitEqualsExpression(node:Token, context:any, type:any){
+    protected async VisitNotExpression(node: Token, context: any, type: any) {
+        await this.Visit(node.value, context, type);
+    }
+
+    protected async VisitEqualsExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
         await this.Visit(node.value.right, context, type);
     }
 
-    protected async VisitNotEqualsExpression(node:Token, context:any, type:any){
+    protected async VisitNotEqualsExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
         await this.Visit(node.value.right, context, type);
     }
 
-    protected async VisitLesserThanExpression(node:Token, context:any, type:any){
+    protected async VisitLesserThanExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
         await this.Visit(node.value.right, context, type);
     }
 
-    protected async VisitLesserOrEqualsExpression(node:Token, context:any, type:any){
+    protected async VisitLesserOrEqualsExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
         await this.Visit(node.value.right, context, type);
     }
 
-    protected async VisitGreaterThanExpression(node:Token, context:any, type:any){
+    protected async VisitGreaterThanExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
         await this.Visit(node.value.right, context, type);
     }
 
-    protected async VisitGreaterOrEqualsExpression(node:Token, context:any, type:any){
+    protected async VisitGreaterOrEqualsExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
         await this.Visit(node.value.right, context, type);
     }
 
-    protected async VisitHasExpression(node:Token, context:any, type:any){
+    protected async VisitHasExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
         await this.Visit(node.value.right, context, context.type || type);
     }
@@ -212,7 +212,7 @@ export class ResourcePathVisitor{
         await Promise.all(node.value.items.map(async (item) => {
             let expandPath = item.value.path.raw;
             let visitor = this.includes[expandPath];
-            if (!visitor){
+            if (!visitor) {
                 visitor = new ResourcePathVisitor(node[ODATA_TYPE], this.entitySets);
                 this.includes[expandPath] = visitor;
             }
@@ -223,7 +223,7 @@ export class ResourcePathVisitor{
     protected async VisitExpandItem(node: Token, context: any, type: any) {
         await this.Visit(node.value.path, context, type);
         type = this.navigation[this.navigation.length - 1].node[ODATA_TYPE] || type;
-        if (node.value.options){
+        if (node.value.options) {
             this.ast = new Token(node);
             this.ast.type = TokenType.QueryOptions;
             this.ast.raw = node.value.options.map(n => n.raw).join("&");
@@ -235,50 +235,50 @@ export class ResourcePathVisitor{
     }
 
     protected async VisitExpandPath(node: Token, context: any, type: any) {
-        for (let item of node.value){
+        for (let item of node.value) {
             await this.Visit(item, Object.assign({}, context), type);
             type = item[ODATA_TYPE] || type;
         }
-        for (let i = this.navigation.length - 1; i >= 0; i--){
+        for (let i = this.navigation.length - 1; i >= 0; i--) {
             let nav = this.navigation[i];
-            if (nav.type == TokenType.EntityCollectionNavigationProperty || nav.type == TokenType.EntityNavigationProperty){
+            if (nav.type == TokenType.EntityCollectionNavigationProperty || nav.type == TokenType.EntityNavigationProperty) {
                 this.navigationProperty = nav.name;
                 break;
             }
         }
     }
 
-    protected VisitId(node:Token){
+    protected VisitId(node: Token) {
         this.id = node.value;
     }
 
-    protected VisitInlineCount(node:Token){
+    protected VisitInlineCount(node: Token) {
         this.inlinecount = Literal.convert(node.value.value, node.value.raw);
     }
-    
-    protected async VisitAliasAndValue(node:Token, context:any){
+
+    protected async VisitAliasAndValue(node: Token, context: any) {
         await this.Visit(node.value.value.value, context);
         this.alias[node.value.alias.value.name] = context.literal;
         delete context.literal;
     }
-    
-    protected async VisitResourcePath(node:Token, context:any){
+
+    protected async VisitResourcePath(node: Token, context: any) {
         await this.Visit(node.value.resource, context);
         await this.Visit(node.value.navigation, context, context[ODATA_TYPE]);
         delete context[ODATA_TYPE];
     }
 
-    protected VisitSingletonEntity(node:Token){
+    protected VisitSingletonEntity(node: Token) {
         this.singleton = node.raw;
     }
 
-    protected VisitEntitySetName(node:Token, context: any){
+    protected VisitEntitySetName(node: Token, context: any) {
         node[ODATA_TYPE] = context[ODATA_TYPE] = this.entitySets[node.value.name].prototype.elementType;
         this.navigation.push({ name: node.value.name, type: node.type, node });
         this.path += "/" + node.value.name;
     }
 
-    protected VisitCountExpression(node:Token){
+    protected VisitCountExpression(node: Token) {
         this.navigation.push({
             name: "$count",
             type: node.type,
@@ -288,18 +288,18 @@ export class ResourcePathVisitor{
         this.path += "/$count";
     };
 
-    protected async VisitCollectionNavigation(node:Token, context:any, type: any){
+    protected async VisitCollectionNavigation(node: Token, context: any, type: any) {
         context.isCollection = true;
         await this.Visit(node.value.path, context, type);
         delete context.isCollection;
     }
 
-    protected async VisitCollectionNavigationPath(node:Token, context:any, type: any){
+    protected async VisitCollectionNavigationPath(node: Token, context: any, type: any) {
         await this.Visit(node.value.predicate, context, type);
         await this.Visit(node.value.navigation, context, type);
     }
 
-    protected async VisitSimpleKey(node:Token, _:any, type:any){
+    protected async VisitSimpleKey(node: Token, _: any, type: any) {
         let lastNavigationPart = this.navigation[this.navigation.length - 1];
         node[ODATA_TYPENAME] = Edm.getTypeName(type, node.value.key, this.serverType.container);
         node[ODATA_TYPE] = Edm.getType(type, node.value.key, this.serverType.container);
@@ -315,11 +315,11 @@ export class ResourcePathVisitor{
         this.path += "(\\(([^,]+)\\))";
     }
 
-    protected async VisitCompoundKey(node:Token, _:any, type:any){
+    protected async VisitCompoundKey(node: Token, _: any, type: any) {
         this.path += "(\\(";
         let lastNavigationPart = this.navigation[this.navigation.length - 1];
         lastNavigationPart.key = await Promise.all<KeyValuePair>(node.value.map(async (pair, i) => {
-            this.path += i == node.value.length -1 ? "([^,]+)" : "([^,]+,)";
+            this.path += i == node.value.length - 1 ? "([^,]+)" : "([^,]+,)";
             node[ODATA_TYPENAME] = Edm.getTypeName(type, pair.value.key.value.name, this.serverType.container);
             node[ODATA_TYPE] = Edm.getType(type, pair.value.key.value.name, this.serverType.container);
             let value = Literal.convert(pair.value.value.value, pair.value.value.raw);
@@ -335,10 +335,10 @@ export class ResourcePathVisitor{
         this.path += "\\))";
     }
 
-    protected VisitQualifiedTypeName(node:Token, context:any, type:any){
+    protected VisitQualifiedTypeName(node: Token, context: any, type: any) {
         const children = Edm.getChildren(node[ODATA_TYPE]);
         const child = children.find(t => `${t.namespace}.${t.name}` == node.raw);
-        if (child){
+        if (child) {
             node[ODATA_TYPE] = child;
             node[ODATA_TYPENAME] = node.raw;
             this.navigation.push({
@@ -350,26 +350,26 @@ export class ResourcePathVisitor{
         }
     }
 
-    protected async VisitSingleNavigation(node:Token, context:any, type: any){
+    protected async VisitSingleNavigation(node: Token, context: any, type: any) {
         context.isCollection = false;
         if (node.value.name) await this.Visit(node.value.name, context, type);
         await this.Visit(node.value.path, context, type);
         delete context.isCollection;
     }
 
-    protected async VisitPropertyPath(node:Token, context:any, type: any){
+    protected async VisitPropertyPath(node: Token, context: any, type: any) {
         await this.Visit(node.value.path, context, type);
         await this.Visit(node.value.navigation, context, type);
     }
 
-    protected VisitProperty(node:Token, _:any){
+    protected VisitProperty(node: Token, _: any) {
         node[ODATA_TYPENAME] = Edm.getTypeName(node[ODATA_TYPE], node.value.name, this.serverType.container);
         node[ODATA_TYPE] = Edm.getType(node[ODATA_TYPE], node.value.name, this.serverType.container);
         this.navigation.push({ name: node.value.name, type: node.type, node });
         this.path += "/" + node.value.name;
     };
 
-    protected VisitValueExpression(node:Token){
+    protected VisitValueExpression(node: Token) {
         this.navigation.push({
             name: "$value",
             type: node.type,
@@ -379,7 +379,7 @@ export class ResourcePathVisitor{
         this.path += "/$value";
     }
 
-    protected VisitRefExpression(node:Token){
+    protected VisitRefExpression(node: Token) {
         this.navigation.push({
             name: "$ref",
             type: node.type,
@@ -389,12 +389,12 @@ export class ResourcePathVisitor{
         this.path += "/$ref";
     }
 
-    protected async VisitBoundOperation(node:Token, context:any, type:any){
+    protected async VisitBoundOperation(node: Token, context: any, type: any) {
         await this.Visit(node.value.operation, context, type);
         await this.Visit(node.value.navigation, context, type);
     }
 
-    protected VisitBoundActionCall(node:Token){
+    protected VisitBoundActionCall(node: Token) {
         let part = {
             type: node.type,
             name: node.raw,
@@ -404,7 +404,7 @@ export class ResourcePathVisitor{
         this.path += "/" + part.name;
     }
 
-    protected async VisitBoundFunctionCall(node:Token, context:any, type:any){
+    protected async VisitBoundFunctionCall(node: Token, context: any, type: any) {
         let part = {
             type: node.type,
             name: node.value.call.value.namespace + "." + node.value.call.value.name,
@@ -414,7 +414,7 @@ export class ResourcePathVisitor{
         this.navigation.push(part);
         this.path += "/" + part.name;
         this.path += "(\\(";
-        if (context.isCollection){
+        if (context.isCollection) {
             type = this.serverType.getController(type);
         }
         context.parameters = Edm.getParameters(type, part.name.split(".").pop());
@@ -426,7 +426,7 @@ export class ResourcePathVisitor{
         this.path += "\\))";
     }
 
-    protected async VisitFunctionImportCall(node:Token, context:any){
+    protected async VisitFunctionImportCall(node: Token, context: any) {
         let part = {
             type: node.type,
             name: node.value.import.value.name,
@@ -442,7 +442,7 @@ export class ResourcePathVisitor{
         this.path += "\\))";
     }
 
-    protected async VisitFunctionParameter(node:Token, context:any){
+    protected async VisitFunctionParameter(node: Token, context: any) {
         let edmParam = context.parameters.find(p => p.name == [node.value.name.value.name]);
         let deserializer = (edmParam && Edm.getURLDeserializer(node[ODATA_TYPE], edmParam.name, edmParam.type, this.serverType.container)) || (_ => _);
 
@@ -455,7 +455,7 @@ export class ResourcePathVisitor{
         delete context.literal;
     }
 
-    protected VisitActionImportCall(node:Token){
+    protected VisitActionImportCall(node: Token) {
         let part = {
             type: node.value.type,
             name: node.value.value.name,
@@ -465,13 +465,13 @@ export class ResourcePathVisitor{
         this.path += "/" + part.name;
     }
 
-    protected VisitParameterAlias(node:Token, context:any){
+    protected VisitParameterAlias(node: Token, context: any) {
         context.literal = (name => _ => this.alias[name])(node.value.name);
     }
-    
-    protected async VisitLiteral(node:Token, context:any, type:any){
+
+    protected async VisitLiteral(node: Token, context: any, type: any) {
         let literal = Literal.convert(node.value, node.raw);
-        if (node.value != context.typeName){
+        if (node.value != context.typeName) {
             node.raw = await (context.deserializer || (_ => _))(literal);
             node.value = context.typeName;
             literal = node.raw;
@@ -479,25 +479,32 @@ export class ResourcePathVisitor{
         context.literal = literal;
     }
 
-    protected VisitEnum(node:Token, context:any, type:any){
+    protected VisitEnum(node: Token, context: any, type: any) {
         this.Visit(node.value.value, context, type);
     }
 
-    protected VisitEnumValue(node:Token, context:any, type:any){
+    protected VisitEnumValue(node: Token, context: any, type: any) {
         this.Visit(node.value.values[0], context, type);
     }
 
-    protected VisitEnumerationMember(node:Token, context:any, type:any){
-        if (context.filter && type){
+    protected VisitEnumerationMember(node: Token, context: any, type: any) {
+        if (context.filter && type) {
             node.type = TokenType.EnumMemberValue;
             node.raw = `${type && type[node.value.name]}`;
             node.value = context.typeName;
-        }else{
+        } else {
             context.literal = (type && type[node.value.name]) || node.value.name;
         }
     }
 
-    protected VisitEnumMemberValue(node:Token, context:any, type:any){
+    protected VisitEnumMemberValue(node: Token, context: any, type: any) {
         context.literal = Literal.convert(node.value, node.raw);
+    }
+
+    protected async VisitRootExpression(node: Token, context: any, type: any) {
+        let rootValue = await this.serverType.execute(node.raw.replace('$root/', ''), 'GET');
+        node.type = TokenType.Literal;
+        node.value = rootValue.elementType;
+        node.raw = await <any>Edm.escape(rootValue.body.value, node.value);
     }
 }
