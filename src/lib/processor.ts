@@ -1008,7 +1008,7 @@ export class ODataProcessor extends Transform {
                         result = run(result, defaultHandlers);
                     }
 
-                    if (isAction) {
+                    if (isAction && !returnType) {
                         return ODataResult.NoContent(result).then(resolve, reject);
                     } else {
                         return ODataResult.Ok(result).then((result) => {
@@ -1107,7 +1107,7 @@ export class ODataProcessor extends Transform {
                             }, reject);
                         }
                     }
-                    if (isAction) {
+                    if (isAction && !returnType) {
                         return ODataResult.NoContent(opResult).then(resolve, reject);
                     }
                     return ODataResult.Ok(opResult).then((result) => {
