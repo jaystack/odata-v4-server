@@ -117,6 +117,13 @@ export function createMetadataJSON(server:typeof ODataServer){
                 name: prop,
                 type: Edm.getTypeName(elementType, prop, server.container),
                 nullable: Edm.isNullable(elementType, prop),
+                maxLength: Edm.getMaxLength(elementType, prop),
+                precision: Edm.getPrecision(elementType, prop),
+                scale: Edm.getScale(elementType, prop),
+                unicode: Edm.isUnicode(elementType, prop),
+                SRID: Edm.getSRID(elementType, prop),
+                concurrencyMode: Edm.getConcurrencyMode(elementType, prop),
+                defaultValue: Edm.getDefaultValue(elementType, prop),
                 annotation: Edm.getAnnotations(elementType, prop),
                 partner: Edm.getPartner(elementType, prop)
             };

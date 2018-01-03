@@ -33,6 +33,13 @@ const EdmMediaEntity:string = "edm:mediaentity";
 const EdmOpenType:string = "emd:opentype";
 const EdmChildren:string = "edm:children";
 const EdmContainer:Function[] = [];
+const EdmMaxLength:string = "edm:maxlength";
+const EdmPrecision:string = "edm:precision";
+const EdmScale:string = "edm:scale";
+const EdmUnicode:string = "edm:unicode";
+const EdmSRID:string = "edm:srid";
+const EdmDefaultValue:string = "edm:defaultvalue";
+const EdmConcurrencyMode:string = "edm:concurrencymode";
 
 /**
  * Defines OData Edm decorators
@@ -470,6 +477,200 @@ export const Required = (function Required(){
 /** Returns true if property is required (decorated by Edm.Required) */
 export function isRequired(target:Function, propertyKey:string):boolean{
     return Reflect.getMetadata(EdmNullableProperty, target.prototype, propertyKey) == false ? true : false;
+}
+
+/** Edm.MaxLength decorator to set property max length */
+export function MaxLength(maxLength: number){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.maxLength = maxLength;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    maxLength
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmMaxLength, maxLength, target, targetKey);
+        }
+    };
+}
+/** Returns property max length (decorated by Edm.MaxLength) */
+export function getMaxLength(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmMaxLength, target.prototype, propertyKey);
+}
+
+/** Edm.Precision decorator to set property precision */
+export function Precision(precision: number){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.precision = precision;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    precision
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmPrecision, precision, target, targetKey);
+        }
+    };
+}
+/** Returns property precision (decorated by Edm.Precision) */
+export function getPrecision(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmPrecision, target.prototype, propertyKey);
+}
+
+/** Edm.Scale decorator to set property scale */
+export function Scale(scale: number){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.scale = scale;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    scale
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmScale, scale, target, targetKey);
+        }
+    };
+}
+/** Returns property scale (decorated by Edm.Scale) */
+export function getScale(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmScale, target.prototype, propertyKey);
+}
+
+/** Edm.Unicode decorator for describing unicode properties */
+export const Unicode = (function Unicode(){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.unicode = true;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    unicode: true
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmUnicode, true, target, targetKey);
+        }
+    };
+})();
+/** Returns true if property is unicode (decorated by Edm.Unicode) */
+export function isUnicode(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmUnicode, target.prototype, propertyKey);
+}
+
+/** Edm.SRID decorator to set property SRID */
+export function SRID(srid: number){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.srid = srid;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    SRID: srid
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmSRID, srid, target, targetKey);
+        }
+    };
+}
+/** Returns property SRID (decorated by Edm.SRID) */
+export function getSRID(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmSRID, target.prototype, propertyKey);
+}
+
+/** Edm.DefaultValue decorator to set property default value */
+export function DefaultValue(value: any){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.defaultValue = value;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    defaultValue: value
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmDefaultValue, value, target, targetKey);
+        }
+    };
+}
+/** Returns property default value (decorated by Edm.DefaultValue) */
+export function getDefaultValue(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmDefaultValue, target.prototype, propertyKey);
+}
+
+/** Edm.ConcurrencyMode decorator to set property concurrency mode */
+export function ConcurrencyMode(mode: string){
+    return function(target, targetKey){
+        if (typeof target == "function"){
+            register(target);
+        }
+        Reflect.defineMetadata(EdmConcurrencyMode, mode, target, targetKey);
+    };
+}
+/** Returns property concurrency mode (decorated by Edm.ConcurrencyMode) */
+export function getConcurrencyMode(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmConcurrencyMode, target.prototype, propertyKey);
 }
 
 function operationDecoratorFactory(type, returnType?){

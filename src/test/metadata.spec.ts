@@ -218,6 +218,8 @@ export class Meta extends BaseMeta {
     p4: number
 
     @Edm.Decimal
+    @Edm.Precision(13)
+    @Edm.Scale(2)
     p5: number
 
     @Edm.Double
@@ -227,6 +229,7 @@ export class Meta extends BaseMeta {
     p7: number
 
     @Edm.Guid
+    @Edm.ConcurrencyMode("custom")
     p8: string
 
     @Edm.Int16
@@ -238,6 +241,7 @@ export class Meta extends BaseMeta {
     p10: number
 
     @Edm.Int64
+    @Edm.DefaultValue(256)
     p11: number
 
     @Edm.SByte
@@ -251,6 +255,7 @@ export class Meta extends BaseMeta {
 
     @Edm.String
     @Edm.ForeignKey('c0')
+    @Edm.Unicode
     p15: string
 
     @Edm.TimeOfDay
@@ -284,6 +289,7 @@ export class Meta extends BaseMeta {
     p25: any
 
     @Edm.GeometryPoint
+    @Edm.SRID(123)
     p26: any
 
     @Edm.GeometryLineString
@@ -829,6 +835,27 @@ export class MetaTestServer extends ODataServer {
         @Edm.Nullable
         @Edm.Required
         message: string) {
+        return `Server FunctionImport ${message}`;
+    }
+
+    @odata.namespace("Functions")
+    @Edm.FunctionImport(Edm.String)
+    FunctionImport3(
+        @Edm.String
+        @Edm.MaxLength(8)
+        @Edm.Unicode
+        message: string,
+
+        @Edm.Decimal
+        @Edm.Required
+        @Edm.Nullable
+        @Edm.Precision(13)
+        @Edm.Scale(2)
+        value: number[],
+    
+        @Edm.GeometryPoint
+        @Edm.SRID(1)
+        geo: any) {
         return `Server FunctionImport ${message}`;
     }
 
