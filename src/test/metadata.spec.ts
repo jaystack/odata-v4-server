@@ -876,6 +876,85 @@ MetaTestServer.create(4001);
 MetaTestServer.create('/test', 4002);
 createODataServer(MetaTestServer, "/test", 4003);
 
+@Edm.OpenType
+export class Executor {
+    @Edm.Action
+    @Edm.String
+    action() {
+        return "foobar";
+    }
+
+    @Edm.Action(Edm.String)
+    action2() {
+        return "foobar";
+    }
+
+    @Edm.Function
+    @Edm.ComplexType(Complex)
+    func(@Edm.ComplexType(Complex) complex: Complex) {
+        return complex.c0;
+    }
+
+    @Edm.Function
+    @Edm.EntityType(Meta)
+    func2(@Edm.EntityType(Meta) meta: Meta) {
+        return meta.b0;
+    }
+}
+
+@odata.type(Executor)
+export class ActionFunctionController extends ODataController {
+    @Edm.Action
+    @Edm.String
+    action() {
+        return "foobar";
+    }
+
+    @Edm.Action(Edm.String)
+    action2() {
+        return "foobar";
+    }
+
+    @Edm.Function
+    @Edm.String
+    func(@Edm.ComplexType(Complex) complex: Complex) {
+        return complex.c0;
+    }
+
+    @Edm.Function
+    @Edm.String
+    func2(@Edm.EntityType(Meta) meta: Meta) {
+        return meta.b0;
+    }
+}
+
+@Edm.Container(TestContainer)
+@odata.controller(ActionFunctionController, "Execute")
+export class ActionFunctionServer extends ODataServer {
+    @Edm.ActionImport
+    @Edm.String
+    action() {
+        return "foobar";
+    }
+
+    @Edm.ActionImport(Edm.String)
+    action2() {
+        return "foobar";
+    }
+
+    @Edm.FunctionImport
+    @Edm.String
+    func(@Edm.ComplexType(Complex) complex: Complex) {
+        return complex.c0;
+    }
+
+    @Edm.FunctionImport
+    @Edm.String
+    func2(@Edm.EntityType(Meta) meta: Meta) {
+        return meta.b0;
+    }
+}
+
 if (typeof describe == "function") {
     describe("Metadata test", () => {
         it("should return metadata xml", () => {
@@ -905,6 +984,12 @@ if (typeof describe == "function") {
         it("should return EnumServer metadata xml", () => {
             expect(beautify(EnumServer.$metadata().document())).to.equal(
                 beautify(fs.readFileSync(path.join(__dirname, "metadata", "$enumserver.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
+            );
+        });
+
+        it("should return ActionFunctionServer metadata xml", () => {
+            expect(beautify(ActionFunctionServer.$metadata().document())).to.equal(
+                beautify(fs.readFileSync(path.join(__dirname, "metadata", "$actionfunction.xml"), "utf8").replace(/" \/>/gi, "\"/>"))
             );
         });
     });
