@@ -1487,7 +1487,7 @@ export function testFactory(createTest: any) {
                     {
                         "@odata.id": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)",
                         "@odata.type": "#Meta.Meta",
-                        "Genre": "Server.Genre2'0'",
+                        "Genre": "EnumSchema.Genre2'0'",
                         "MongoId": new ObjectID("5968aad95eb7eb3a94a264f6"),
                         "Id": 1,
                         "p0": 1,
@@ -1529,7 +1529,7 @@ export function testFactory(createTest: any) {
                 "@odata.type": "#Meta.Meta",
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
-                "Genre": "Server.Genre2'0'",
+                "Genre": "EnumSchema.Genre2'0'",
                 "b0": "b0",
                 "Id": 1,
                 "p9": 9,
@@ -1552,7 +1552,7 @@ export function testFactory(createTest: any) {
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
                 "@odata.type": "#Meta.Meta",
-                "Genre": "Server.Genre2'0'",
+                "Genre": "EnumSchema.Genre2'0'",
                 "MongoId": new ObjectID("578f2b8c12eaebabec4af242"),
                 "b0": "b0",
                 "Id": 1,
@@ -1582,7 +1582,7 @@ export function testFactory(createTest: any) {
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
                 "@odata.type": "#Meta.Meta",
-                "Genre": "Server.Genre2'0'",
+                "Genre": "EnumSchema.Genre2'0'",
                 "MongoId": new ObjectID("578f2b8c12eaebabec4af242"),
                 "b0": "b0",
                 "Id": 1,
@@ -1612,7 +1612,7 @@ export function testFactory(createTest: any) {
                 "@odata.context": "http://localhost/$metadata#Meta/$entity",
                 "@odata.id": "http://localhost/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
                 "@odata.type": "#Meta.Meta",
-                "Genre": "Server.Genre2'0'",
+                "Genre": "EnumSchema.Genre2'0'",
                 "MongoId": new ObjectID("578f2b8c12eaebabec4af242"),
                 "b0": "b0",
                 "Id": 1,
@@ -1650,7 +1650,7 @@ export function testFactory(createTest: any) {
                         {
                             "@odata.id": "http://localhost/Meta(MongoId='5968aad95eb7eb3a94a264f6',Id=1,p9=9,p10=10)",
                             "@odata.type": "#Meta.Meta",
-                            "Genre": "Server.Genre2'0'",
+                            "Genre": "EnumSchema.Genre2'0'",
                             "MongoId": new ObjectID("5968aad95eb7eb3a94a264f6"),
                             "Id": 1,
                             "p0": 1,
@@ -1672,7 +1672,7 @@ export function testFactory(createTest: any) {
             createTest("call action what use odata type", MetaTestServer, "POST /EmptyEntity/Server.emptyEntityAction", {
                 statusCode: 204
             },
-                { value: "Server.Genre2'0'" }
+                { value: "EnumSchema.Genre2'0'" }
             );
         });
     });
@@ -1685,7 +1685,7 @@ export function testFactory(createTest: any) {
                 "value": [
                     {
                         "@odata.id": "http://localhost/TestEntity(1)",
-                        "Genre": "Server.Genre2'0'",
+                        "Genre": "EnumSchema.Genre2'0'",
                         "test": 1
                     }
                 ]
@@ -1701,7 +1701,7 @@ export function testFactory(createTest: any) {
                 "value": [
                     {
                         "@odata.id": "http://localhost/TestEntity(1)",
-                        "Genre": "Server.Genre2'0'",
+                        "Genre": "EnumSchema.Genre2'0'",
                         "test": 1
                     }
                 ]
@@ -1715,7 +1715,7 @@ export function testFactory(createTest: any) {
             body: {
                 "@odata.context": "http://localhost/$metadata#TestEntity/$entity",
                 "@odata.id": "http://localhost/TestEntity(99)",
-                "Genre": "Server.Genre2'0'",
+                "Genre": "EnumSchema.Genre2'0'",
                 "test": 99
             },
             elementType: TestEntity,
@@ -1765,20 +1765,20 @@ export function testFactory(createTest: any) {
             contentType: "text/plain"
         });
         describe("use enum type action/function parameter", () => {
-            createTest("should return ", MetaTestServer, "GET /EmptyEntity/Server.emptyEntityFunction(value=Server.Genre2'0')", {
+            createTest("should return ", MetaTestServer, "GET /EmptyEntity/Server.emptyEntityFunction(value=EnumSchema.Genre2'0')", {
                 statusCode: 200,
                 body: {
-                    "@odata.context": "http://localhost/$metadata#Server.Genre2",
+                    "@odata.context": "http://localhost/$metadata#EnumSchema.Genre2",
                     value: 0
                 },
                 elementType: Genre,
                 contentType: "application/json"
             });
 
-            createTest("should return ", MetaTestServer, "GET /EmptyEntity/Server.emptyEntityFunction(value=Server.Genre2'Rock')", {
+            createTest("should return ", MetaTestServer, "GET /EmptyEntity/Server.emptyEntityFunction(value=EnumSchema.Genre2'Rock')", {
                 statusCode: 200,
                 body: {
-                    "@odata.context": "http://localhost/$metadata#Server.Genre2",
+                    "@odata.context": "http://localhost/$metadata#EnumSchema.Genre2",
                     value: 2
                 },
                 elementType: Genre,

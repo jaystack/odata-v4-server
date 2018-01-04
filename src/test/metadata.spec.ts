@@ -69,6 +69,14 @@ export enum Genre {
     Metal,
     Classic
 }
+Edm.Annotate({
+    term: "foo",
+    string: "bar"
+})(Genre)
+Edm.Annotate({
+    term: "foo",
+    string: "bar"
+})(Genre, "Rock")
 
 @Edm.OpenType
 class Index {
@@ -492,9 +500,10 @@ export class TestContainerBase extends Edm.ContainerBase {
 export class TestContainer extends TestContainerBase {
     @Edm.Flags
     @Edm.Int64
-    @Edm.URLSerialize((value: Genre) => `Server.Genre2'${value || 0}'`)
-    @Edm.Serialize(value => `Server.Genre2'${value || 0}'`)
-    Genre2 = Genre
+    @Edm.URLSerialize((value: Genre) => `EnumSchema.Genre2'${value || 0}'`)
+    @Edm.Serialize(value => `EnumSchema.Genre2'${value || 0}'`)
+    @odata.namespace("EnumSchema")
+    'EnumSchema.Genre2' = Genre
 
     @Edm.String
     @Edm.URLSerialize((value: ObjectID) => `'${value.toHexString()}'`)

@@ -3,6 +3,7 @@ import * as util from "util";
 import { ODataController } from "./controller";
 import { ODataServer } from "./server";
 import { getFunctionParameters, Decorator } from "./utils";
+import * as odata from "./odata";
 
 const EdmProperties:string = "edm:properties";
 const EdmKeyProperties:string = "edm:keyproperties";
@@ -256,7 +257,12 @@ export function getTypeName(target:Function, propertyKey:string, container?: Con
     if (container && container instanceof ContainerBase){
         let containerType = container.resolve(type);
         if (containerType){
-            let namespace = (<any>(Object.getPrototypeOf(container).constructor || target)).namespace || "Default";
+            const containerPrototype = Object.getPrototypeOf(container);
+            let namespace = odata.getNamespace(containerPrototype.constructor, containerType) || (<any>(containerPrototype.constructor || target)).namespace || "Default";
+            if (containerType.indexOf(".") > 0){
+                namespace = containerType.slice(0, containerType.lastIndexOf("."));
+                containerType = containerType.slice(containerType.lastIndexOf(".") + 1);
+            }
             type = namespace + "." + containerType;
         }
     }
@@ -1087,7 +1093,11 @@ export function Annotate(...annotation:any[]){
 }
 /** ?????????? */
 export function getAnnotations(target:Function, targetKey?:string):any[]{
-    return Reflect.getOwnMetadata(EdmAnnotations, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
+    try{
+        return Reflect.getOwnMetadata(EdmAnnotations, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
+    }catch{
+        return Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
+    }
 }
 
 /** ?????????? */
