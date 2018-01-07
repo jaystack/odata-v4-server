@@ -25,6 +25,7 @@ const ODataStreamParameter: string = "odata:streamparameter";
 const ODataResultParameter: string = "odata:resultparameter";
 const ODataIdParameter: string = "odata:idparameter";
 const ODataTypeParameter: string = "odata:typeparameter";
+const ODataNamespace: string = "odata:namespace";
 
 /** Set element type
  * @param elementType The type of element
@@ -49,9 +50,17 @@ export function type(elementType: Function, targetKey?, parameterIndex?): Functi
  */
 export function namespace(namespace: string) {
     return function (target: any, targetKey?: string) {
-        if (targetKey) target[targetKey].namespace = namespace;
-        else target.namespace = namespace;
+        if (targetKey){
+            if (target[targetKey]){
+                target[targetKey].namespace = namespace;
+            }else{
+                Reflect.defineMetadata(ODataNamespace, namespace, target, targetKey);
+            }
+        }else target.namespace = namespace;
     };
+}
+export function getNamespace(target: any, targetKey?: string) {
+    return Reflect.getMetadata(ODataNamespace, target.prototype, targetKey) || (target[targetKey] || target).namespace;
 }
 
 /** Set container

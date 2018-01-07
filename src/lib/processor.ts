@@ -1302,7 +1302,7 @@ export class ODataProcessor extends Transform {
     private __setODataType(context, elementType) {
         let containerType = this.serverType.container.resolve(elementType);
         if (containerType) {
-            context["@odata.type"] = `#${(this.serverType.container["namespace"] || elementType.namespace || this.serverType.namespace)}.${containerType}`;
+            context["@odata.type"] = `#${odata.getNamespace(Object.getPrototypeOf(this.serverType.container).constructor, containerType) || (this.serverType.container["namespace"] || elementType.namespace || this.serverType.namespace)}.${containerType}`;
         } else {
             context["@odata.type"] = `#${(elementType.namespace || this.serverType.namespace)}.${elementType.name}`;
         }
@@ -1311,15 +1311,12 @@ export class ODataProcessor extends Transform {
     private async __convertEntity(context, result, elementType, includes?) {
         if (!(elementType.prototype instanceof Object) || elementType === Object || this.options.disableEntityConversion) return Object.assign(context, result || {});
         let resultType = Object.getPrototypeOf(result).constructor;
-        if (resultType != Object && resultType != this.ctrl.prototype.elementType) {
+        if (resultType != Object && resultType != this.ctrl.prototype.elementType && resultType.prototype instanceof this.ctrl.prototype.elementType) {
             elementType = resultType;
             if (this.options.metadata != ODataMetadataType.none && Edm.isEntityType(elementType)) this.__setODataType(context, elementType);
         }
         if (typeof result["@odata.type"] == "function") {
             elementType = result["@odata.type"];
-            if (this.options.metadata != ODataMetadataType.none && Edm.isEntityType(elementType)) this.__setODataType(context, elementType);
-        }
-        if (typeof context["@odata.type"] == "undefined" && this.ctrl && elementType != this.ctrl.prototype.elementType) {
             if (this.options.metadata != ODataMetadataType.none && Edm.isEntityType(elementType)) this.__setODataType(context, elementType);
         }
         if (this.options.metadata == ODataMetadataType.full) {

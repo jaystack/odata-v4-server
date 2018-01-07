@@ -26,6 +26,18 @@
                 </Property>
             </EntityType>
         </Schema>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="EnumSchema">
+            <EnumType Name="Genre2" UnderlyingType="Edm.Int64" IsFlags="true">
+                <Member Name="Unknown" Value="0"/>
+                <Member Name="Pop" Value="1"/>
+                <Member Name="Rock" Value="2">
+                    <Annotation Term="foo" String="bar"/>
+                </Member>
+                <Member Name="Metal" Value="3"/>
+                <Member Name="Classic" Value="4"/>
+                <Annotation Term="foo" String="bar"/>
+            </EnumType>
+        </Schema>
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Functions">
             <Function Name="f0" IsBound="true">
                 <Parameter Name="bindingParameter" Type="Meta.Meta" />
@@ -54,9 +66,16 @@
                 <Parameter Name="message" Type="Edm.String" Nullable="true" />
                 <ReturnType Type="Edm.String" />
             </Function>
+            <Function Name="FunctionImport3" IsBound="false">
+                <Parameter Name="geo" Type="Edm.GeometryPoint" SRID="1"/>
+                <Parameter Name="value" Type="Edm.Decimal" Nullable="false" Precision="13" Scale="2"/>
+                <Parameter Name="message" Type="Edm.String" MaxLength="8" Unicode="true"/>
+                <ReturnType Type="Edm.String"/>
+            </Function>
             <EntityContainer Name="Default">
                 <FunctionImport Name="FunctionImport" Function="Functions.FunctionImport" />
                 <FunctionImport Name="FunctionImport2" Function="Functions.FunctionImport2" />
+                <FunctionImport Name="FunctionImport3" Function="Functions.FunctionImport3"/>
             </EntityContainer>
         </Schema>
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Media">
@@ -104,17 +123,17 @@
                 <Property Name="p2" Type="Edm.Byte" />
                 <Property Name="p3" Type="Edm.Date" />
                 <Property Name="p4" Type="Edm.DateTimeOffset" />
-                <Property Name="p5" Type="Edm.Decimal" />
+                <Property Name="p5" Type="Edm.Decimal" Precision="13" Scale="2" />
                 <Property Name="p6" Type="Edm.Double" />
                 <Property Name="p7" Type="Edm.Duration" />
                 <Property Name="p8" Type="Edm.Guid" />
                 <Property Name="p9" Type="Edm.Int16" Nullable="false" />
                 <Property Name="p10" Type="Edm.Int32" Nullable="false" />
-                <Property Name="p11" Type="Edm.Int64" />
+                <Property Name="p11" Type="Edm.Int64" DefaultValue="256" />
                 <Property Name="p12" Type="Edm.SByte" />
                 <Property Name="p13" Type="Edm.Single" />
                 <Property Name="p14" Type="Edm.Stream" />
-                <Property Name="p15" Type="Edm.String" />
+                <Property Name="p15" Type="Edm.String" Unicode="true" />
                 <Property Name="p16" Type="Edm.TimeOfDay" />
                 <Property Name="p17" Type="Edm.Geography" />
                 <Property Name="p18" Type="Edm.GeographyPoint" />
@@ -125,7 +144,7 @@
                 <Property Name="p23" Type="Edm.GeographyMultiPolygon" />
                 <Property Name="p24" Type="Edm.GeographyCollection" />
                 <Property Name="p25" Type="Edm.Geometry" />
-                <Property Name="p26" Type="Edm.GeometryPoint" />
+                <Property Name="p26" Type="Edm.GeometryPoint" SRID="123" />
                 <Property Name="p27" Type="Edm.GeometryLineString" />
                 <Property Name="p28" Type="Edm.GeometryPolygon" />
                 <Property Name="p29" Type="Edm.GeometryMultiPoint" />
@@ -168,12 +187,20 @@
                 <Property Name="p66" Type="Edm.Stream" />
                 <Property Name="Complex" Type="Meta.Complex" />
                 <Property Name="ComplexList" Type="Collection(Meta.Complex)" />
-                <Property Name="Genre" Type="Server.Genre2" />
+                <Property Name="Genre" Type="EnumSchema.Genre2" />
                 <Property Name="Color" Type="Server.Color2" />
                 <NavigationProperty Name="MediaList" Type="Collection(Media.Media)" Partner="Meta" />
             </EntityType>
-            <ComplexType Name="Complex"></ComplexType>
-            <ComplexType Name="fwd"></ComplexType>
+            <ComplexType Name="BaseComplex">
+                <Property Name="bc0" Type="Edm.String"/>
+                <Property Name="Genre" Type="EnumSchema.Genre2"/>
+            </ComplexType>
+            <ComplexType Name="Complex" BaseType="Meta.SubComplex">
+                <Property Name="c0" Type="Edm.String"/>
+            </ComplexType>
+            <ComplexType Name="SubComplex" BaseType="Meta.BaseComplex">
+                <Property Name="sc0" Type="Edm.String"/>
+            </ComplexType>
             <Action Name="a0" IsBound="true">
                 <Parameter Name="bindingParameter" Type="Meta.Meta" />
             </Action>
@@ -209,7 +236,7 @@
                     <PropertyRef Name="test" />
                 </Key>
                 <Property Name="test" Type="Edm.Int32" Nullable="false" />
-                <Property Name="Genre" Type="Server.Genre2" />
+                <Property Name="Genre" Type="EnumSchema.Genre2" />
             </EntityType>
             <TypeDefinition Name="MyType" UnderlyingType="Edm.String"></TypeDefinition>
             <TypeDefinition Name="ObjectID2" UnderlyingType="Edm.String"></TypeDefinition>
@@ -218,45 +245,38 @@
                 <Member Name="Green" Value="1" />
                 <Member Name="Blue" Value="2" />
             </EnumType>
-            <EnumType Name="Genre2" UnderlyingType="Edm.Int64" IsFlags="true">
-                <Member Name="Unknown" Value="0" />
-                <Member Name="Pop" Value="1" />
-                <Member Name="Rock" Value="2" />
-                <Member Name="Metal" Value="3" />
-                <Member Name="Classic" Value="4" />
-            </EnumType>
             <Action Name="enumTypeAction" IsBound="true">
                 <Parameter Name="bindingParameter" Type="Server.EmptyEntity" />
-                <Parameter Name="value" Type="Server.Genre2" />
+                <Parameter Name="value" Type="EnumSchema.Genre2" />
             </Action>
             <Action Name="emptyEntityAction" IsBound="true">
                 <Parameter Name="bindingParameter" Type="Collection(Server.EmptyEntity)" />
-                <Parameter Name="value" Type="Server.Genre2" />
+                <Parameter Name="value" Type="EnumSchema.Genre2" />
             </Action>
             <Action Name="ActionImport" IsBound="false" />
             <Action Name="ActionImportParams" IsBound="false">
                 <Parameter Name="value" Type="Collection(Edm.Int32)" />
             </Action>
             <Action Name="ServerEnumTypeActionImport" IsBound="false">
-                <Parameter Name="value" Type="Server.Genre2" />
+                <Parameter Name="value" Type="EnumSchema.Genre2" />
             </Action>
             <Function Name="enumTypeFunction" IsBound="true">
                 <Parameter Name="bindingParameter" Type="Server.EmptyEntity" />
-                <Parameter Name="value" Type="Server.Genre2" />
-                <ReturnType Type="Server.Genre2" />
+                <Parameter Name="value" Type="EnumSchema.Genre2" />
+                <ReturnType Type="EnumSchema.Genre2" />
             </Function>
             <Function Name="emptyEntityFunction" IsBound="true">
                 <Parameter Name="bindingParameter" Type="Collection(Server.EmptyEntity)" />
-                <Parameter Name="value" Type="Server.Genre2" />
-                <ReturnType Type="Server.Genre2" />
+                <Parameter Name="value" Type="EnumSchema.Genre2" />
+                <ReturnType Type="EnumSchema.Genre2" />
             </Function>
             <Function Name="ObjId" IsBound="false">
                 <Parameter Name="v" Type="Server.ObjectID2" />
                 <ReturnType Type="Server.ObjectID2" />
             </Function>
             <Function Name="ServerEnumTypeFunctionImport" IsBound="false">
-                <Parameter Name="value" Type="Server.Genre2" />
-                <ReturnType Type="Server.Genre2" />
+                <Parameter Name="value" Type="EnumSchema.Genre2" />
+                <ReturnType Type="EnumSchema.Genre2" />
             </Function>
             <EntityContainer Name="ActionImportContainer">
                 <ActionImport Name="ActionImport" Action="Server.ActionImport" />

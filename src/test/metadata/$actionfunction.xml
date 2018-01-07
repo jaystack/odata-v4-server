@@ -1,6 +1,224 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
     <edmx:DataServices>
-        
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Default">
+            <EntityType Name="Executor" OpenType="true">
+            </EntityType>
+            <Action Name="action" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Default.Executor"/>
+                <ReturnType Type="Edm.String"/>
+            </Action>
+            <Action Name="action2" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Default.Executor"/>
+                <ReturnType Type="Edm.String"/>
+            </Action>
+            <Action Name="action" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Collection(Default.Executor)"/>
+                <ReturnType Type="Edm.String"/>
+            </Action>
+            <Action Name="action2" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Collection(Default.Executor)"/>
+                <ReturnType Type="Edm.String"/>
+            </Action>
+            <Action Name="action" IsBound="false">
+                <ReturnType Type="Edm.String"/>
+            </Action>
+            <Action Name="action2" IsBound="false">
+                <ReturnType Type="Edm.String"/>
+            </Action>
+            <Function Name="func" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Default.Executor"/>
+                <Parameter Name="complex" Type="Meta.Complex"/>
+                <ReturnType Type="Meta.Complex"/>
+            </Function>
+            <Function Name="func2" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Default.Executor"/>
+                <Parameter Name="meta" Type="Meta.Meta"/>
+                <ReturnType Type="Meta.Meta"/>
+            </Function>
+            <Function Name="func" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Collection(Default.Executor)"/>
+                <Parameter Name="complex" Type="Meta.Complex"/>
+                <ReturnType Type="Edm.String"/>
+            </Function>
+            <Function Name="func2" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Collection(Default.Executor)"/>
+                <Parameter Name="meta" Type="Meta.Meta"/>
+                <ReturnType Type="Edm.String"/>
+            </Function>
+            <Function Name="func" IsBound="false">
+                <Parameter Name="complex" Type="Meta.Complex"/>
+                <ReturnType Type="Edm.String"/>
+            </Function>
+            <Function Name="func2" IsBound="false">
+                <Parameter Name="meta" Type="Meta.Meta"/>
+                <ReturnType Type="Edm.String"/>
+            </Function>
+            <EntityContainer Name="Default">
+                <EntitySet Name="Execute" EntityType="Default.Executor"/>
+                <ActionImport Name="action" Action="Default.action"/>
+                <ActionImport Name="action2" Action="Default.action2"/>
+                <FunctionImport Name="func" Function="Default.func"/>
+                <FunctionImport Name="func2" Function="Default.func2"/>
+            </EntityContainer>
+        </Schema>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="EnumSchema">
+            <EnumType Name="Genre2" UnderlyingType="Edm.Int64" IsFlags="true">
+                <Member Name="Unknown" Value="0"/>
+                <Member Name="Pop" Value="1"/>
+                <Member Name="Rock" Value="2">
+                    <Annotation Term="foo" String="bar"/>
+                </Member>
+                <Member Name="Metal" Value="3"/>
+                <Member Name="Classic" Value="4"/>
+                <Annotation Term="foo" String="bar"/>
+            </EnumType>
+        </Schema>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Functions">
+            <Function Name="f0" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Meta.Meta"/>
+                <ReturnType Type="Edm.String"/>
+            </Function>
+            <Function Name="f2" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Meta.Meta"/>
+                <Parameter Name="message" Type="Edm.String"/>
+                <ReturnType Type="Edm.String"/>
+            </Function>
+        </Schema>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Media">
+            <EntityType Name="Media" HasStream="true">
+                <Key>
+                    <PropertyRef Name="Id"/>
+                </Key>
+                <Property Name="Id" Type="Edm.Int32" Nullable="false">
+                    <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+                </Property>
+                <Property Name="StringId" Type="Edm.String" Nullable="false"/>
+                <NavigationProperty Name="Meta" Type="Media.Meta" Partner="MediaList"/>
+                <Annotation Term="UI.DisplayName" String="Media"/>
+            </EntityType>
+        </Schema>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Meta">
+            <EntityType Name="BaseMeta">
+                <Key>
+                    <PropertyRef Name="MongoId"/>
+                </Key>
+                <Property Name="MongoId" Type="Server.ObjectID2" Nullable="false">
+                    <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+                </Property>
+                <Property Name="b0" Type="Edm.String"/>
+            </EntityType>
+            <EntityType Name="Meta" BaseType="Meta.BaseMeta">
+                <Key>
+                    <PropertyRef Name="Id"/>
+                </Key>
+                <Property Name="Id" Type="Edm.Int32" Nullable="false">
+                    <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+                    <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+                    <Annotation Term="UI.DisplayName" String="Identifier"/>
+                    <Annotation Term="UI.ControlHint" String="ReadOnly"/>
+                </Property>
+                <Property Name="MongoId" Type="Server.ObjectID2" Nullable="false">
+                    <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
+                </Property>
+                <Property Name="myType" Type="Server.MyType"/>
+                <Property Name="p0" Type="Edm.Binary" Nullable="true"/>
+                <Property Name="p1" Type="Edm.Boolean"/>
+                <Property Name="p2" Type="Edm.Byte"/>
+                <Property Name="p3" Type="Edm.Date"/>
+                <Property Name="p4" Type="Edm.DateTimeOffset"/>
+                <Property Name="p5" Type="Edm.Decimal" Precision="13" Scale="2"/>
+                <Property Name="p6" Type="Edm.Double"/>
+                <Property Name="p7" Type="Edm.Duration"/>
+                <Property Name="p8" Type="Edm.Guid"/>
+                <Property Name="p9" Type="Edm.Int16" Nullable="false"/>
+                <Property Name="p10" Type="Edm.Int32" Nullable="false"/>
+                <Property Name="p11" Type="Edm.Int64" DefaultValue="256"/>
+                <Property Name="p12" Type="Edm.SByte"/>
+                <Property Name="p13" Type="Edm.Single"/>
+                <Property Name="p14" Type="Edm.Stream"/>
+                <Property Name="p15" Type="Edm.String" Unicode="true"/>
+                <Property Name="p16" Type="Edm.TimeOfDay"/>
+                <Property Name="p17" Type="Edm.Geography"/>
+                <Property Name="p18" Type="Edm.GeographyPoint"/>
+                <Property Name="p19" Type="Edm.GeographyLineString"/>
+                <Property Name="p20" Type="Edm.GeographyPolygon"/>
+                <Property Name="p21" Type="Edm.GeographyMultiPoint"/>
+                <Property Name="p22" Type="Edm.GeographyMultiLineString"/>
+                <Property Name="p23" Type="Edm.GeographyMultiPolygon"/>
+                <Property Name="p24" Type="Edm.GeographyCollection"/>
+                <Property Name="p25" Type="Edm.Geometry"/>
+                <Property Name="p26" Type="Edm.GeometryPoint" SRID="123"/>
+                <Property Name="p27" Type="Edm.GeometryLineString"/>
+                <Property Name="p28" Type="Edm.GeometryPolygon"/>
+                <Property Name="p29" Type="Edm.GeometryMultiPoint"/>
+                <Property Name="p30" Type="Edm.GeometryMultiLineString"/>
+                <Property Name="p31" Type="Edm.GeometryMultiPolygon"/>
+                <Property Name="p32" Type="Edm.GeometryCollection"/>
+                <Property Name="p33" Type="Collection(Edm.Binary)" Nullable="true"/>
+                <Property Name="p34" Type="Collection(Edm.Boolean)"/>
+                <Property Name="p35" Type="Collection(Edm.Byte)"/>
+                <Property Name="p36" Type="Collection(Edm.Date)"/>
+                <Property Name="p37" Type="Collection(Edm.DateTimeOffset)"/>
+                <Property Name="p38" Type="Collection(Edm.Decimal)"/>
+                <Property Name="p39" Type="Collection(Edm.Double)"/>
+                <Property Name="p40" Type="Collection(Edm.Duration)"/>
+                <Property Name="p41" Type="Collection(Edm.Guid)"/>
+                <Property Name="p42" Type="Collection(Edm.Int16)"/>
+                <Property Name="p43" Type="Collection(Edm.Int32)"/>
+                <Property Name="p44" Type="Collection(Edm.Int64)"/>
+                <Property Name="p45" Type="Collection(Edm.SByte)"/>
+                <Property Name="p46" Type="Collection(Edm.Single)"/>
+                <Property Name="p47" Type="Collection(Edm.Stream)"/>
+                <Property Name="p48" Type="Collection(Edm.String)"/>
+                <Property Name="p49" Type="Collection(Edm.TimeOfDay)"/>
+                <Property Name="p50" Type="Collection(Edm.Geography)"/>
+                <Property Name="p51" Type="Collection(Edm.GeographyPoint)"/>
+                <Property Name="p52" Type="Collection(Edm.GeographyLineString)"/>
+                <Property Name="p53" Type="Collection(Edm.GeographyPolygon)"/>
+                <Property Name="p54" Type="Collection(Edm.GeographyMultiPoint)"/>
+                <Property Name="p55" Type="Collection(Edm.GeographyMultiLineString)"/>
+                <Property Name="p56" Type="Collection(Edm.GeographyMultiPolygon)"/>
+                <Property Name="p57" Type="Collection(Edm.GeographyCollection)"/>
+                <Property Name="p58" Type="Collection(Edm.Geometry)"/>
+                <Property Name="p59" Type="Collection(Edm.GeometryPoint)"/>
+                <Property Name="p60" Type="Collection(Edm.GeometryLineString)"/>
+                <Property Name="p61" Type="Collection(Edm.GeometryPolygon)"/>
+                <Property Name="p62" Type="Collection(Edm.GeometryMultiPoint)"/>
+                <Property Name="p63" Type="Collection(Edm.GeometryMultiLineString)"/>
+                <Property Name="p64" Type="Collection(Edm.GeometryMultiPolygon)"/>
+                <Property Name="p65" Type="Collection(Edm.GeometryCollection)"/>
+                <Property Name="p66" Type="Edm.Stream"/>
+                <Property Name="Complex" Type="Meta.Complex"/>
+                <Property Name="ComplexList" Type="Collection(Meta.Complex)"/>
+                <Property Name="Genre" Type="EnumSchema.Genre2"/>
+                <Property Name="Color" Type="Server.Color2"/>
+                <NavigationProperty Name="MediaList" Type="Collection(Media.Media)" Partner="Meta"/>
+            </EntityType>
+            <ComplexType Name="BaseComplex">
+                <Property Name="bc0" Type="Edm.String"/>
+                <Property Name="Genre" Type="EnumSchema.Genre2"/>
+            </ComplexType>
+            <ComplexType Name="Complex" BaseType="Meta.SubComplex">
+                <Property Name="c0" Type="Edm.String"/>
+            </ComplexType>
+            <ComplexType Name="SubComplex" BaseType="Meta.BaseComplex">
+                <Property Name="sc0" Type="Edm.String"/>
+            </ComplexType>
+            <Action Name="a0" IsBound="true">
+                <Parameter Name="bindingParameter" Type="Meta.Meta"/>
+            </Action>
+        </Schema>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Server">
+            <TypeDefinition Name="MyType" UnderlyingType="Edm.String">
+            </TypeDefinition>
+            <TypeDefinition Name="ObjectID2" UnderlyingType="Edm.String">
+            </TypeDefinition>
+            <EnumType Name="Color2" UnderlyingType="Edm.Int32">
+                <Member Name="Red" Value="0"/>
+                <Member Name="Green" Value="1"/>
+                <Member Name="Blue" Value="2"/>
+            </EnumType>
+        </Schema>
     </edmx:DataServices>
 </edmx:Edmx>

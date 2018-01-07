@@ -279,8 +279,8 @@ describe("OData HTTP", () => {
                     "Color@odata.type": "#Color2",
                     "Complex@odata.type": "#Meta.Complex",
                     "ComplexList@odata.type": "#Collection(Meta.Complex)",
-                    "Genre@odata.type": "#Server.Genre2",
-                    "Genre": "Server.Genre2'0'",
+                    "Genre@odata.type": "#EnumSchema.Genre2",
+                    "Genre": "EnumSchema.Genre2'0'",
                     "Id": 1,
                     "Id@odata.type": "#Int32",
                     "MediaList": [
@@ -420,7 +420,7 @@ describe("OData HTTP", () => {
                             "StringId": "two"
                         }
                     ],
-                    "Genre": "Server.Genre2'0'",
+                    "Genre": "EnumSchema.Genre2'0'",
                     "MongoId": "578f2b8c12eaebabec4af242",
                     "b0": "b0",
                     "p10": 10,

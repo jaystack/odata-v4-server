@@ -1,3 +1,4 @@
+import { Transform } from "stream";
 import { ODataStream } from "./result";
 
 const patternSource = "[^(]*\\(([^)]*)\\)";
@@ -11,7 +12,7 @@ export const getFunctionParameters = function(fn:Function, name?:string){
 export const getAllPropertyNames = function(proto:any):string[]{
     let propNames = Object.getOwnPropertyNames(proto);
     proto = Object.getPrototypeOf(proto);
-    if (proto !== Object.prototype) propNames = propNames.concat(getAllPropertyNames(proto));
+    if (proto !== Object.prototype && proto !== Transform.prototype) propNames = propNames.concat(getAllPropertyNames(proto));
     return propNames;
 };
 let GeneratorFunction;

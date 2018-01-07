@@ -3,6 +3,7 @@ import * as util from "util";
 import { ODataController } from "./controller";
 import { ODataServer } from "./server";
 import { getFunctionParameters, Decorator } from "./utils";
+import * as odata from "./odata";
 
 const EdmProperties:string = "edm:properties";
 const EdmKeyProperties:string = "edm:keyproperties";
@@ -33,6 +34,13 @@ const EdmMediaEntity:string = "edm:mediaentity";
 const EdmOpenType:string = "emd:opentype";
 const EdmChildren:string = "edm:children";
 const EdmContainer:Function[] = [];
+const EdmMaxLength:string = "edm:maxlength";
+const EdmPrecision:string = "edm:precision";
+const EdmScale:string = "edm:scale";
+const EdmUnicode:string = "edm:unicode";
+const EdmSRID:string = "edm:srid";
+const EdmDefaultValue:string = "edm:defaultvalue";
+const EdmConcurrencyMode:string = "edm:concurrencymode";
 
 /**
  * Defines OData Edm decorators
@@ -249,7 +257,12 @@ export function getTypeName(target:Function, propertyKey:string, container?: Con
     if (container && container instanceof ContainerBase){
         let containerType = container.resolve(type);
         if (containerType){
-            let namespace = (<any>(Object.getPrototypeOf(container).constructor || target)).namespace || "Default";
+            const containerPrototype = Object.getPrototypeOf(container);
+            let namespace = odata.getNamespace(containerPrototype.constructor, containerType) || (<any>(containerPrototype.constructor || target)).namespace || "Default";
+            if (containerType.indexOf(".") > 0){
+                namespace = containerType.slice(0, containerType.lastIndexOf("."));
+                containerType = containerType.slice(containerType.lastIndexOf(".") + 1);
+            }
             type = namespace + "." + containerType;
         }
     }
@@ -291,11 +304,11 @@ export function getTypeName(target:Function, propertyKey:string, container?: Con
 export function getType(target:Function, propertyKey:string, container?: ContainerBase):Function | string{
     let type = !propertyKey ? Reflect.getMetadata(EdmType, target) : Reflect.getMetadata(EdmType, target.prototype, propertyKey);
     let elementType = !propertyKey ? Reflect.getMetadata(EdmElementType, target) : Reflect.getMetadata(EdmElementType, target.prototype, propertyKey);
-    let hasEntityType = isEntityType(target, propertyKey);
+    let hasEntityType = isEntityType(target, propertyKey) || isComplexType(target, propertyKey);
     if (!elementType) elementType = type;
+    if (elementType && elementType.__forward__ref__) elementType = elementType();
+    if (type && type.__forward__ref__) type = type();
     if (hasEntityType){
-        if (elementType.__forward__ref__) elementType = elementType();
-        if (type.__forward__ref__) type = type();
         if (typeof elementType == "string" && elementType.indexOf(".") < 0) elementType = ((<any>target).namespace || "Default") + "." + elementType;
         if (typeof type == "string" && type.indexOf(".") < 0) type = ((<any>target).namespace || "Default") + "." + type;
     }
@@ -472,6 +485,200 @@ export function isRequired(target:Function, propertyKey:string):boolean{
     return Reflect.getMetadata(EdmNullableProperty, target.prototype, propertyKey) == false ? true : false;
 }
 
+/** Edm.MaxLength decorator to set property max length */
+export function MaxLength(maxLength: number){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.maxLength = maxLength;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    maxLength
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmMaxLength, maxLength, target, targetKey);
+        }
+    };
+}
+/** Returns property max length (decorated by Edm.MaxLength) */
+export function getMaxLength(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmMaxLength, target.prototype, propertyKey);
+}
+
+/** Edm.Precision decorator to set property precision */
+export function Precision(precision: number){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.precision = precision;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    precision
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmPrecision, precision, target, targetKey);
+        }
+    };
+}
+/** Returns property precision (decorated by Edm.Precision) */
+export function getPrecision(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmPrecision, target.prototype, propertyKey);
+}
+
+/** Edm.Scale decorator to set property scale */
+export function Scale(scale: number){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.scale = scale;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    scale
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmScale, scale, target, targetKey);
+        }
+    };
+}
+/** Returns property scale (decorated by Edm.Scale) */
+export function getScale(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmScale, target.prototype, propertyKey);
+}
+
+/** Edm.Unicode decorator for describing unicode properties */
+export const Unicode = (function Unicode(){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.unicode = true;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    unicode: true
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmUnicode, true, target, targetKey);
+        }
+    };
+})();
+/** Returns true if property is unicode (decorated by Edm.Unicode) */
+export function isUnicode(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmUnicode, target.prototype, propertyKey);
+}
+
+/** Edm.SRID decorator to set property SRID */
+export function SRID(srid: number){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.srid = srid;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    SRID: srid
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmSRID, srid, target, targetKey);
+        }
+    };
+}
+/** Returns property SRID (decorated by Edm.SRID) */
+export function getSRID(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmSRID, target.prototype, propertyKey);
+}
+
+/** Edm.DefaultValue decorator to set property default value */
+export function DefaultValue(value: any){
+    return function(target, targetKey, parameterIndex?:number){
+        if (typeof parameterIndex == "number"){
+            let parameterNames = getFunctionParameters(target, targetKey);
+            let existingParameters: any[] = Reflect.getOwnMetadata(EdmParameters, target, targetKey) || [];
+            let paramName = parameterNames[parameterIndex];
+            let param:any = existingParameters.filter(p => p.name == paramName)[0];
+            if (param){
+                param.defaultValue = value;
+            }else{
+                existingParameters.push({
+                    name: parameterNames[parameterIndex],
+                    defaultValue: value
+                });
+            }
+            Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
+        }else{
+            if (typeof target == "function"){
+                register(target);
+            }
+            Reflect.defineMetadata(EdmDefaultValue, value, target, targetKey);
+        }
+    };
+}
+/** Returns property default value (decorated by Edm.DefaultValue) */
+export function getDefaultValue(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmDefaultValue, target.prototype, propertyKey);
+}
+
+/** Edm.ConcurrencyMode decorator to set property concurrency mode */
+export function ConcurrencyMode(mode: string){
+    return function(target, targetKey){
+        if (typeof target == "function"){
+            register(target);
+        }
+        Reflect.defineMetadata(EdmConcurrencyMode, mode, target, targetKey);
+    };
+}
+/** Returns property concurrency mode (decorated by Edm.ConcurrencyMode) */
+export function getConcurrencyMode(target:Function, propertyKey:string):boolean{
+    return Reflect.getMetadata(EdmConcurrencyMode, target.prototype, propertyKey);
+}
+
 function operationDecoratorFactory(type, returnType?){
     return function(target, targetKey){
         let element = function(){};
@@ -564,11 +771,12 @@ export function isFunction(target:Function, propertyKey:string):boolean{
 }
 
 /** Edm.ComplexType decorator for describing properties of complex types */
-export function ComplexType(type:Function){
+export function ComplexType(type?:Function | string){
     return function(target:any, targetKey?:string, parameterIndex?:any){
+        if (type && (<any>type).__forward__ref__) type = (<any>type)();
         let baseType = Object.getPrototypeOf(target).constructor;
         if (baseType != Object && getProperties(baseType.prototype).length > 0){
-            EntityType()(baseType.prototype);
+            ComplexType()(baseType.prototype);
             let children = Reflect.getOwnMetadata(EdmChildren, baseType) || [];
             if (children.indexOf(target.constructor) < 0){
                 children.unshift(target.constructor);
@@ -594,22 +802,14 @@ export function ComplexType(type:Function){
             if (typeof target == "function"){
                 register(target);
             }
-            let baseType = Object.getPrototypeOf(target).constructor;
-            if (baseType != Object && getProperties(baseType.prototype).length > 0){
-                EntityType()(baseType.prototype);
-                let children = Reflect.getOwnMetadata(EdmChildren, baseType) || [];
-                if (children.indexOf(target.constructor) < 0){
-                    children.unshift(target.constructor);
-                }
-                Reflect.defineMetadata(EdmChildren, children, baseType);
-            }
             let desc = Object.getOwnPropertyDescriptor(target, targetKey);
             if (targetKey && targetKey != EdmType && ((desc && typeof desc.value != "function") || (!desc && typeof target[targetKey] != "function"))) {
                 let properties:string[] = Reflect.getOwnMetadata(EdmProperties, target) || [];
                 if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
                 Reflect.defineMetadata(EdmProperties, properties, target);
             }
-            Reflect.defineMetadata(EdmComplexType, type, target, targetKey);
+            if (type) Reflect.defineMetadata(EdmComplexType, true, type);
+            Reflect.defineMetadata(EdmComplexType, type || true, target, targetKey);
             Reflect.defineMetadata(EdmType, type, target, targetKey);
         }
     };
@@ -669,7 +869,7 @@ export function EntityType(type?:Function | string){
                     type: type
                 });
             }
-            Reflect.defineMetadata(EdmEntityType, param.type, param.type);
+            Reflect.defineMetadata(EdmEntityType, true, param.type);
             Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
         }else{
             if (typeof target == "function"){
@@ -681,18 +881,17 @@ export function EntityType(type?:Function | string){
                 if (properties.indexOf(targetKey) < 0) properties.push(targetKey);
                 Reflect.defineMetadata(EdmProperties, properties, target);
             }
-            Reflect.defineMetadata(EdmEntityType, type, target, targetKey);
+            if (type) Reflect.defineMetadata(EdmEntityType, true, type);
+            Reflect.defineMetadata(EdmEntityType, type || true, target, targetKey);
             Reflect.defineMetadata(EdmType, type, target, targetKey);
         }
     };
 }
 /** Returns true if property is an EntityType (decorated by Edm.EntityType) */
 export function isEntityType(target:Function, propertyKey?:string):boolean{
-    try{
-        return Reflect.hasMetadata(EdmEntityType, target.prototype, propertyKey);
-    }catch(err){
-        return false;
-    }
+    return typeof propertyKey == "string" 
+        ? !Reflect.hasMetadata(EdmComplexType, target.prototype, propertyKey) && Reflect.hasMetadata(EdmEntityType, target.prototype, propertyKey)
+        : !Reflect.hasMetadata(EdmComplexType, target) && Reflect.hasMetadata(EdmEntityType, target);
 }
 
 export function Flags(target, targetKey){
@@ -720,11 +919,12 @@ export function EnumType(type:any){
             if (param){
                 param.type = type;
             }else{
-                existingParameters.push({
+                existingParameters.push(param = {
                     name: paramName,
                     type: type
                 });
             }
+            Reflect.defineMetadata(EdmEnumType, true, param.type);
             Reflect.defineMetadata(EdmParameters, existingParameters, target, targetKey);
         }else{
             if (typeof target == "function"){
@@ -741,7 +941,7 @@ export function EnumType(type:any){
         }
     }
 }
-export function isEnumType(target, propertyKey){
+export function isEnumType(target:any, propertyKey?:string):boolean{
     return typeof propertyKey == "string"
         ? Reflect.hasMetadata(EdmEnumType, target.prototype, propertyKey)
         : Reflect.hasMetadata(EdmEnumType, target);
@@ -886,7 +1086,11 @@ export function Annotate(...annotation:any[]){
 }
 /** ?????????? */
 export function getAnnotations(target:Function, targetKey?:string):any[]{
-    return Reflect.getOwnMetadata(EdmAnnotations, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
+    try{
+        return Reflect.getOwnMetadata(EdmAnnotations, target.prototype, targetKey) || Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
+    }catch{
+        return Reflect.getOwnMetadata(EdmAnnotations, target, targetKey) || [];
+    }
 }
 
 /** ?????????? */
