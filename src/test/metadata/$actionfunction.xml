@@ -4,6 +4,14 @@
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Default">
             <EntityType Name="Executor" OpenType="true">
             </EntityType>
+            <EntityType Name="FuncEntity">
+            </EntityType>
+            <EntityType Name="FuncEntity2">
+            </EntityType>
+            <ComplexType Name="FuncComplex">
+            </ComplexType>
+            <ComplexType Name="FuncComplex2">
+            </ComplexType>
             <Action Name="action" IsBound="true">
                 <Parameter Name="bindingParameter" Type="Default.Executor"/>
                 <ReturnType Type="Edm.String"/>
@@ -24,6 +32,19 @@
                 <ReturnType Type="Edm.String"/>
             </Action>
             <Action Name="action2" IsBound="false">
+                <ReturnType Type="Edm.String"/>
+            </Action>
+            <Action Name="action3" IsBound="false">
+                <ReturnType Type="FuncEnumSchema.FuncEnum"/>
+            </Action>
+            <Action Name="action4" IsBound="false">
+                <ReturnType Type="Default.FuncComplex"/>
+            </Action>
+            <Action Name="action5" IsBound="false">
+                <ReturnType Type="Default.FuncEntity"/>
+            </Action>
+            <Action Name="action6" IsBound="false">
+                <Parameter Name="enumValue" Type="FuncEnumSchema.FuncEnum3"/>
                 <ReturnType Type="Edm.String"/>
             </Action>
             <Function Name="func" IsBound="true">
@@ -54,12 +75,38 @@
                 <Parameter Name="meta" Type="Meta.Meta"/>
                 <ReturnType Type="Edm.String"/>
             </Function>
+            <Function Name="func3" IsBound="false">
+                <ReturnType Type="FuncEnumSchema.FuncEnum2"/>
+            </Function>
+            <Function Name="func4" IsBound="false">
+                <ReturnType Type="Default.FuncComplex2"/>
+            </Function>
+            <Function Name="func5" IsBound="false">
+                <ReturnType Type="Default.FuncEntity2"/>
+            </Function>
+            <Function Name="func6" IsBound="false">
+                <Parameter Name="enumValue" Type="FuncEnumSchema.FuncEnum4"/>
+                <ReturnType Type="Edm.String"/>
+            </Function>
+            <Function Name="func7" IsBound="false">
+                <Parameter Name="foobar" Type="Foo.Bar"/>
+                <ReturnType Type="Edm.String"/>
+            </Function>
             <EntityContainer Name="Default">
                 <EntitySet Name="Execute" EntityType="Default.Executor"/>
                 <ActionImport Name="action" Action="Default.action"/>
                 <ActionImport Name="action2" Action="Default.action2"/>
+                <ActionImport Name="action3" Action="Default.action3"/>
+                <ActionImport Name="action4" Action="Default.action4"/>
+                <ActionImport Name="action5" Action="Default.action5"/>
+                <ActionImport Name="action6" Action="Default.action6"/>
                 <FunctionImport Name="func" Function="Default.func"/>
                 <FunctionImport Name="func2" Function="Default.func2"/>
+                <FunctionImport Name="func3" Function="Default.func3"/>
+                <FunctionImport Name="func4" Function="Default.func4"/>
+                <FunctionImport Name="func5" Function="Default.func5"/>
+                <FunctionImport Name="func6" Function="Default.func6"/>
+                <FunctionImport Name="func7" Function="Default.func7"/>
             </EntityContainer>
         </Schema>
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="EnumSchema">
@@ -72,6 +119,24 @@
                 <Member Name="Metal" Value="3"/>
                 <Member Name="Classic" Value="4"/>
                 <Annotation Term="foo" String="bar"/>
+            </EnumType>
+        </Schema>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Foo">
+            <TypeDefinition Name="Bar" UnderlyingType="Edm.String">
+            </TypeDefinition>
+        </Schema>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="FuncEnumSchema">
+            <EnumType Name="FuncEnum" UnderlyingType="Edm.Int64">
+                <Member Name="Default" Value="42"/>
+            </EnumType>
+            <EnumType Name="FuncEnum2" UnderlyingType="Edm.Int64">
+                <Member Name="Default" Value="13"/>
+            </EnumType>
+            <EnumType Name="FuncEnum3" UnderlyingType="Edm.Int64">
+                <Member Name="ActionEnumMemberName" Value="42"/>
+            </EnumType>
+            <EnumType Name="FuncEnum4" UnderlyingType="Edm.Int64">
+                <Member Name="FunctionEnumMemberName" Value="42"/>
             </EnumType>
         </Schema>
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Functions">

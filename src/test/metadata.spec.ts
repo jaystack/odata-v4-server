@@ -497,6 +497,28 @@ export class TestContainerBase extends Edm.ContainerBase {
     Test2 = TestEntity
 }
 
+export enum FuncEnum {
+    Default = 42
+}
+
+export enum FuncEnum2 {
+    Default = 13
+}
+
+export enum FuncEnum3 {
+    ActionEnumMemberName = 42
+}
+
+export enum FuncEnum4 {
+    FunctionEnumMemberName = 42
+}
+
+export class Foobar {
+    toString() {
+        return "foobar";
+    }
+}
+
 export class TestContainer extends TestContainerBase {
     @Edm.Flags
     @Edm.Int64
@@ -510,6 +532,25 @@ export class TestContainer extends TestContainerBase {
     @Edm.URLDeserialize((value: string) => new ObjectID(value))
     @Edm.Deserialize(value => new ObjectID(value))
     ObjectID2 = ObjectID
+
+    @Edm.Int64
+    @odata.namespace("FuncEnumSchema")
+    FuncEnum = FuncEnum
+
+    @Edm.Int64
+    @odata.namespace("FuncEnumSchema")
+    FuncEnum2 = FuncEnum2
+
+    @Edm.Int64
+    @odata.namespace("FuncEnumSchema")
+    FuncEnum3 = FuncEnum3
+
+    @Edm.Int64
+    @odata.namespace("FuncEnumSchema")
+    FuncEnum4 = FuncEnum4
+
+    @Edm.String
+    "Foo.Bar" = Foobar
 }
 
 @odata.namespace("Container")
@@ -964,6 +1005,12 @@ export class ActionFunctionController extends ODataController {
     }
 }
 
+export class FuncComplex{}
+export class FuncComplex2{}
+
+export class FuncEntity{}
+export class FuncEntity2{}
+
 @Edm.Container(TestContainer)
 @odata.controller(ActionFunctionController, "Execute")
 export class ActionFunctionServer extends ODataServer {
@@ -978,6 +1025,33 @@ export class ActionFunctionServer extends ODataServer {
         return "foobar";
     }
 
+    @Edm.ActionImport
+    @Edm.EnumType(FuncEnum)
+    action3() {
+        return FuncEnum.Default;
+    }
+
+    @Edm.ActionImport
+    @Edm.ComplexType(FuncComplex)
+    action4() {
+        return new FuncComplex();
+    }
+
+    @Edm.ActionImport
+    @Edm.EntityType(FuncEntity)
+    action5() {
+        return new FuncEntity();
+    }
+
+    @Edm.ActionImport
+    @Edm.String
+    action6(
+        @Edm.EnumType(FuncEnum3)
+        enumValue:FuncEnum3
+    ) {
+        return FuncEnum3[enumValue];
+    }
+
     @Edm.FunctionImport
     @Edm.String
     func(@Edm.ComplexType(Complex) complex: Complex) {
@@ -988,6 +1062,42 @@ export class ActionFunctionServer extends ODataServer {
     @Edm.String
     func2(@Edm.EntityType(Meta) meta: Meta) {
         return meta.b0;
+    }
+
+    @Edm.FunctionImport
+    @Edm.EnumType(FuncEnum2)
+    func3() {
+        return FuncEnum2.Default;
+    }
+
+    @Edm.FunctionImport
+    @Edm.ComplexType(FuncComplex2)
+    func4() {
+        return new FuncComplex2();
+    }
+
+    @Edm.FunctionImport
+    @Edm.EntityType(FuncEntity2)
+    func5() {
+        return new FuncEntity2();
+    }
+
+    @Edm.FunctionImport
+    @Edm.String
+    func6(
+        @Edm.EnumType(FuncEnum4)
+        enumValue:FuncEnum4
+    ) {
+        return FuncEnum4[enumValue];
+    }
+
+    @Edm.FunctionImport
+    @Edm.String
+    func7(
+        @Edm.TypeDefinition(Foobar)
+        foobar:Foobar
+    ) {
+        return foobar;
     }
 }
 

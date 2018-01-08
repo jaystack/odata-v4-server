@@ -900,8 +900,8 @@ export function Flags(target, targetKey){
 export function isFlags(target:Function, propertyKey:string):boolean{
     return Reflect.getMetadata(EdmFlags, target.prototype, propertyKey);
 }
-export function EnumType(type:any){
-    return function(target:any, targetKey?:string, parameterIndex?:number){
+export function EnumType(type:any):Decorator{
+    return function(target:any, targetKey?:string, parameterIndex?:number):any{
         let baseType = Object.getPrototypeOf(target).constructor;
         if (baseType != Object && getProperties(baseType.prototype).length > 0){
             EntityType()(baseType.prototype);
