@@ -124,16 +124,16 @@ export interface IODataValidator {
      * @param {string} odataQuery - An OData query string
      * @return {null} If validation succeeds, returns null, otherwise throws a ValidationError
      */
-    validate(odataQuery: string, options: IODataValidatorOptions);
-    validate(odataQuery: Token, options: IODataValidatorOptions);
-    validate(odataQuery: string | Token, options: IODataValidatorOptions);
+    validate(odataQuery: string, options?: IODataValidatorOptions);
+    validate(odataQuery: Token, options?: IODataValidatorOptions);
+    validate(odataQuery: string | Token, options?: IODataValidatorOptions);
 }
 
 /** Attach validator
  * @param connector Connector to use
  */
 export function validation(validator: IODataValidator, options: IODataValidatorOptions) {
-    return function (target: typeof ODataServer) {
+    return function (target: typeof ODataServer | typeof ODataController) {
         target.validator = function (odataQuery: string | Token) {
             return validator.validate(odataQuery, options);
         };

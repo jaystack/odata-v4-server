@@ -1,3 +1,4 @@
+import { Token } from "odata-v4-parser/lib/lexer";
 import * as odata from "./odata";
 import { ODataBase } from "./odata";
 import { getFunctionParameters } from "./utils";
@@ -6,6 +7,7 @@ export class ODataControllerBase{
     entitySetName:string
     elementType:Function
     static containerName:string
+    static validator:(odataQuery:string | Token) => null;
 
     static on(method:string, fn:Function | string, ...keys:string[]){
         let fnName = <string>((<any>fn).name || fn);

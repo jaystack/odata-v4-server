@@ -139,9 +139,10 @@ export class ODataServerBase extends Transform{
         };
     }
 
-    static execute<T>(url:string, method:string, body?:any):Promise<ODataResult<T>>;
-    static execute<T>(context:any, body?:any):Promise<ODataResult<T>>;
-    static execute<T>(url:string | any, method:string | any, body?:any):Promise<ODataResult<T>>{
+    static execute<T>(url:string, body?:object):Promise<ODataResult<T>>;
+    static execute<T>(url:string, method?:string, body?:object):Promise<ODataResult<T>>;
+    static execute<T>(context:object, body?:object):Promise<ODataResult<T>>;
+    static execute<T>(url:string | object, method?:string | object, body?:object):Promise<ODataResult<T>>{
         let context:any = {};
         if (typeof url == "object"){
             context = Object.assign(context, url);
@@ -150,9 +151,13 @@ export class ODataServerBase extends Transform{
             }
             url = undefined;
             method = undefined;
-        }else if (typeof url == "string" && typeof method == "string"){
+        }else if (typeof url == "string"){
             context.url = url;
-            context.method = method;
+            if (typeof method == "object"){
+                body = method;
+                method = "POST";
+            }
+            context.method = method || "GET";
         }
         let processor = this.createProcessor(context, <ODataProcessorOptions>{
             objectMode: true,
