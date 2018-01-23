@@ -264,6 +264,9 @@ class ImagesController extends ODataController{
     }
 }
 
+@Edm.OpenType
+class PlainObject{}
+
 @Edm.Container(NorthwindTypes)
 @odata.controller(ProductsController, true)
 @odata.controller(CategoriesController, true)
@@ -274,6 +277,11 @@ class StreamServer extends ODataServer{
     @Edm.FunctionImport
     objid(@Edm.TypeDefinition(ObjectID) v:ObjectID){
         return v.toHexString();
+    }
+
+    @Edm.FunctionImport(Edm.String)
+    stringify(@Edm.EntityType(PlainObject) obj:any):string {
+        return JSON.stringify(obj);
     }
 
     @odata.container("almafa")

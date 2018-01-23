@@ -479,6 +479,10 @@ export class ResourcePathVisitor {
         context.literal = literal;
     }
 
+    protected VisitObject(node: Token, context: any, type: any) {
+        context.literal = JSON.parse(node.raw);
+    }
+
     protected VisitEnum(node: Token, context: any, type: any) {
         this.Visit(node.value.value, context, type);
     }
