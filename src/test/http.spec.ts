@@ -270,6 +270,33 @@ describe("OData HTTP", () => {
             });
         });
 
+        it("should return expanded Meta with 'application/json;odata.metadata=full' header using $select", () => {
+            return request.get(`http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$select=Id&$expand=Meta.Meta/MediaList`, { headers: { accept: 'application/json;odata.metadata=full' } }, (err, response, result) => {
+                expect(JSON.parse(result)).to.deep.equal({
+                    "@odata.context": "http://localhost:3003/$metadata#Meta(Id)/$entity",
+                    "@odata.id": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)",
+                    "@odata.type": "#Meta.Meta",
+                    "Id": 1,
+                    "Id@odata.type": "#Int32",
+                    "MediaList": [
+                        {
+                            "@odata.id": "http://localhost:3003/Media(Id=1,StringId='two')",
+                            "@odata.mediaContentType": "audio/mp3",
+                            "@odata.mediaReadLink": "http://localhost:3003/Media(Id=1,StringId='two')/$value",
+                            "@odata.type": "#Media.Media",
+                            "Id": 1,
+                            "Id@odata.type": "#Int32",
+                            "Meta@odata.associationLink": "http://localhost:3003/Media(Id=1,StringId='two')/Meta/$ref",
+                            "Meta@odata.navigationLink": "http://localhost:3003/Media(Id=1,StringId='two')/Meta",
+                            "StringId": "two"
+                        }
+                    ],
+                    "MediaList@odata.associationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList/$ref",
+                    "MediaList@odata.navigationLink": "http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)/MediaList"
+                });
+            });
+        });
+
         it("should return expanded Meta with 'application/json;odata.metadata=full' header", () => {
             return request.get(`http://localhost:3003/Meta(MongoId='578f2b8c12eaebabec4af242',Id=1,p9=9,p10=10)?$expand=Meta.Meta/MediaList`, { headers: { accept: 'application/json;odata.metadata=full' } }, (err, response, result) => {
                 expect(JSON.parse(result)).to.deep.equal({

@@ -584,7 +584,7 @@ export class MetaController extends ODataController {
     }
 
     @odata.method("GET")
-    findOneByKeys( @odata.key('Id') key1: number, @odata.key('p10') key2: number, @odata.key('p9') key3: number, @odata.key('MongoId') key4: string) {
+    findOneByKeys( @odata.query query:ODataQuery, @odata.key('Id') key1: number, @odata.key('p10') key2: number, @odata.key('p9') key3: number, @odata.key('MongoId') key4: string) {
         let meta = new Meta();
         meta.Id = key1;
         meta.p9 = key3;

@@ -1,4 +1,4 @@
-import { Token } from "odata-v4-parser/lib/lexer";
+import { Token, TokenType } from "odata-v4-parser/lib/lexer";
 
 export const processQueries = async (_query: Token) => {
     const query = await clone(_query);

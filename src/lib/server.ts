@@ -159,6 +159,7 @@ export class ODataServerBase extends Transform{
             }
             context.method = method || "GET";
         }
+        context.method = context.method || "GET";
         let processor = this.createProcessor(context, <ODataProcessorOptions>{
             objectMode: true,
             metadata: context.metadata || ODataMetadataType.minimal

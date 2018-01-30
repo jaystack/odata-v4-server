@@ -666,11 +666,7 @@ export function testFactory(createTest: any) {
             body: {
                 "@odata.context": "http://localhost/$metadata#Products(Name,CategoryId)/$entity",
                 "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')",
-                "Discontinued": false,
                 "Name": "Chai",
-                "QuantityPerUnit": "10 boxes x 20 bags",
-                "UnitPrice": 39,
-                "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
                 "CategoryId": new ObjectID("578f2baa12eaebabec4af289")
             },
             elementType: Product,
@@ -683,11 +679,7 @@ export function testFactory(createTest: any) {
                 "@odata.context": "http://localhost/$metadata#Products(Name,CategoryId)",
                 "value": [{
                     "@odata.id": "http://localhost/Products('578f2b8c12eaebabec4af23c')",
-                    "Discontinued": false,
                     "Name": "Chai",
-                    "QuantityPerUnit": "10 boxes x 20 bags",
-                    "UnitPrice": 39,
-                    "_id": new ObjectID("578f2b8c12eaebabec4af23c"),
                     "CategoryId": new ObjectID("578f2baa12eaebabec4af289")
                 }]
             },

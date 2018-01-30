@@ -10,6 +10,7 @@ export const odata = _odata;
 export * from "./controller";
 export * from "./processor";
 export * from "./server";
+export * from "./metadata";
 export * from "./result";
 export * from "./visitor";
 export * from "./error";

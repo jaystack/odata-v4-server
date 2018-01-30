@@ -20,6 +20,10 @@ export interface NavigationPart {
     node: Token
 }
 
+export interface ISelect {
+    [property: string]: ISelect
+}
+
 export const ODATA_TYPE = "@odata.type";
 export const ODATA_TYPENAME = "@odata.type.name";
 export class ResourcePathVisitor {
@@ -29,6 +33,7 @@ export class ResourcePathVisitor {
     }
 
     navigation: NavigationPart[]
+    select: ISelect
     alias: any
     path: string
     singleton: string
@@ -113,6 +118,18 @@ export class ResourcePathVisitor {
 
     protected async VisitQueryOptions(node: Token, context: any, type: any) {
         await Promise.all(node.value.options.map(async (option) => await this.Visit(option, Object.assign({}, context), type)));
+    }
+
+    protected VisitSelect(node: Token, context: any, type: any) {
+        this.select = {};
+        node.value.items.forEach((item) => this.Visit(item, context));
+    }
+
+    protected VisitSelectItem(node: Token, context: any, type: any) {
+        let select = this.select;
+        node.raw.split("/").forEach(part => {
+            select = select[part] = select[part] || {};
+        });
     }
 
     protected async VisitFilter(node: Token, context: any, type: any) {
