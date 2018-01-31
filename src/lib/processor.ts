@@ -12,6 +12,7 @@ import * as Edm from "./edm";
 import * as odata from "./odata";
 import { ResourceNotFoundError, MethodNotAllowedError } from "./error";
 import { ODataServer, ODataHttpContext } from "./server";
+import { IODataResult } from './index';
 
 const getODataRoot = function (context: ODataHttpContext) {
     return (context.protocol || "http") + "://" + (context.host || "localhost") + (context.base || "");
@@ -208,7 +209,7 @@ const expCalls = {
                         if (prop.indexOf("@odata") >= 0) delete result[prop];
                     }
 
-                    result = result.value || result;
+                    result = (<IODataResult>result).value || result;
                     if (typeof result == "object" && (prevPart.type == "PrimitiveProperty" || prevPart.type == "PrimitiveKeyProperty")) return Promise.resolve(result.toString());
                     return Promise.resolve(result);
                 }
