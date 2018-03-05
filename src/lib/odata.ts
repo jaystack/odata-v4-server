@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { Token, TokenType } from "odata-v4-parser/lib/lexer";
+import { ErrorRequestHandler } from "express";
 import { ODataServer } from "./server";
 import { ODataController } from "./controller";
 import { EntityType } from "./edm";
@@ -138,6 +139,15 @@ export function validation(validator: IODataValidator, options: IODataValidatorO
             return validator.validate(odataQuery, options);
         };
     };
+}
+
+/** Set error handler
+ * @param errorHandler Error request handler to use
+ */
+export function error(errorHandler: ErrorRequestHandler) {
+  return function (target: typeof ODataServer) {
+      target.errorHandler = errorHandler;
+  };
 }
 
 /** Class decorator for server that binds the given controller to the server. 

@@ -1,6 +1,6 @@
 import { MongoClient, ObjectID, Db } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
-import { Edm, odata, ODataController, ODataServer, ODataQuery, createODataServer } from "../lib/index";
+import { Edm, odata, ODataController, ODataServer, ODataQuery, createODataServer, ODataErrorHandler } from "../lib/index";
 import { Category, Product, NorthwindTypes } from "./model";
 import { Writable } from "stream";
 let categories = require("./categories");
@@ -79,6 +79,11 @@ export class NorthwindODataServer extends ODataServer{
         let productsCollection = db.collection("Products");
         await categoryCollection.insertMany(categories);
         await productsCollection.insertMany(products);
+    }
+
+    static errorHandler(err, req, res, next){
+      delete err.stack;
+      ODataErrorHandler(err, req, res, next);
     }
 }
 

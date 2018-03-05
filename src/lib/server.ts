@@ -78,6 +78,7 @@ export class ODataServerBase extends Transform{
     static parser = ODataParser;
     static connector:IODataConnector
     static validator:(odataQuery:string | Token) => null;
+    static errorHandler:express.ErrorRequestHandler = ODataErrorHandler;
     private serverType:typeof ODataServer
 
     static requestHandler(){
@@ -285,7 +286,7 @@ export class ODataServerBase extends Transform{
         }, server.document().requestHandler());
         router.get("/\\$metadata", server.$metadata().requestHandler());
         router.use(server.requestHandler());
-        router.use(ODataErrorHandler);
+        router.use(server.errorHandler);
 
         if (typeof path == "number"){
             if (typeof port == "string"){
@@ -317,7 +318,7 @@ export function ODataErrorHandler(err, _, res, next){
             error: {
                 code: statusCode,
                 message: err.message,
-                stack: err.stack
+                stack: process.env.ODATA_V4_DISABLE_STACKTRACE ? undefined : err.stack
             }
         });
     }else next();
