@@ -192,6 +192,12 @@ describe("OData execute", () => {
         });
     });
 
+    it("should return entity set result with nextLink", async () => {
+        const result = await TestServer.execute("/NextLinkEntitySet", "GET");
+
+        return expect(result.body["@odata.nextLink"]).to.equal("http://localhost/NextLinkEntitySet?$skip=1&$top=1");
+    });
+
     it("should create category reference on product", () => {
         return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "POST", {
             "@odata.id": "http://localhost/Categories(categoryId='578f2baa12eaebabec4af28c')"

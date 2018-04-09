@@ -205,6 +205,16 @@ export class InlineCountController extends ODataController {
 }
 
 @odata.type(Foobar)
+export class NextLinkController extends ODataController {
+    @odata.GET
+    entitySet() {
+        let result = [{ id: 1, a: 1 }];
+        (<any>result).nextLink = "http://localhost/NextLinkEntitySet?$skip=1&$top=1";
+        return result;
+    }
+}
+
+@odata.type(Foobar)
 export class BoundOperationController extends ODataController {
     @Edm.Action
     Action() {
@@ -1010,6 +1020,7 @@ export class HiddenController extends ODataController { }
 @odata.controller(GeneratorTestController, "GeneratorEntitySet")
 @odata.controller(AsyncTestController, "AsyncEntitySet")
 @odata.controller(InlineCountController, "InlineCountEntitySet")
+@odata.controller(NextLinkController, "NextLinkEntitySet")
 @odata.controller(BoundOperationController, "BoundOperationEntitySet")
 @odata.controller(ImagesController, "ImagesControllerEntitySet")
 @odata.controller(MusicController, "MusicControllerEntitySet")
