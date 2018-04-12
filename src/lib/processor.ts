@@ -531,6 +531,9 @@ export class ODataProcessor extends Transform {
                         this.push("{");
                         if (this.options.metadata != ODataMetadataType.none) {
                             this.push(`"@odata.context":"${this.odataContext}",`);
+                            if (this.streamNextLink) {
+                                this.push(`"@odata.nextLink":"${this.streamNextLink}",`);
+                            }
                         }
                         this.push('"value":[');
                     }
@@ -815,10 +818,14 @@ export class ODataProcessor extends Transform {
                     if (this.method == "get") {
                         currentResult.then((value) => {
                             try {
+                                const nl = result.body["@odata.context"];
                                 result.body = {
                                     "@odata.context": this.options.metadata != ODataMetadataType.none ? result.body["@odata.context"] : undefined,
                                     value: value
                                 };
+                                if (this.options.metadata != ODataMetadataType.none && nl) {
+                                    result.body["@odata.context"] = nl;
+                                }
                                 let elementType = result.elementType;
                                 //if (value instanceof Object)
                                 result.elementType = Edm.isEnumType(result.elementType, part.name)
@@ -1562,6 +1569,7 @@ export class ODataProcessor extends Transform {
         }
         if (isCollection && navigationResult.body.value && Array.isArray(navigationResult.body.value)) {
             if (typeof navigationResult.body["@odata.count"] == "number") context[prop + "@odata.count"] = navigationResult.body["@odata.count"];
+            if (typeof navigationResult.body["@odata.nextLink"] == "string") context[prop + "@odata.nextLink"] = navigationResult.body["@odata.nextLink"];
             context[prop] = navigationResult.body.value;
         } else if (navigationResult.body && Object.keys(navigationResult.body).length > 0) {
             context[prop] = navigationResult.body;

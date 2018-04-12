@@ -1178,6 +1178,45 @@ export function testFactory(createTest: any) {
                 contentType: "application/json"
                 });
 
+            createTest("should return GeneratorCategories expanded with GeneratorProducts@odata.nextLink when using $top in $expand subquery",
+                TestServer, "GET /GeneratorCategories?$expand=GeneratorProducts($top=2)&$top=1&$orderby=Name desc", {
+                    statusCode: 200,
+                    body: {
+                        "@odata.context": "http://localhost/$metadata#GeneratorCategories",
+                        "value": [
+                            {
+                                "@odata.id": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af28d')",
+                                "Description": "Seaweed and fish",
+                                "Name": "Seafood",
+                                "_id": new ObjectID("578f2baa12eaebabec4af28d"),
+                                "GeneratorProducts": [
+                                    {
+                                        "@odata.id": "http://localhost/GeneratorProducts('578f2b8c12eaebabec4af242')",
+                                        "Discontinued": false,
+                                        "Name": "Ikura",
+                                        "QuantityPerUnit": "12 - 200 ml jars",
+                                        "UnitPrice": 31,
+                                        "_id": new ObjectID("578f2b8c12eaebabec4af242"),
+                                        "CategoryId": new ObjectID("578f2baa12eaebabec4af28d")
+                                    },
+                                    {
+                                        "@odata.id": "http://localhost/GeneratorProducts('578f2b8c12eaebabec4af245')",
+                                        "Discontinued": false,
+                                        "Name": "Konbu",
+                                        "QuantityPerUnit": "2 kg box",
+                                        "UnitPrice": 6,
+                                        "_id": new ObjectID("578f2b8c12eaebabec4af245"),
+                                        "CategoryId": new ObjectID("578f2baa12eaebabec4af28d"),
+                                    }
+                                ],
+                                "GeneratorProducts@odata.nextLink": "http://localhost/GeneratorCategories('578f2baa12eaebabec4af28d')?$expand=GeneratorProducts($top=2&$skip=2)"
+                            }
+                        ]
+                    },
+                    elementType: GeneratorCategory,
+                    contentType: "application/json"
+                });
+
             createTest("should return GeneratorCategories expanded with GeneratorProduct using $top,$filter,$expand subqueries",
                 TestServer, "GET /GeneratorCategories?$expand=GeneratorProducts($orderby=Name desc)&$top=1&$orderby=Name desc", {
                 statusCode: 200,

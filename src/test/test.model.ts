@@ -824,6 +824,10 @@ export class CategoriesAdvancedGeneratorController extends ODataController {
         response = yield doSkip(response, options);
         response = yield doTop(response, options);
 
+        if (query && query.raw && query.raw === "$top=2") {
+            (<any>response).nextLink = "http://localhost/GeneratorCategories('578f2baa12eaebabec4af28d')?$expand=GeneratorProducts($top=2&$skip=2)";
+        }
+
         return response
     }
 }
