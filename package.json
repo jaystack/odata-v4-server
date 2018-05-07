@@ -123,7 +123,7 @@
     "odata-v4-inmemory": "^0.1.9",
     "odata-v4-mongodb": "^0.1.12",
     "remap-istanbul": "^0.9.6",
-    "request": "^2.83.0",
+    "request": "^2.85.0",
     "request-promise": "^4.2.2",
     "rimraf": "^2.6.2",
     "source-map-support": "^0.4.18",
