@@ -222,7 +222,7 @@ export class ResourcePathVisitor {
 
     protected async VisitHasExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
-        await this.Visit(node.value.right, context, context.type || type);
+        await this.Visit(node.value.right, context, type);
     }
 
     protected async VisitExpand(node: Token, context: any, type: any) {
@@ -500,19 +500,25 @@ export class ResourcePathVisitor {
         context.literal = JSON.parse(node.raw);
     }
 
-    protected VisitEnum(node: Token, context: any, type: any) {
-        this.Visit(node.value.value, context, type);
+    protected async VisitEnum(node: Token, context: any, type: any) {
+        await this.Visit(node.value.value, context, type);
     }
 
-    protected VisitEnumValue(node: Token, context: any, type: any) {
-        this.Visit(node.value.values[0], context, type);
+    protected async VisitEnumValue(node: Token, context: any, type: any) {
+        await this.Visit(node.value.values[0], context, type);
     }
 
-    protected VisitEnumerationMember(node: Token, context: any, type: any) {
+    protected async VisitEnumerationMember(node: Token, context: any, type: any) {
         if (context.filter && type) {
             node.type = TokenType.EnumMemberValue;
-            node.raw = `${type && type[node.value.name]}`;
-            node.value = context.typeName;
+            const deserializer = Edm.getURLDeserializer(type, context.typeName, context.type, this.serverType.container);
+            if (deserializer){
+                node.raw = await deserializer(node.value.name);
+                node.value = node.raw;
+            }else{
+                node.raw = `${type && type[node.value.name]}`;
+                node.value = context.typeName;
+            }
         } else {
             context.literal = (type && type[node.value.name]) || node.value.name;
         }
