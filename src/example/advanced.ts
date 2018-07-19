@@ -7,7 +7,7 @@ let categories = require("./categories");
 let products = require("./products");
 
 const mongodb = async function():Promise<Db>{
-    return await MongoClient.connect("mongodb://localhost:27017/odataserver");
+    return (await MongoClient.connect("mongodb://localhost:27017/odataserver")).db();
 };
 
 @odata.type(Product)
@@ -16,7 +16,7 @@ export class ProductsController extends ODataController{
     @odata.GET
     async find(@odata.query query:ODataQuery, @odata.stream stream:Writable){
         let mongodbQuery = createQuery(query);
-        return (await mongodb()).collection("Products").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).stream().pipe(stream);
+        return (await mongodb()).collection("Products").find(mongodbQuery.query, { projection: mongodbQuery.projection, skip: mongodbQuery.skip, limit: mongodbQuery.limit }).stream().pipe(stream);
     }
 
     @odata.GET
@@ -39,7 +39,7 @@ export class CategoriesController extends ODataController{
     @odata.GET
     async find(@odata.query query:ODataQuery, @odata.stream stream:Writable){
         let mongodbQuery = createQuery(query);
-        return (await mongodb()).collection("Categories").find(mongodbQuery.query, mongodbQuery.projection, mongodbQuery.skip, mongodbQuery.limit).stream().pipe(stream);
+        return (await mongodb()).collection("Categories").find(mongodbQuery.query, { projection: mongodbQuery.projection, skip: mongodbQuery.skip, limit: mongodbQuery.limit }).stream().pipe(stream);
     }
 
     @odata.GET

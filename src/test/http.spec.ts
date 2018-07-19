@@ -16,7 +16,14 @@ let products = require("./model/products");
 const { expect } = require("chai");
 
 let serverCache = new WeakMap<typeof ODataServer, number>();
+let serverCacheArray = [];
 let serverPort = 5000;
+
+if (typeof after == "function"){
+    after(function(){
+        serverCacheArray.forEach(server => server.close());
+    });
+}
 
 function createTestFactory(it) {
     return function createTest(testcase: string, server: typeof ODataServer, command: string, compare: any, body?: any) {
@@ -27,8 +34,9 @@ function createTestFactory(it) {
             let port: number;
             if (!serverCache.has(server)) {
                 port = serverPort++;
-                server.create(port);
+                const instance = server.create(port);
                 serverCache.set(server, port);
+                serverCacheArray.push(instance);
             } else {
                 port = serverCache.get(server);
             }
@@ -70,11 +78,11 @@ const createTest: any = createTestFactory(it);
 createTest.only = createTestFactory(it.only);
 
 describe("OData HTTP", () => {
-    TestServer.create(3002);
+    serverCacheArray.push(TestServer.create(3002));
     serverCache.set(TestServer, 3002);
     testFactory(createTest);
 
-    MetaTestServer.create(3003, 'localhost');
+    serverCacheArray.push(MetaTestServer.create(3003, 'localhost'));
     serverCache.set(MetaTestServer, 3003);
 
     describe("accept header", () => {

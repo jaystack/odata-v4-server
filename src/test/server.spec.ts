@@ -1203,8 +1203,6 @@ export function testFactory(createTest: any) {
                 elementType: GeneratorCategory,
                 contentType: "application/json"
                 });
-
-
         });
 
         createTest("should return product name property", TestServer, "GET /Products('578f2b8c12eaebabec4af23c')/Name", {

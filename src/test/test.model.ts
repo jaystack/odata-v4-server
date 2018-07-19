@@ -18,6 +18,13 @@ let products = require("./model/products").slice();
 let categories2 = require("./model/categories").slice();
 let products2 = require("./model/products").slice();
 
+const serverCache = [];
+if (typeof after == "function"){
+    after(function(){
+        serverCache.forEach(server => server.close());
+    });
+}
+
 export class Foobar {
     @Edm.Key
     @Edm.Computed
@@ -1063,7 +1070,7 @@ export class TestServer extends ODataServer {
     }
 }
 
-TestServer.create(5005);
+serverCache.push(TestServer.create(5005));
 
 @odata.namespace("Authentication")
 @odata.controller(UsersController, true)
@@ -1079,13 +1086,13 @@ export class AuthenticationServer extends ODataServer {
 @odata.controller(ProductsController, true)
 @odata.controller(CategoriesController, false)
 export class ProductServer extends ODataServer { }
-ProductServer.create(7001);
+serverCache.push(ProductServer.create(7001));
 
 @odata.cors
 @odata.controller(ProductsController, false)
 @odata.controller(CategoriesController, true)
 export class CategoryServer extends ODataServer { }
-CategoryServer.create(7002);
+serverCache.push(CategoryServer.create(7002));
 
 export class NoServer extends ODataServer { }
 
