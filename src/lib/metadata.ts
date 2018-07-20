@@ -344,7 +344,7 @@ export function createMetadataJSON(server: typeof ODataServer) {
         let children = Edm.getChildren(elementType);
         children.forEach((child) => {
             let resolvedType = resolveType(child, elementType, prop, elementType);
-            let definitionContainer = Edm.isEntityType(baseType) ? "entityType" : "complexType";
+            let definitionContainer = Edm.isEntityType(child) ? "entityType" : "complexType";
             if (resolvedType && !resolvedType.schema.entityType.filter(et => et.name == resolvedType.definition.name)[0]) {
                 resolvedType.schema[definitionContainer].push(resolvedType.definition);
             }

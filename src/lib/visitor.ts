@@ -317,6 +317,7 @@ export class ResourcePathVisitor {
 
     protected async VisitCollectionNavigation(node: Token, context: any, type: any) {
         context.isCollection = true;
+        await this.Visit(node.value.name, context, type);
         await this.Visit(node.value.path, context, type);
         delete context.isCollection;
     }
@@ -516,6 +517,9 @@ export class ResourcePathVisitor {
     }
 
     protected async VisitEnum(node: Token, context: any, type: any) {
+        const enumName = node.value.name.raw.split('.');
+        context.enumName = enumName.pop();
+        context.enumNamespace = enumName.join('.');
         await this.Visit(node.value.value, context, type);
     }
 
@@ -531,8 +535,19 @@ export class ResourcePathVisitor {
                 node.raw = await deserializer(node.value.name);
                 node.value = node.raw;
             }else{
-                // node.raw = `${context.type && context.type[node.value.name]}`;
-                node.raw = `${type && type[node.value.name]}`;
+                const { enumNamespace, enumName } = context;
+                const qualifiedEnumTypeName = `${enumNamespace}.${enumName}`;
+                if (!(context.type || context.typeName) && enumNamespace && enumName){
+                    context.type = this.serverType.container[qualifiedEnumTypeName] || this.serverType.container[context.enumName];
+                    const containerType = Object.getPrototypeOf(this.serverType.container).constructor;
+                    context.typeName =
+                        Edm.getTypeName(containerType, qualifiedEnumTypeName, this.serverType.container) ||
+                        Edm.getTypeName(containerType, enumName, this.serverType.container) ||
+                        "Edm.Int32";
+                }
+                node[ODATA_TYPE] = context.type;
+                node[ODATA_TYPENAME] = context.typeName;
+                node.raw = `${context.type && context.type[node.value.name]}`;
                 node.value = context.typeName;
             }
         } else {

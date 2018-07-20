@@ -64,7 +64,7 @@ function ensureODataHeaders(req, res, next?){
         let origsend = res.send;
         res.send = <any>((data) => {
             if (typeof data == "object") data = JSON.stringify(data);
-            origsend.call(res, new Buffer(data, bufferEncoding[charset]));
+            origsend.call(res, Buffer.from(data, bufferEncoding[charset]));
         });
     }
 

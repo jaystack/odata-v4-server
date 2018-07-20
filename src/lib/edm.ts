@@ -355,7 +355,7 @@ export function getParameters(target:Function, targetKey:string):any[]{
     return params;
 }
 export function getChildren(target:Function){
-    return Reflect.getMetadata(EdmChildren, target) || [];
+    return Reflect.getOwnMetadata(EdmChildren, target) || [];
 }
 
 /** Edm.Key decorator for describing properties as keys */
