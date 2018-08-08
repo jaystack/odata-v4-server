@@ -7,6 +7,14 @@ import * as fs from "fs";
 import * as path from "path";
 const { expect } = require("chai");
 const beautify = require("xml-beautifier");
+
+const serverCache = [];
+if (typeof after == "function"){
+    after(function(){
+        serverCache.forEach(server => server.close());
+    });
+}
+
 const toObjectID = _id => _id && !(_id instanceof ObjectID) ? ObjectID.createFromHexString(_id) : _id;
 let schemaJson = {
     version: "4.0",
@@ -833,11 +841,11 @@ class SchemaJsonTestController extends ODataController { }
 @odata.controller(SchemaJsonTestController, true)
 class SchemaJsonServer extends ODataServer { }
 SchemaJsonServer.$metadata(schemaJson);
-SchemaJsonServer.create("/schemaJsonTest", 4004);
+serverCache.push(SchemaJsonServer.create("/schemaJsonTest", 4004));
 
 class DefineEntitiesServer extends ODataServer{}
 DefineEntitiesServer.$metadata(defineEntities);
-DefineEntitiesServer.create("/defineEntitiesTest", 4005);
+serverCache.push(DefineEntitiesServer.create("/defineEntitiesTest", 4005));
 
 @Edm.Container(TestContainer)
 @odata.namespace("Server")
@@ -933,7 +941,7 @@ export class MetaTestServer extends ODataServer {
 export class TypeDefServer extends ODataServer {
 
 }
-TypeDefServer.create(4010);
+serverCache.push(TypeDefServer.create(4010));
 
 @Edm.Container(EnumContainer)
 @odata.cors
@@ -941,7 +949,7 @@ TypeDefServer.create(4010);
 export class EnumServer extends ODataServer {
 
 }
-EnumServer.create(4011);
+serverCache.push(EnumServer.create(4011));
 
 MetaTestServer.addController(HiddenEmptyController);
 MetaTestServer.addController(EmptyEntity4Controller, true);
@@ -949,9 +957,9 @@ MetaTestServer.addController(EmptyEntity5Controller, true, EmptyEntity5);
 MetaTestServer.addController(EmptyEntity6Controller, 'EmptyEntity6', EmptyEntity6);
 
 MetaTestServer.create();
-MetaTestServer.create(4001);
-MetaTestServer.create('/test', 4002);
-createODataServer(MetaTestServer, "/test", 4003);
+serverCache.push(MetaTestServer.create(4001));
+serverCache.push(MetaTestServer.create('/test', 4002));
+serverCache.push(createODataServer(MetaTestServer, "/test", 4003));
 
 @Edm.OpenType
 export class Executor {

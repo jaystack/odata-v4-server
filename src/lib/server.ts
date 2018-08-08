@@ -4,6 +4,7 @@ import { Edm as Metadata } from "odata-v4-metadata";
 import * as ODataParser from "odata-v4-parser";
 import { Token, TokenType } from "odata-v4-parser/lib/lexer";
 import * as express from "express";
+import * as http from "http";
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import { Transform, TransformOptions } from "stream";
@@ -63,7 +64,7 @@ function ensureODataHeaders(req, res, next?){
         let origsend = res.send;
         res.send = <any>((data) => {
             if (typeof data == "object") data = JSON.stringify(data);
-            origsend.call(res, new Buffer(data, bufferEncoding[charset]));
+            origsend.call(res, Buffer.from(data, bufferEncoding[charset]));
         });
     }
 
@@ -256,11 +257,11 @@ export class ODataServerBase extends Transform{
     }
 
     static create():express.Router;
-    static create(port:number):void;
-    static create(path:string, port:number):void;
-    static create(port:number, hostname:string):void;
-    static create(path?:string | RegExp | number, port?:number | string, hostname?:string):void;
-    static create(path?:string | RegExp | number, port?:number | string, hostname?:string):void | express.Router{
+    static create(port:number):http.Server;
+    static create(path:string, port:number):http.Server;
+    static create(port:number, hostname:string):http.Server;
+    static create(path?:string | RegExp | number, port?:number | string, hostname?:string):http.Server;
+    static create(path?:string | RegExp | number, port?:number | string, hostname?:string):http.Server | express.Router{
         let server = this;
         let router = express.Router();
         router.use((req, _, next) => {
@@ -298,7 +299,7 @@ export class ODataServerBase extends Transform{
         if (typeof port == "number"){
             let app = express();
             app.use((<any>path) || "/", router);
-            app.listen(port, <any>hostname);
+            return app.listen(port, <any>hostname);
         }
         return router;
     }
@@ -333,19 +334,19 @@ export function createODataServer(server:typeof ODataServer):express.Router;
  * @param server OData Server instance
  * @param port   port number for Express to listen to
  */
-export function createODataServer(server:typeof ODataServer, port:number):void;
+export function createODataServer(server:typeof ODataServer, port:number):http.Server;
 /** Create Express server for OData Server
  * @param server OData Server instance
  * @param path   routing path for Express
  * @param port   port number for Express to listen to
  */
-export function createODataServer(server:typeof ODataServer, path:string, port:number):void;
+export function createODataServer(server:typeof ODataServer, path:string, port:number):http.Server;
 /** Create Express server for OData Server
  * @param server   OData Server instance
  * @param port     port number for Express to listen to
  * @param hostname hostname for Express
  */
-export function createODataServer(server:typeof ODataServer, port:number, hostname:string):void;
+export function createODataServer(server:typeof ODataServer, port:number, hostname:string):http.Server;
 /** Create Express server for OData Server
  * @param server   OData Server instance
  * @param path     routing path for Express
@@ -353,6 +354,6 @@ export function createODataServer(server:typeof ODataServer, port:number, hostna
  * @param hostname hostname for Express
  * @return         Express Router object
  */
-export function createODataServer(server:typeof ODataServer, path?:string | RegExp | number, port?:number | string, hostname?:string):void | express.Router{
+export function createODataServer(server:typeof ODataServer, path?:string | RegExp | number, port?:number | string, hostname?:string):http.Server | express.Router{
     return server.create(path, port, hostname);
 }

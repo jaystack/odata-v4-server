@@ -7,7 +7,7 @@ let categories = require("./categories");
 let products = require("./products");
 
 const mongodb = async function (): Promise<Db> {
-    return await MongoClient.connect("mongodb://localhost:27017/odataserver");
+    return (await MongoClient.connect("mongodb://localhost:27017/odataserver")).db();
 };
 
 class ProductsController extends ODataController {
@@ -18,10 +18,11 @@ class ProductsController extends ODataController {
         if (typeof mongodbQuery.query._id == "string") mongodbQuery.query._id = new ObjectID(mongodbQuery.query._id);
         if (typeof mongodbQuery.query.CategoryId == "string") mongodbQuery.query.CategoryId = new ObjectID(mongodbQuery.query.CategoryId);
         return db.collection("Products").find(
-            mongodbQuery.query,
-            mongodbQuery.projection,
-            mongodbQuery.skip,
-            mongodbQuery.limit
+            mongodbQuery.query, {
+                projection: mongodbQuery.projection,
+                skip: mongodbQuery.skip,
+                limit: mongodbQuery.limit
+            }
         ).toArray();
     }
 
@@ -52,10 +53,11 @@ class CategoriesController extends ODataController {
         let mongodbQuery = createQuery(query);
         if (typeof mongodbQuery.query._id == "string") mongodbQuery.query._id = new ObjectID(mongodbQuery.query._id);
         return db.collection("Categories").find(
-            mongodbQuery.query,
-            mongodbQuery.projection,
-            mongodbQuery.skip,
-            mongodbQuery.limit
+            mongodbQuery.query, {
+                projection: mongodbQuery.projection,
+                skip: mongodbQuery.skip,
+                limit: mongodbQuery.limit
+            }
         ).toArray();
     }
 

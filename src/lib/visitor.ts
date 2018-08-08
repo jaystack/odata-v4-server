@@ -156,7 +156,12 @@ export class ResourcePathVisitor {
     }
 
     protected async VisitFirstMemberExpression(node: Token, context: any, type: any) {
-        await this.Visit(node.value, context, type);
+        const firstMemberContext = { ...context, isFirstMemberExpression: true };
+        await this.Visit(node.value, firstMemberContext, type);
+        if (firstMemberContext.qualifiedType && firstMemberContext.qualifiedTypeName){
+            type = firstMemberContext.qualifiedType || type;
+            node.raw = node.raw.split('/').pop();
+        }
         context.type = Edm.getType(type, node.raw, this.serverType.container);
         context.typeName = Edm.getTypeName(type, node.raw, this.serverType.container);
         context.deserializer = Edm.getURLDeserializer(type, node.raw, context.type, this.serverType.container);
@@ -171,12 +176,17 @@ export class ResourcePathVisitor {
                 enumNamespace = enumName.slice(0, enumName.lastIndexOf("."));
                 enumName = enumName.slice(enumName.lastIndexOf(".") + 1);
             }
-            context.typeName = Edm.getTypeName(containerType, enumName, this.serverType.container) || "Edm.Int32";
+            context.typeName = Edm.getTypeName(containerType, enumName, this.serverType.container) ||
+                Edm.getTypeName(containerType, `${enumNamespace}.${enumName}`, this.serverType.container) ||
+                "Edm.Int32";
         }
     }
 
     protected async VisitMemberExpression(node: Token, context: any, type: any) {
-        await this.Visit(node.value, context, type);
+        if (node.value && node.value.name && node.value.value){
+            await this.Visit(node.value.name, context, type);
+            await this.Visit(node.value.value, context, type);
+        } else await this.Visit(node.value, context, type);
     }
 
     protected async VisitPropertyPathExpression(node: Token, context: any, type: any) {
@@ -222,7 +232,7 @@ export class ResourcePathVisitor {
 
     protected async VisitHasExpression(node: Token, context: any, type: any) {
         await this.Visit(node.value.left, context, type);
-        await this.Visit(node.value.right, context, context.type || type);
+        await this.Visit(node.value.right, context, type);
     }
 
     protected async VisitExpand(node: Token, context: any, type: any) {
@@ -307,6 +317,7 @@ export class ResourcePathVisitor {
 
     protected async VisitCollectionNavigation(node: Token, context: any, type: any) {
         context.isCollection = true;
+        await this.Visit(node.value.name, context, type);
         await this.Visit(node.value.path, context, type);
         delete context.isCollection;
     }
@@ -358,12 +369,17 @@ export class ResourcePathVisitor {
         if (child) {
             node[ODATA_TYPE] = child;
             node[ODATA_TYPENAME] = node.raw;
-            this.navigation.push({
-                name: node.raw,
-                type: node.type,
-                node
-            });
-            this.path += `/${node.raw}`;
+            if (context.isFirstMemberExpression){
+                context.qualifiedType = child;
+                context.qualifiedTypeName = node.raw;
+            }else{
+                this.navigation.push({
+                    name: node.raw,
+                    type: node.type,
+                    node
+                });
+                this.path += `/${node.raw}`;
+            }
         }
     }
 
@@ -500,19 +516,40 @@ export class ResourcePathVisitor {
         context.literal = JSON.parse(node.raw);
     }
 
-    protected VisitEnum(node: Token, context: any, type: any) {
-        this.Visit(node.value.value, context, type);
+    protected async VisitEnum(node: Token, context: any, type: any) {
+        const enumName = node.value.name.raw.split('.');
+        context.enumName = enumName.pop();
+        context.enumNamespace = enumName.join('.');
+        await this.Visit(node.value.value, context, type);
     }
 
-    protected VisitEnumValue(node: Token, context: any, type: any) {
-        this.Visit(node.value.values[0], context, type);
+    protected async VisitEnumValue(node: Token, context: any, type: any) {
+        await this.Visit(node.value.values[0], context, type);
     }
 
-    protected VisitEnumerationMember(node: Token, context: any, type: any) {
+    protected async VisitEnumerationMember(node: Token, context: any, type: any) {
         if (context.filter && type) {
             node.type = TokenType.EnumMemberValue;
-            node.raw = `${type && type[node.value.name]}`;
-            node.value = context.typeName;
+            const deserializer = Edm.getURLDeserializer(type, context.typeName, context.type, this.serverType.container);
+            if (deserializer){
+                node.raw = await deserializer(node.value.name);
+                node.value = node.raw;
+            }else{
+                const { enumNamespace, enumName } = context;
+                const qualifiedEnumTypeName = `${enumNamespace}.${enumName}`;
+                if (!(context.type || context.typeName) && enumNamespace && enumName){
+                    context.type = this.serverType.container[qualifiedEnumTypeName] || this.serverType.container[context.enumName];
+                    const containerType = Object.getPrototypeOf(this.serverType.container).constructor;
+                    context.typeName =
+                        Edm.getTypeName(containerType, qualifiedEnumTypeName, this.serverType.container) ||
+                        Edm.getTypeName(containerType, enumName, this.serverType.container) ||
+                        "Edm.Int32";
+                }
+                node[ODATA_TYPE] = context.type;
+                node[ODATA_TYPENAME] = context.typeName;
+                node.raw = `${context.type && context.type[node.value.name]}`;
+                node.value = context.typeName;
+            }
         } else {
             context.literal = (type && type[node.value.name]) || node.value.name;
         }

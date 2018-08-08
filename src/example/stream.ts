@@ -9,7 +9,7 @@ import { Category, Product } from "./model";
 import { createMetadataJSON } from "../lib/metadata";
 
 const mongodb = async function():Promise<Db>{
-    return await MongoClient.connect("mongodb://localhost:27017/odataserver");
+    return (await MongoClient.connect("mongodb://localhost:27017/odataserver")).db();
 };
 
 const delay = async function(ms:number):Promise<any>{
@@ -41,10 +41,11 @@ class ProductsController extends ODataController{
         if (typeof mongodbQuery.query.CategoryId == "string") mongodbQuery.query.CategoryId = new ObjectID(mongodbQuery.query.CategoryId);
         let cursor = db.collection("Products")
             .find(
-                mongodbQuery.query,
-                mongodbQuery.projection,
-                mongodbQuery.skip,
-                mongodbQuery.limit
+                mongodbQuery.query, {
+                    projection: mongodbQuery.projection,
+                    skip: mongodbQuery.skip,
+                    limit: mongodbQuery.limit
+                }
             );
         let item = yield cursor.next();
         while (item){
@@ -83,10 +84,11 @@ class CategoriesController extends ODataController{
         if (typeof mongodbQuery.query._id == "string") mongodbQuery.query._id = new ObjectID(mongodbQuery.query._id);
         let cursor = db.collection("Categories")
             .find(
-                mongodbQuery.query,
-                mongodbQuery.projection,
-                mongodbQuery.skip,
-                mongodbQuery.limit
+                mongodbQuery.query, {
+                    projection: mongodbQuery.projection,
+                    skip: mongodbQuery.skip,
+                    limit: mongodbQuery.limit
+                }
             );
         let result = yield cursor.toArray();
         result.inlinecount = yield cursor.count(false);
