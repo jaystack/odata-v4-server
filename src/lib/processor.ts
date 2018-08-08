@@ -450,6 +450,7 @@ export class ODataProcessor extends Transform {
     private streamObject = false;
     private streamEnd = false;
     private streamInlineCount: number;
+    private streamNextLink: string;
     private elementType: any;
     private resultCount = 0;
 
@@ -530,6 +531,9 @@ export class ODataProcessor extends Transform {
                         this.push("{");
                         if (this.options.metadata != ODataMetadataType.none) {
                             this.push(`"@odata.context":"${this.odataContext}",`);
+                            if (this.streamNextLink) {
+                                this.push(`"@odata.nextLink":"${this.streamNextLink}",`);
+                            }
                         }
                         this.push('"value":[');
                     }
@@ -544,6 +548,15 @@ export class ODataProcessor extends Transform {
                             } else {
                                 delete chunk["@odata.count"];
                                 delete chunk.inlinecount;
+                            }
+                        }
+                        if (chunk["@odata.nextLink"] || chunk.nextLink) {
+                            this.streamNextLink = chunk["@odata.nextLink"] || chunk.nextLink;
+                            if (Object.keys(chunk).length == 1) {
+                                return typeof done == "function" ? done() : null;
+                            } else {
+                                delete chunk["@odata.nextLink"];
+                                delete chunk.nextLink;
                             }
                         }
                         let entity = {};
@@ -594,6 +607,9 @@ export class ODataProcessor extends Transform {
                 if (this.streamStart && typeof this.streamInlineCount == "number") {
                     flushObject["@odata.count"] = this.streamInlineCount;
                 }
+                if (this.options.metadata != ODataMetadataType.none && this.streamNextLink) {
+                    flushObject["@odata.nextLink"] = this.streamNextLink;
+                }
                 this.push(flushObject);
             } else {
                 if (this.streamStart) {
@@ -604,7 +620,9 @@ export class ODataProcessor extends Transform {
                     if (this.options.metadata == ODataMetadataType.none) {
                         this.push('{"value":[]}');
                     } else {
-                        this.push(`{"@odata.context":"${this.odataContext}","value":[]}`);
+                        let md = `{"@odata.context":"${this.odataContext}"`;
+                        if (this.streamNextLink) { md = `${md},{"@odata.nextLink":"${this.streamNextLink}"`; }
+                        this.push(`${md}","value":[]}`);
                     }
                 }
             }
@@ -612,7 +630,9 @@ export class ODataProcessor extends Transform {
             if (this.options.metadata == ODataMetadataType.none) {
                 this.push('{"value":[]}');
             } else {
-                this.push(`{"@odata.context":"${this.odataContext}","value":[]}`);
+                let md = `{"@odata.context":"${this.odataContext}"`;
+                if (this.streamNextLink) { md = `${md},{"@odata.nextLink":"${this.streamNextLink}"`; }
+                this.push(`${md}","value":[]}`);
             }
         }
         this.streamEnd = true;
@@ -798,10 +818,14 @@ export class ODataProcessor extends Transform {
                     if (this.method == "get") {
                         currentResult.then((value) => {
                             try {
+                                const nl = result.body["@odata.context"];
                                 result.body = {
                                     "@odata.context": this.options.metadata != ODataMetadataType.none ? result.body["@odata.context"] : undefined,
                                     value: value
                                 };
+                                if (this.options.metadata != ODataMetadataType.none && nl) {
+                                    result.body["@odata.context"] = nl;
+                                }
                                 let elementType = result.elementType;
                                 //if (value instanceof Object)
                                 result.elementType = Edm.isEnumType(result.elementType, part.name)
@@ -1285,6 +1309,7 @@ export class ODataProcessor extends Transform {
         let elementType = result.elementType = jsPrimitiveTypes.indexOf(result.elementType) >= 0 || result.elementType == String || typeof result.elementType != "function" ? ctrlType : result.elementType;
         if (typeof result.body == "object" && result.body) {
             if (typeof result.body["@odata.count"] == "number") context["@odata.count"] = result.body["@odata.count"];
+            if (result.body && result.body.value && result.body.value["nextLink"] && typeof result.body.value["nextLink"] == "string") context["@odata.nextLink"] = result.body.value["nextLink"];
             if (!result.body["@odata.context"]) {
                 let ctrl = this.ctrl && this.ctrl.prototype.elementType == ctrlType ? this.ctrl : this.serverType.getController(ctrlType);
                 if (result.body.value && Array.isArray(result.body.value)) {
@@ -1544,6 +1569,7 @@ export class ODataProcessor extends Transform {
         }
         if (isCollection && navigationResult.body.value && Array.isArray(navigationResult.body.value)) {
             if (typeof navigationResult.body["@odata.count"] == "number") context[prop + "@odata.count"] = navigationResult.body["@odata.count"];
+            if (typeof navigationResult.body["@odata.nextLink"] == "string") context[prop + "@odata.nextLink"] = navigationResult.body["@odata.nextLink"];
             context[prop] = navigationResult.body.value;
         } else if (navigationResult.body && Object.keys(navigationResult.body).length > 0) {
             context[prop] = navigationResult.body;

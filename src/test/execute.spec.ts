@@ -192,6 +192,18 @@ describe("OData execute", () => {
         });
     });
 
+    it("should return entity set result with nextLink", async () => {
+        const result = await TestServer.execute("/NextLinkEntitySet", "GET");
+
+        return expect(result.body["@odata.nextLink"]).to.equal("http://localhost/NextLinkEntitySet?$skip=1&$top=1");
+    });
+
+    it("should return navigation property expanded with nextLink", async () => {
+        const result = await TestServer.execute("/GeneratorCategories?$expand=GeneratorProducts($top=2)&$top=1&$orderby=Name desc", "GET");
+
+        return expect(result.body.value[0]["GeneratorProducts@odata.nextLink"]).to.equal("http://localhost/GeneratorCategories('578f2baa12eaebabec4af28d')?$expand=GeneratorProducts($top=2&$skip=2)");
+    });
+
     it("should create category reference on product", () => {
         return TestServer.execute("/Products('578f2b8c12eaebabec4af286')/Category/$ref", "POST", {
             "@odata.id": "http://localhost/Categories(categoryId='578f2baa12eaebabec4af28c')"
