@@ -104,7 +104,7 @@
     "@types/lodash": "^4.14.98",
     "@types/mocha": "^2.2.47",
     "@types/mongodb": "^2.2.20",
-    "@types/node": "^7.0.52",
+    "@types/node": "^10.9.4",
     "@types/request": "^2.47.0",
     "@types/request-promise": "^4.1.41",
     "@types/stream-buffers": "^3.0.2",
