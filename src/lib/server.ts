@@ -29,6 +29,10 @@ export interface ODataHttpContext{
     response:express.Response & Writable
 }
 
+interface ODataBaseServerOptions {
+    useTls: boolean;
+}
+
 function ensureODataMetadataType(req, res){
     let metadata:ODataMetadataType = ODataMetadataType.minimal;
     if (req.headers && req.headers.accept && req.headers.accept.indexOf("odata.metadata=") >= 0){
@@ -82,14 +86,25 @@ export class ODataServerBase extends Transform{
     static errorHandler:express.ErrorRequestHandler = ODataErrorHandler;
     private serverType:typeof ODataServer
 
+    /**
+     * Whether to use TLS
+     * for the protocol.
+     * This is necessary to force
+     * TLS for a service running behind
+     * a loadbalancer that terminates
+     * TLS
+     */
+    static useTls: boolean;
+
     static requestHandler(){
+
         return (req:express.Request, res:express.Response, next:express.NextFunction) => {
             try{
                 ensureODataHeaders(req, res);
                 let processor = this.createProcessor({
                     url: req.url,
                     method: req.method,
-                    protocol: req.secure ? "https" : "http",
+                    protocol: this.useTls || req.secure ? "https" : "http",
                     host: req.headers.host,
                     base: req.baseUrl,
                     request: req,
@@ -193,11 +208,13 @@ export class ODataServerBase extends Transform{
         });
     }
 
-    constructor(opts?:TransformOptions){
+    constructor(opts?:TransformOptions & ODataBaseServerOptions){
         super(Object.assign(<TransformOptions>{
             objectMode: true
         }, opts));
         this.serverType = Object.getPrototypeOf(this).constructor;
+
+        ODataServerBase.useTls = opts && opts.useTls;
     }
 
     _transform(chunk:any, _?:string, done?:Function){
