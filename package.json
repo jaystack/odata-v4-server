@@ -1,6 +1,6 @@
 {
-  "name": "odata-v4-server",
-  "version": "0.2.13",
+  "name": "odata-v4-server-tls-support",
+  "version": "0.0.2",
   "description": "OData V4 Server",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
@@ -64,7 +64,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jaystack/odata-v4-server.git"
+    "url": "git+https://github.com/cognigy/odata-v4-server.git"
   },
   "keywords": [
     "OData",
@@ -72,12 +72,12 @@
     "V4",
     "server"
   ],
-  "author": "JayStack",
+  "author": "Cognigy",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jaystack/odata-v4-server/issues"
+    "url": "https://github.com/cognigy/odata-v4-server/issues"
   },
-  "homepage": "https://github.com/jaystack/odata-v4-server#readme",
+  "homepage": "https://github.com/cognigy/odata-v4-server#readme",
   "dependencies": {
     "@types/body-parser": "1.17.0",
     "@types/cors": "2.8.4",
