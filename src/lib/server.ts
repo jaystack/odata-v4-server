@@ -29,10 +29,6 @@ export interface ODataHttpContext{
     response:express.Response & Writable
 }
 
-interface ODataBaseServerOptions {
-    useTls: boolean;
-}
-
 function ensureODataMetadataType(req, res){
     let metadata:ODataMetadataType = ODataMetadataType.minimal;
     if (req.headers && req.headers.accept && req.headers.accept.indexOf("odata.metadata=") >= 0){
@@ -87,14 +83,15 @@ export class ODataServerBase extends Transform{
     private serverType:typeof ODataServer
 
     /**
-     * Whether to use TLS
-     * for the protocol.
-     * This is necessary to force
-     * TLS for a service running behind
-     * a loadbalancer that terminates
-     * TLS
+     * Set this variable
+     * to force the protocol
+     * no matter what the value of
+     * req.secure is. This is useful
+     * to e.g. use "https" even though
+     * TLS was already terminated
+     * by a loadbalancer.
      */
-    static useTls: boolean;
+    static protocol: "http" | "https";
 
     static requestHandler(){
 
@@ -104,7 +101,7 @@ export class ODataServerBase extends Transform{
                 let processor = this.createProcessor({
                     url: req.url,
                     method: req.method,
-                    protocol: this.useTls || req.secure ? "https" : "http",
+                    protocol: this.protocol || req.secure ? "https" : "http",
                     host: req.headers.host,
                     base: req.baseUrl,
                     request: req,
@@ -208,13 +205,11 @@ export class ODataServerBase extends Transform{
         });
     }
 
-    constructor(opts?:TransformOptions & ODataBaseServerOptions){
+    constructor(opts?:TransformOptions){
         super(Object.assign(<TransformOptions>{
             objectMode: true
         }, opts));
         this.serverType = Object.getPrototypeOf(this).constructor;
-
-        ODataServerBase.useTls = opts && opts.useTls;
     }
 
     _transform(chunk:any, _?:string, done?:Function){
@@ -278,8 +273,11 @@ export class ODataServerBase extends Transform{
     static create(path:string, port:number):http.Server;
     static create(port:number, hostname:string):http.Server;
     static create(path?:string | RegExp | number, port?:number | string, hostname?:string):http.Server;
-    static create(path?:string | RegExp | number, port?:number | string, hostname?:string):http.Server | express.Router{
+    static create(path?:string | RegExp | number, port?:number | string, hostname?:string, protocol?: "http" | "https"):http.Server | express.Router;
+    static create(path?:string | RegExp | number, port?:number | string, hostname?:string, protocol?:"http" | "https"):http.Server | express.Router{
         let server = this;
+        server.protocol = protocol;
+
         let router = express.Router();
         router.use((req, _, next) => {
             req.url = req.url.replace(/[\/]+/g, "/").replace(":/", "://");
@@ -364,13 +362,15 @@ export function createODataServer(server:typeof ODataServer, path:string, port:n
  * @param hostname hostname for Express
  */
 export function createODataServer(server:typeof ODataServer, port:number, hostname:string):http.Server;
+
 /** Create Express server for OData Server
  * @param server   OData Server instance
  * @param path     routing path for Express
  * @param port     port number for Express to listen to
  * @param hostname hostname for Express
+ * @param protocol the protocol to use (http or https)
  * @return         Express Router object
  */
-export function createODataServer(server:typeof ODataServer, path?:string | RegExp | number, port?:number | string, hostname?:string):http.Server | express.Router{
-    return server.create(path, port, hostname);
+export function createODataServer(server:typeof ODataServer, path?:string | RegExp | number, port?:number | string, hostname?:string, protocol?: "http" | "https"):http.Server | express.Router{
+    return server.create(path, port, hostname, protocol);
 }
