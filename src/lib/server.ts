@@ -101,7 +101,7 @@ export class ODataServerBase extends Transform{
                 let processor = this.createProcessor({
                     url: req.url,
                     method: req.method,
-                    protocol: this.protocol || req.secure ? "https" : "http",
+                    protocol: this.protocol || (req.secure ? "https" : "http"),
                     host: req.headers.host,
                     base: req.baseUrl,
                     request: req,
