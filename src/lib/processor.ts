@@ -395,7 +395,7 @@ class ODataStreamWrapper extends Transform {
         if (typeof done == "function") done();
     }
 
-    protected _flush(done?: Function) {
+    _flush(done?: Function) {
         if (typeof done == "function") done();
     }
 
@@ -581,7 +581,7 @@ export class ODataProcessor extends Transform {
         }
     }
 
-    protected _flush(done?: Function) {
+    _flush(done?: Function) {
         if (this.streamEnabled && this.streamObject) {
             if (this.options.objectMode) {
                 let flushObject: any = {
@@ -1594,7 +1594,8 @@ export class ODataProcessor extends Transform {
         }
 
         if (filterParam) {
-            let filterAst = queryString;
+            let filterAst;
+            filterAst = queryString;
             let resourceFilterAst = this.resourcePath.ast.value.query && this.resourcePath.ast.value.query.value.options && this.resourcePath.ast.value.query.value.options.find(t => t.type == TokenType.Filter);
             if (typeof filterAst == "string") {
                 filterAst = qs.parse(filterAst).$filter;
