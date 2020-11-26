@@ -1,10 +1,8 @@
 /// <reference types="mocha" />
-import { ODataServer, createODataServer, NotImplementedError } from "../lib/index";
+import { ODataServer, NotImplementedError } from "../lib/index";
 import { testFactory } from './server.spec';
 import { MetaTestServer } from './metadata.spec';
-import { TestServer, Foobar } from './test.model';
-import { Product, Category } from "./model/model";
-import { ObjectID } from "mongodb";
+import { TestServer } from './test.model';
 import * as request from 'request-promise';
 import * as streamBuffers from "stream-buffers";
 import * as fs from "fs";
@@ -19,8 +17,8 @@ let serverCache = new WeakMap<typeof ODataServer, number>();
 let serverCacheArray = [];
 let serverPort = 5000;
 
-if (typeof after == "function"){
-    after(function(){
+if (typeof after == "function") {
+    after(function () {
         serverCacheArray.forEach(server => server.close());
     });
 }
@@ -40,7 +38,7 @@ function createTestFactory(it) {
             } else {
                 port = serverCache.get(server);
             }
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 request[method](`http://localhost:${port}${path}`, { json: body }, (err, response, result) => {
                     if (err) return reject(err);
                     try {
@@ -473,7 +471,7 @@ describe("OData HTTP", () => {
         });
 
         it("should return error if odata-maxversion less then 4.0", () => {
-            return request.get(`http://localhost:3002/EntitySet`, { headers: { 'odata-maxversion': '3.0' ,accept: '*/*;odata.metadata=full' } }, (err, response, result) => {
+            return request.get(`http://localhost:3002/EntitySet`, { headers: { 'odata-maxversion': '3.0', accept: '*/*;odata.metadata=full' } }, (err, response, result) => {
                 expect(JSON.parse(result).error.message).to.equal("Only OData version 4.0 supported");
             }).catch(ex => {
                 if (ex) expect(JSON.parse(ex.error).error.message).to.equal("Only OData version 4.0 supported");
@@ -614,8 +612,8 @@ describe("OData HTTP", () => {
                 expect(JSON.parse(result)).to.deep.equal({
                     "@odata.context": "http://localhost:3002/$metadata#Categories/$entity",
                     "@odata.id": "http://localhost:3002/Categories('578f2baa12eaebabec4af28d')",
-                    "Description":"Seaweed and fish",
-                    "Name":"Seafood",
+                    "Description": "Seaweed and fish",
+                    "Name": "Seafood",
                     "_id": "578f2baa12eaebabec4af28d"
                 });
             });
@@ -642,8 +640,8 @@ describe("OData HTTP", () => {
                 expect(JSON.parse(result)).to.deep.equal({
                     "@odata.context": "http://localhost:3002/$metadata#Categories/$entity",
                     "@odata.id": "http://localhost:3002/Categories('578f2baa12eaebabec4af28b')",
-                    "Description":"Prepared meats",
-                    "Name":"Meat/Poultry",
+                    "Description": "Prepared meats",
+                    "Name": "Meat/Poultry",
                     "_id": "578f2baa12eaebabec4af28b"
                 });
             });
@@ -686,8 +684,8 @@ describe("OData HTTP", () => {
                 expect(JSON.parse(result)).to.deep.equal({
                     "@odata.context": "http://localhost:3002/$metadata#Categories/$entity",
                     "@odata.id": "http://localhost:3002/Categories('578f2baa12eaebabec4af289')",
-                    "Description":"Soft drinks",
-                    "Name":"Beverages",
+                    "Description": "Soft drinks",
+                    "Name": "Beverages",
                     "_id": "578f2baa12eaebabec4af289"
                 });
             });
@@ -798,9 +796,9 @@ describe("OData HTTP", () => {
             return request.get(`http://localhost:3002/?$expand=Any`, (err, req, res) => {
                 expect(JSON.parse(res).error.message).to.equal("Unsupported query");
             })
-            .catch(ex => {
-                expect(JSON.parse(ex.error).error.message).to.equal("Unsupported query");
-            });
+                .catch(ex => {
+                    expect(JSON.parse(ex.error).error.message).to.equal("Unsupported query");
+                });
         });
     });
 
@@ -821,9 +819,9 @@ describe("OData HTTP", () => {
             return request.get(`http://localhost:3002/NonExistent`, (err, req, res) => {
                 expect(JSON.parse(res).error.message).to.equal("Cannot read property 'node' of undefined");
             })
-            .catch(ex => {
-                expect(JSON.parse(ex.error).error.message).to.equal("Cannot read property 'node' of undefined");
-            });
+                .catch(ex => {
+                    expect(JSON.parse(ex.error).error.message).to.equal("Cannot read property 'node' of undefined");
+                });
         });
     });
 });
