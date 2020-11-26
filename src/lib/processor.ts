@@ -557,7 +557,6 @@ export class ODataProcessor extends Transform {
                             this.resultCount++;
                             if (typeof done == "function") done();
                         }, (err) => {
-                            console.log(err);
                             if (typeof done == "function") done(err);
                         });
                     } else {
@@ -566,7 +565,6 @@ export class ODataProcessor extends Transform {
                         if (typeof done == "function") done();
                     }
                 } catch (err) {
-                    console.log(err);
                     if (typeof done == "function") done(err);
                 }
             } else {
@@ -820,7 +818,6 @@ export class ODataProcessor extends Transform {
                                     resolve(result);
                                 }
                             } catch (err) {
-                                console.log(err);
                                 reject(err);
                             }
                         }, reject);
