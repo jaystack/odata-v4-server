@@ -64,7 +64,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jaystack/odata-v4-server.git"
+    "url": "git+https://github.com/cognigy/odata-v4-server.git"
   },
   "keywords": [
     "OData",
@@ -72,12 +72,12 @@
     "V4",
     "server"
   ],
-  "author": "JayStack",
+  "author": "Cognigy",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jaystack/odata-v4-server/issues"
+    "url": "https://github.com/cognigy/odata-v4-server/issues"
   },
-  "homepage": "https://github.com/jaystack/odata-v4-server#readme",
+  "homepage": "https://github.com/cognigy/odata-v4-server#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
