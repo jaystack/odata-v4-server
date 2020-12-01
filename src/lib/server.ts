@@ -83,13 +83,9 @@ export class ODataServerBase extends Transform{
     private serverType:typeof ODataServer
 
     /**
-     * Set this variable
-     * to force the protocol
-     * no matter what the value of
-     * req.secure is. This is useful
-     * to e.g. use "https" even though
-     * TLS was already terminated
-     * by a loadbalancer.
+     * Set this variable to force the protocol no matter what the value of
+     * req.secure is. This is useful to e.g. use "https" even though TLS was 
+     * already terminated by a loadbalancer.
      */
     static protocol: "http" | "https";
 
@@ -119,11 +115,19 @@ export class ODataServerBase extends Transform{
                     }
                 });
                 let hasError = false;
+
                 processor.on("data", (chunk, encoding, done) => {
-                    if (!hasError){
-                        res.write(chunk, encoding, done);
+                    if (!hasError) {
+                        if (!res.write(chunk, encoding, done)) {
+                            processor.pause();
+                        }
                     }
                 });
+
+                res.on("drain", function () {
+                    processor.resume();
+                });
+
                 let body = req.body && Object.keys(req.body).length > 0 ? req.body : req;
                 let origStatus = res.statusCode;
                 processor.execute(body).then((result:ODataResult) => {
@@ -181,7 +185,9 @@ export class ODataServerBase extends Transform{
         let values = [];
         let flushObject;
         let response = "";
-        if (context.response instanceof Writable) processor.pipe(context.response);
+        if (context.response instanceof Writable) {
+            processor.pipe(context.response);
+        }
         processor.on("data", (chunk:any) => {
             if (!(typeof chunk == "string" || chunk instanceof Buffer)){
                 if (chunk["@odata.context"] && chunk.value && Array.isArray(chunk.value) && chunk.value.length == 0){
@@ -190,7 +196,9 @@ export class ODataServerBase extends Transform{
                 }else{
                     values.push(chunk);
                 }
-            }else response += chunk.toString();
+            } else{
+                response += chunk.toString();
+            }
         });
         return processor.execute(context.body || body).then((result:ODataResult<T>) => {
             if (flushObject){
