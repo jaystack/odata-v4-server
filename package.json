@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-server-tls-support",
-  "version": "0.2.14",
+  "version": "0.2.15",
   "description": "OData V4 Server",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
