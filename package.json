@@ -89,7 +89,8 @@
     "odata-v4-service-document": "0.0.3",
     "odata-v4-service-metadata": "^0.1.6",
     "qs": "^6.9.4",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "tslib": "^2.0.3"
   },
   "devDependencies": {
     "@types/body-parser": "1.17.0",
