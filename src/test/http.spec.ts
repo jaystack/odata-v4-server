@@ -817,10 +817,10 @@ describe("OData HTTP", () => {
     describe("Non existent entity", () => {
         it("should return cannot read property node error", () => {
             return request.get(`http://localhost:3002/NonExistent`, (err, req, res) => {
-                expect(JSON.parse(res).error.message).to.equal("Cannot read property 'node' of undefined");
+                expect(JSON.parse(res).error.message).to.equal("Cannot read properties of undefined (reading 'node')");
             })
                 .catch(ex => {
-                    expect(JSON.parse(ex.error).error.message).to.equal("Cannot read property 'node' of undefined");
+                    expect(JSON.parse(ex.error).error.message).to.equal("Cannot read properties of undefined (reading 'node')");
                 });
         });
     });

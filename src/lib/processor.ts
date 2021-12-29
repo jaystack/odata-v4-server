@@ -620,7 +620,7 @@ export class ODataProcessor extends Transform {
                     } else {
                         let md = `{"@odata.context":"${this.odataContext}"`;
                         if (this.streamNextLink) { md = `${md},{"@odata.nextLink":"${this.streamNextLink}"`; }
-                        this.push(`${md}","value":[]}`);
+                        this.push(`${md},"value":[]}`);
                     }
                 }
             }
@@ -630,7 +630,7 @@ export class ODataProcessor extends Transform {
             } else {
                 let md = `{"@odata.context":"${this.odataContext}"`;
                 if (this.streamNextLink) { md = `${md},{"@odata.nextLink":"${this.streamNextLink}"`; }
-                this.push(`${md}","value":[]}`);
+                this.push(`${md},"value":[]}`);
             }
         }
         this.streamEnd = true;
