@@ -444,7 +444,7 @@ describe("OData execute", () => {
             return TestServer.execute("/NonExistent", "GET")
                 .then((result) => { })
                 .catch(err => {
-                    expect(err.message).to.equal("Cannot read property 'node' of undefined");
+                    expect(err.message).to.equal("Cannot read properties of undefined (reading 'node')");
                 });
         });
     });
