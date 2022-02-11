@@ -634,7 +634,7 @@ if (typeof describe == "function") {
                     expect(result).to.deep.equal({ statusCode: 204 });
                 })
                 .catch((error) => {
-                    expect(error.message).to.equal("Cannot read property 'node' of undefined");
+                    expect(error.message).to.equal("Cannot read properties of undefined (reading 'node')");
                 })
             })
         });

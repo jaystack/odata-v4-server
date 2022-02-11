@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2019",
     "module": "commonjs",
+    "moduleResolution": "node",
     "declaration": true,
     "experimentalDecorators": true,
     "outDir": "build",
@@ -12,7 +13,10 @@
     "noImplicitThis": true,
     "noEmitHelpers": true,
     "importHelpers": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "lib": [
+      "es2019"
+    ]
   },
   "exclude": [
     "node_modules",

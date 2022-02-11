@@ -2,7 +2,7 @@ import { ServiceMetadata } from "odata-v4-service-metadata";
 import { ServiceDocument } from "odata-v4-service-document";
 import { Edm as Metadata } from "odata-v4-metadata";
 import * as ODataParser from "odata-v4-parser";
-import { Token, TokenType } from "odata-v4-parser/lib/lexer";
+import { Token } from "odata-v4-parser/lib/lexer";
 import * as express from "express";
 import * as http from "http";
 import * as bodyParser from "body-parser";
@@ -82,14 +82,22 @@ export class ODataServerBase extends Transform{
     static errorHandler:express.ErrorRequestHandler = ODataErrorHandler;
     private serverType:typeof ODataServer
 
+    /**
+     * Set this variable to force the protocol no matter what the value of
+     * req.secure is. This is useful to e.g. use "https" even though TLS was 
+     * already terminated by a loadbalancer.
+     */
+    static protocol: "http" | "https";
+
     static requestHandler(){
+
         return (req:express.Request, res:express.Response, next:express.NextFunction) => {
             try{
                 ensureODataHeaders(req, res);
                 let processor = this.createProcessor({
                     url: req.url,
                     method: req.method,
-                    protocol: req.secure ? "https" : "http",
+                    protocol: this.protocol || (req.secure ? "https" : "http"),
                     host: req.headers.host,
                     base: req.baseUrl,
                     request: req,
@@ -107,11 +115,19 @@ export class ODataServerBase extends Transform{
                     }
                 });
                 let hasError = false;
+
                 processor.on("data", (chunk, encoding, done) => {
-                    if (!hasError){
-                        res.write(chunk, encoding, done);
+                    if (!hasError) {
+                        if (!res.write(chunk, encoding, done)) {
+                            processor.pause();
+                        }
                     }
                 });
+
+                res.on("drain", function () {
+                    processor.resume();
+                });
+
                 let body = req.body && Object.keys(req.body).length > 0 ? req.body : req;
                 let origStatus = res.statusCode;
                 processor.execute(body).then((result:ODataResult) => {
@@ -169,7 +185,9 @@ export class ODataServerBase extends Transform{
         let values = [];
         let flushObject;
         let response = "";
-        if (context.response instanceof Writable) processor.pipe(context.response);
+        if (context.response instanceof Writable) {
+            processor.pipe(context.response);
+        }
         processor.on("data", (chunk:any) => {
             if (!(typeof chunk == "string" || chunk instanceof Buffer)){
                 if (chunk["@odata.context"] && chunk.value && Array.isArray(chunk.value) && chunk.value.length == 0){
@@ -178,7 +196,9 @@ export class ODataServerBase extends Transform{
                 }else{
                     values.push(chunk);
                 }
-            }else response += chunk.toString();
+            } else{
+                response += chunk.toString();
+            }
         });
         return processor.execute(context.body || body).then((result:ODataResult<T>) => {
             if (flushObject){
@@ -261,8 +281,11 @@ export class ODataServerBase extends Transform{
     static create(path:string, port:number):http.Server;
     static create(port:number, hostname:string):http.Server;
     static create(path?:string | RegExp | number, port?:number | string, hostname?:string):http.Server;
-    static create(path?:string | RegExp | number, port?:number | string, hostname?:string):http.Server | express.Router{
+    static create(path?:string | RegExp | number, port?:number | string, hostname?:string, protocol?: "http" | "https"):http.Server | express.Router;
+    static create(path?:string | RegExp | number, port?:number | string, hostname?:string, protocol?:"http" | "https"):http.Server | express.Router{
         let server = this;
+        server.protocol = protocol;
+
         let router = express.Router();
         router.use((req, _, next) => {
             req.url = req.url.replace(/[\/]+/g, "/").replace(":/", "://");
@@ -347,13 +370,15 @@ export function createODataServer(server:typeof ODataServer, path:string, port:n
  * @param hostname hostname for Express
  */
 export function createODataServer(server:typeof ODataServer, port:number, hostname:string):http.Server;
+
 /** Create Express server for OData Server
  * @param server   OData Server instance
  * @param path     routing path for Express
  * @param port     port number for Express to listen to
  * @param hostname hostname for Express
+ * @param protocol the protocol to use (http or https)
  * @return         Express Router object
  */
-export function createODataServer(server:typeof ODataServer, path?:string | RegExp | number, port?:number | string, hostname?:string):http.Server | express.Router{
-    return server.create(path, port, hostname);
+export function createODataServer(server:typeof ODataServer, path?:string | RegExp | number, port?:number | string, hostname?:string, protocol?: "http" | "https"):http.Server | express.Router{
+    return server.create(path, port, hostname, protocol);
 }

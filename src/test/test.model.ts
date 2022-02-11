@@ -19,8 +19,8 @@ let categories2 = require("./model/categories").slice();
 let products2 = require("./model/products").slice();
 
 const serverCache = [];
-if (typeof after == "function"){
-    after(function(){
+if (typeof after == "function") {
+    after(function () {
         serverCache.forEach(server => server.close());
     });
 }
@@ -47,13 +47,13 @@ export class Foobar {
 
     @odata.namespace("Echo")
     @Edm.Function(Edm.String)
-    echo( @Edm.String message) {
+    echo(@Edm.String message) {
         return message;
     }
 
     @odata.namespace("Echo")
     @Edm.Function(Edm.Collection(Edm.String))
-    echoMany( @Edm.String message) {
+    echoMany(@Edm.String message) {
         return [message];
     }
 }
@@ -97,7 +97,7 @@ export class SyncTestController extends ODataController {
     }
 
     @odata.GET()
-    entity( @odata.key() key: number) {
+    entity(@odata.key() key: number) {
         if (key === 1) return ODataResult.Ok(foobarObj);
         if (key === 2) return ODataResult.Ok(foobarObj2);
         if (key === 999) return ODataResult.Ok({ id: key, foo: "999" });
@@ -105,16 +105,16 @@ export class SyncTestController extends ODataController {
     }
 
     @odata.method("POST")
-    insert( @odata.body body: any) {
+    insert(@odata.body body: any) {
         if (!body.id) body.id = 1;
         return body;
     }
 
-    put( @odata.body body: any) {
+    put(@odata.body body: any) {
         body.id = 1;
     }
 
-    patch( @odata.key key: number, @odata.body delta: any) {
+    patch(@odata.key key: number, @odata.body delta: any) {
         if (key === 2) return Object.assign(foobarObj2, delta);
         return Object.assign({
             id: key,
@@ -124,17 +124,17 @@ export class SyncTestController extends ODataController {
     }
 
     @odata.PUT('foo')
-    putProperty( @odata.body body: any, @odata.result _: Foobar) {
+    putProperty(@odata.body body: any, @odata.result _: Foobar) {
         foobarObj.foo = body.foo;
     }
 
     @odata.PATCH('foo')
-    patchProperty( @odata.body body: any, @odata.result _: Foobar) {
+    patchProperty(@odata.body body: any, @odata.result _: Foobar) {
         foobarObj.foo = body.foo;
     }
 
     @odata.DELETE('foo')
-    deleteProperty( @odata.result _: Foobar) {
+    deleteProperty(@odata.result _: Foobar) {
         if (foobarObj.foo) foobarObj.foo = null;
     }
 
@@ -163,7 +163,7 @@ export class AsyncTestController extends ODataController {
             try {
                 setTimeout(() => {
                     resolve([{ id: 1, a: 1 }]);
-                });
+                }, 0);
             } catch (err) {
                 reject(err);
             }
@@ -171,7 +171,7 @@ export class AsyncTestController extends ODataController {
     }
 
     @odata.GET
-    entity( @odata.key key: number) {
+    entity(@odata.key key: number) {
         return ODataResult.Ok(new Promise((resolve, reject) => {
             try {
                 setTimeout(() => {
@@ -179,7 +179,7 @@ export class AsyncTestController extends ODataController {
                     let result = { id: key };
                     (<any>result).inlinecount = a;
                     resolve(result);
-                });
+                }, 0);
             } catch (err) {
                 reject(err);
             }
@@ -187,13 +187,13 @@ export class AsyncTestController extends ODataController {
     }
 
     @odata.POST
-    insert( @odata.body body: any) {
+    insert(@odata.body body: any) {
         return new Promise((resolve, reject) => {
             try {
                 setTimeout(() => {
                     body.id = 1;
                     resolve(body);
-                });
+                }, 0);
             } catch (err) {
                 reject(err);
             }
@@ -212,21 +212,31 @@ export class InlineCountController extends ODataController {
 }
 
 @odata.type(Foobar)
+export class NextLinkController extends ODataController {
+    @odata.GET
+    entitySet() {
+        let result = [{ id: 1, a: 1 }];
+        (<any>result).nextLink = "http://localhost/NextLinkEntitySet?$skip=1&$top=1";
+        return result;
+    }
+}
+
+@odata.type(Foobar)
 export class BoundOperationController extends ODataController {
     @Edm.Action
     Action() {
         return new Promise((resolve) => {
-            setTimeout(resolve);
+            setTimeout(resolve, 0);
         });
     }
 
     @Edm.Function(Edm.String)
-    Function( @Edm.Int16 value: number) {
+    Function(@Edm.Int16 value: number) {
         return `foobar:${value}`;
     }
 
     @Edm.Function(Edm.String)
-    FunctionMore( @Edm.String message: string, @Edm.Int64 value: number) {
+    FunctionMore(@Edm.String message: string, @Edm.Int64 value: number) {
         return `The number is ${value} and your message was ${message}.`;
     }
 
@@ -236,7 +246,7 @@ export class BoundOperationController extends ODataController {
     }
 
     @odata.GET
-    entity( @odata.key key: number) {
+    entity(@odata.key key: number) {
         return { id: key, a: 1 };
     }
 }
@@ -244,7 +254,7 @@ export class BoundOperationController extends ODataController {
 @odata.type(Image)
 export class ImagesController extends ODataController {
     @odata.GET
-    entitySet( @odata.query _: Token, @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+    entitySet(@odata.query _: Token, @odata.context __: any, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
         let image = new Image();
         image.Id = 1;
         image.Filename = "tmp.png";
@@ -252,7 +262,7 @@ export class ImagesController extends ODataController {
     }
 
     @odata.GET()
-    entity( @odata.key() key: number) {
+    entity(@odata.key() key: number) {
         let image = new Image();
         image.Id = key;
         image.Filename = "tmp.png";
@@ -260,7 +270,7 @@ export class ImagesController extends ODataController {
     }
 
     @odata.GET("Data")
-    getData( @odata.key _: number, @odata.context context: ODataHttpContext) {
+    getData(@odata.key _: number, @odata.context context: ODataHttpContext) {
         let globalReadableImgStrBuffer = new streamBuffers.ReadableStreamBuffer();
         globalReadableImgStrBuffer.put("tmp.png");
         globalReadableImgStrBuffer.stop();
@@ -268,18 +278,18 @@ export class ImagesController extends ODataController {
     }
 
     @odata.POST("Data")
-    postData( @odata.key _: number, @odata.body data: Readable) {
+    postData(@odata.key _: number, @odata.body data: Readable) {
         let globalWritableImgStrBuffer = new streamBuffers.WritableStreamBuffer();
         return data.pipe(globalWritableImgStrBuffer);
     }
 
     @odata.GET("Data2")
-    getData2( @odata.key _: number, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
+    getData2(@odata.key _: number, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
         return new ODataStream(fs.createReadStream(path.join(__dirname, "..", "..", "src", "test", "fixtures", "logo_jaystack.png"))).pipe(context.response);
     }
 
     @odata.POST("Data2")
-    postData2( @odata.key _: number, @odata.body data: Readable) {
+    postData2(@odata.key _: number, @odata.body data: Readable) {
         return new ODataStream(fs.createWriteStream(path.join(__dirname, "..", "..", "src", "test", "fixtures", "tmp.png"))).write(data);
     }
 }
@@ -289,7 +299,7 @@ let globalReadableMediaStrBuffer = new streamBuffers.ReadableStreamBuffer();
 @odata.type(Music)
 export class MusicController extends ODataController {
     @odata.GET
-    findAll( @odata.context _: ODataHttpContext) {
+    findAll(@odata.context _: ODataHttpContext) {
         let music = new Music();
         music.Id = 1;
         music.Artist = "Dream Theater";
@@ -298,7 +308,7 @@ export class MusicController extends ODataController {
     }
 
     @odata.GET
-    findOne( @odata.key() _: number, @odata.context __: ODataHttpContext) {
+    findOne(@odata.key() _: number, @odata.context __: ODataHttpContext) {
         let music = new Music();
         music.Id = 1;
         music.Artist = "Dream Theater";
@@ -307,13 +317,13 @@ export class MusicController extends ODataController {
     }
 
     @odata.GET.$value
-    mp3( @odata.key _: number, @odata.context context: ODataHttpContext) {
+    mp3(@odata.key _: number, @odata.context context: ODataHttpContext) {
         globalReadableMediaStrBuffer.put(globalWritableMediaStrBuffer.getContents());
         return globalReadableMediaStrBuffer.pipe(<Writable>context.response);
     }
 
     @odata.POST.$value
-    post( @odata.key _: number, @odata.body upload: Readable) {
+    post(@odata.key _: number, @odata.body upload: Readable) {
         return upload.pipe(globalWritableMediaStrBuffer);
     }
 }
@@ -321,9 +331,9 @@ export class MusicController extends ODataController {
 @odata.type(Product)
 export class ProductsController extends ODataController {
     @odata.GET
-    find( @odata.query query: Token) {
+    find(@odata.query query: Token) {
         const filter = query && query.value && query.value.options && query.value.options.find(t => t.type == "Filter");
-        if (filter){
+        if (filter) {
             return products
                 .map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId && product.CategoryId.toString() }))
                 .filter(createFilter(filter));
@@ -355,7 +365,7 @@ export class ProductsController extends ODataController {
 
     @odata.createRef("Category")
     @odata.updateRef("Category")
-    async setCategory( @odata.key key: string, @odata.link('categoryId') link: string): Promise<number> {
+    async setCategory(@odata.key key: string, @odata.link('categoryId') link: string): Promise<number> {
         return products.filter(product => {
             if (product._id.toString() === key) {
                 product.CategoryId = new ObjectID(link);
@@ -366,7 +376,7 @@ export class ProductsController extends ODataController {
     }
 
     @odata.deleteRef("Category")
-    unsetCategoryId( @odata.key key: string, @odata.link link: string): Promise<number> {
+    unsetCategoryId(@odata.key key: string, @odata.link link: string): Promise<number> {
         return new Promise((resolve, reject) => {
             products.filter(product => {
                 if (product._id.toString() === key) {
@@ -383,7 +393,7 @@ ProductsController.enableFilter(ProductsController.prototype.find, 'filter');
 @odata.type(Category)
 export class CategoriesController extends ODataController {
     @odata.GET
-    find( @odata.filter filter: Token): Category[] {
+    find(@odata.filter filter: Token): Category[] {
         if (filter) return categories.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
         return categories;
     }
@@ -397,7 +407,7 @@ export class CategoriesController extends ODataController {
     }
 
     @odata.POST("Products")
-    insertProduct( @odata.key key: string, @odata.link link: string, @odata.body body: Product) {
+    insertProduct(@odata.key key: string, @odata.link link: string, @odata.body body: Product) {
         body._id = new ObjectID('578e1a7c12eaebabec4af23c')
         return ODataResult.Created(new Promise((resolve, reject) => {
             try {
@@ -418,7 +428,7 @@ export class CategoriesController extends ODataController {
     @odata.POST("Products").$ref
     @odata.method("PUT", "Products").$ref
     @odata.PATCH("Products").$ref
-    *setCategory( @odata.key key: string, @odata.link link: string) {
+    *setCategory(@odata.key key: string, @odata.link link: string) {
         yield products.filter(product => {
             if (product._id.toString() === link) {
                 product.CategoryId = new ObjectID(key);
@@ -428,7 +438,7 @@ export class CategoriesController extends ODataController {
     }
 
     @odata.DELETE("Products").$ref
-    unsetCategory( @odata.key key: string, @odata.link link: string) {
+    unsetCategory(@odata.key key: string, @odata.link link: string) {
         return new Promise(resolve => {
             products.filter(product => {
                 if (product._id.toString() === link) {
@@ -442,12 +452,12 @@ export class CategoriesController extends ODataController {
 }
 CategoriesController.enableFilter('find');
 
-export class CategoryStream extends Category{}
+export class CategoryStream extends Category { }
 @odata.type(CategoryStream)
 @Edm.EntitySet("Categories")
 export class CategoriesStreamingController extends ODataController {
     @odata.GET
-    find( @odata.filter filter: Token, @odata.stream stream: Writable) {
+    find(@odata.filter filter: Token, @odata.stream stream: Writable) {
         let response = [];
         response = categories;
         if (filter) response = categories.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
@@ -466,7 +476,7 @@ export class CategoriesStreamingController extends ODataController {
     }
 
     @odata.GET("Products")
-    getProducts( @odata.result result: Category, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
+    getProducts(@odata.result result: Category, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
         const filteredProducts = products.filter(p => p.CategoryId && p.CategoryId.toString() === result._id.toString());
         filteredProducts.forEach(p => { stream.write(p) });
         stream.end();
@@ -499,20 +509,20 @@ export class Product2 {
         term: "UI.ControlHint",
         string: "ReadOnly"
     })
-    _id:ObjectID
+    _id: ObjectID
 
     @Edm.String
     @Edm.Required
     @Edm.Convert(toObjectID)
-    CategoryId:ObjectID
+    CategoryId: ObjectID
 
     @Edm.ForeignKey("CategoryId")
     @Edm.EntityType(Edm.ForwardRef(() => Category2))
     @Edm.Partner("Products2")
-    Category2:Category2
+    Category2: Category2
 
     @Edm.Boolean
-    Discontinued:boolean
+    Discontinued: boolean
 
     @Edm.String
     @Edm.Annotate({
@@ -522,7 +532,7 @@ export class Product2 {
         term: "UI.ControlHint",
         string: "ShortText"
     })
-    Name:string
+    Name: string
 
     @Edm.String
     @Edm.Annotate({
@@ -532,7 +542,7 @@ export class Product2 {
         term: "UI.ControlHint",
         string: "ShortText"
     })
-    QuantityPerUnit:string
+    QuantityPerUnit: string
 
     @Edm.Decimal
     @Edm.Annotate({
@@ -542,7 +552,7 @@ export class Product2 {
         term: "UI.ControlHint",
         string: "Decimal"
     })
-    UnitPrice:number
+    UnitPrice: number
 }
 
 @Edm.OpenType
@@ -559,34 +569,34 @@ export class Category2 {
         term: "UI.DisplayName",
         string: "Category2 identifier"
     },
-    {
-        term: "UI.ControlHint",
-        string: "ReadOnly"
-    })
-    _id:ObjectID
+        {
+            term: "UI.ControlHint",
+            string: "ReadOnly"
+        })
+    _id: ObjectID
 
     @Edm.String
-    Description:string
+    Description: string
 
     @Edm.String
     @Edm.Annotate({
         term: "UI.DisplayName",
         string: "Category2 name"
     },
-    {
-        term: "UI.ControlHint",
-        string: "ShortText"
-    })
-    Name:string
+        {
+            term: "UI.ControlHint",
+            string: "ShortText"
+        })
+    Name: string
 
     @Edm.ForeignKey("CategoryId")
     @Edm.Collection(Edm.EntityType(Product2))
     @Edm.Partner("Category2")
-    Products2:Product2[]
+    Products2: Product2[]
 
     @Edm.Collection(Edm.String)
     @Edm.Function
-    echo(){
+    echo() {
         return ["echotest"];
     }
 }
@@ -595,10 +605,10 @@ export class Category2 {
 @Edm.EntitySet("Categories2")
 export class CategoriesGeneratorController extends ODataController {
     @odata.GET
-    *find( @odata.filter filter: Token, @odata.stream stream: Writable) {
+    *find(@odata.filter filter: Token, @odata.stream stream: Writable) {
         let response = categories2;
         if (filter) response = yield categories2.map((category) => Object.assign({}, category, { _id: category._id.toString() })).filter(createFilter(filter));
-        stream.write({"@odata.count": response.length});
+        stream.write({ "@odata.count": response.length });
         for (let category of response) {
             stream.write(category);
             yield delay(1);
@@ -615,12 +625,12 @@ export class CategoriesGeneratorController extends ODataController {
     }
 
     @odata.GET("Products2")
-    *findProduct( @odata.key key: string, @odata.result result: Category2) {
+    *findProduct(@odata.key key: string, @odata.result result: Category2) {
         return yield products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString() && product._id.toString() === key.toString());
     }
 
     @odata.GET("Products2")
-    *findProducts( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: Category2) {
+    *findProducts(@odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: Category2) {
         let response = products2.map((product) => Object.assign({}, product, { _id: product._id.toString() }));
         if (filter) response = response.filter(createFilter(filter));
         response = response.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString());
@@ -636,12 +646,12 @@ export class CategoriesGeneratorController extends ODataController {
 @Edm.EntitySet("Products2")
 export class ProductsGeneratorController extends ODataController {
     @odata.GET
-    *find( @odata.filter filter: Token, @odata.stream stream: Writable) {
+    *find(@odata.filter filter: Token, @odata.stream stream: Writable) {
         let response = products2;
         if (filter) response = yield products2
             .map((product) => Object.assign({}, product, { _id: product._id.toString(), CategoryId: product.CategoryId && product.CategoryId.toString() }))
             .filter(createFilter(filter));
-        
+
         for (let category of response) {
             stream.write(category);
             yield delay(1);
@@ -658,7 +668,7 @@ export class ProductsGeneratorController extends ODataController {
     }
 
     @odata.GET("Category2")
-    *findCategories( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: any) {
+    *findCategories(@odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: any) {
         return yield categories2.filter((c) => c && c._id.toString() === result.CategoryId.toString());
     }
 }
@@ -666,7 +676,7 @@ export class ProductsGeneratorController extends ODataController {
 @odata.type(ProductPromise)
 export class ProductsPromiseGeneratorController extends ODataController {
     @odata.GET
-    *find( @odata.filter filter: Token) {
+    *find(@odata.filter filter: Token) {
         if (filter) {
             return yield Promise.resolve(products2
                 .map((product) => Object.assign({}, product, { _id: product._id.toString() }))
@@ -686,7 +696,7 @@ export class ProductsPromiseGeneratorController extends ODataController {
     }
 
     @odata.GET("CategoryPromise")
-    *findCategories( @odata.filter filter: Token, @odata.result result: ProductPromise) {
+    *findCategories(@odata.filter filter: Token, @odata.result result: ProductPromise) {
         return yield Promise.resolve(categories2.filter((c) => c && c._id.toString() === result.CategoryId.toString()));
     }
 }
@@ -694,7 +704,7 @@ export class ProductsPromiseGeneratorController extends ODataController {
 @odata.type(CategoryPromise)
 export class CategoriesPromiseGeneratorController extends ODataController {
     @odata.GET
-    *find( @odata.filter filter: Token) {
+    *find(@odata.filter filter: Token) {
         if (filter) {
             return yield Promise.resolve(categories2
                 .map((category) => Object.assign({}, category, { _id: category._id.toString() }))
@@ -713,12 +723,12 @@ export class CategoriesPromiseGeneratorController extends ODataController {
     }
 
     @odata.GET("ProductPromises")
-    *findProduct( @odata.key key: string, @odata.result result: CategoryPromise) {
+    *findProduct(@odata.key key: string, @odata.result result: CategoryPromise) {
         return yield Promise.resolve(products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString() && product._id.toString() === key.toString()));
     }
 
     @odata.GET("ProductPromises")
-    *findProducts( @odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: CategoryPromise) {
+    *findProducts(@odata.filter filter: Token, @odata.stream stream: Writable, @odata.result result: CategoryPromise) {
         return yield Promise.resolve(products2.filter((product) => product.CategoryId && product.CategoryId.toString() === result._id.toString()));
     }
 }
@@ -746,7 +756,7 @@ const getCategoryByFilterOfProduct = async (filter: Token, result: GeneratorProd
 @odata.type(GeneratorProduct)
 export class ProductsAdvancedGeneratorController extends ODataController {
     @odata.GET
-    *find( @odata.filter filter: Token) {
+    *find(@odata.filter filter: Token) {
         if (filter) return yield getProductsByFilter(filter);
         return yield getAllProducts();
     }
@@ -758,8 +768,8 @@ export class ProductsAdvancedGeneratorController extends ODataController {
     }
 
     @odata.GET("GeneratorCategory")
-    *findCategories( @odata.filter filter: Token, @odata.result result: GeneratorProduct) {
-        if(filter) return yield getCategoryByFilterOfProduct(filter, result);
+    *findCategories(@odata.filter filter: Token, @odata.result result: GeneratorProduct) {
+        if (filter) return yield getCategoryByFilterOfProduct(filter, result);
         return yield getCategoryOfProduct(result);
     }
 }
@@ -811,7 +821,7 @@ export class CategoriesAdvancedGeneratorController extends ODataController {
     }
 
     @odata.GET("GeneratorProducts")
-    *filterProducts( @odata.query query: Token, @odata.filter filter: Token, @odata.result result: GeneratorCategory) {
+    *filterProducts(@odata.query query: Token, @odata.filter filter: Token, @odata.result result: GeneratorCategory) {
         let options = yield processQueries(query);
 
         let response: GeneratorProduct[] = yield getProductsOfCategory(result);
@@ -820,6 +830,10 @@ export class CategoriesAdvancedGeneratorController extends ODataController {
         response = yield doOrderby(response, options);
         response = yield doSkip(response, options);
         response = yield doTop(response, options);
+
+        if (query && query.raw && query.raw === "$top=2") {
+            (<any>response).nextLink = "http://localhost/GeneratorCategories('578f2baa12eaebabec4af28d')?$expand=GeneratorProducts($top=2&$skip=2)";
+        }
 
         return response
     }
@@ -845,7 +859,7 @@ export class Image2 {
 @odata.type(Image2)
 export class Images2Controller extends ODataController {
     @odata.GET
-    entitySet( @odata.query _: Token) {
+    entitySet(@odata.query _: Token) {
         let image2 = new Image2();
         image2.Id = 1;
         image2.Filename = "tmp.png";
@@ -853,7 +867,7 @@ export class Images2Controller extends ODataController {
     }
 
     @odata.GET()
-    entity( @odata.key() key: number) {
+    entity(@odata.key() key: number) {
         let image2 = new Image2();
         image2.Id = key;
         image2.Filename = "tmp.png";
@@ -861,12 +875,12 @@ export class Images2Controller extends ODataController {
     }
 
     @odata.GET("Data2")
-    *getData2( @odata.key _: number, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
+    *getData2(@odata.key _: number, @odata.stream stream: Writable, @odata.context context: ODataHttpContext) {
         return yield new ODataStream(fs.createReadStream(path.join(__dirname, "..", "..", "src", "test", "fixtures", "logo_jaystack.png"))).pipe(context.response);
     }
 
     @odata.POST("Data2")
-    *postData2( @odata.key _: number, @odata.body data: Readable) {
+    *postData2(@odata.key _: number, @odata.body data: Readable) {
         return yield new ODataStream(fs.createWriteStream(path.join(__dirname, "..", "..", "src", "test", "fixtures", "tmp.png"))).write(data);
     }
 }
@@ -905,7 +919,7 @@ export class UsersController extends ODataController {
     }
 
     @odata.GET
-    findOne( @odata.key key: number) {
+    findOne(@odata.key key: number) {
         return new User(key, new Location("Budapest", "Virág utca"));
     }
 
@@ -954,13 +968,13 @@ export class HeaderTestEntity {
 @odata.type(HeaderTestEntity)
 export class HeaderTestEntityController extends ODataController {
     @odata.GET
-    findAll( @odata.context ctx: ODataHttpContext, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+    findAll(@odata.context ctx: ODataHttpContext, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
         ctx.response.status(403);
         return [];
     }
 
     @odata.GET
-    findOneByKeys( @odata.key key: number, @odata.context ctx: ODataHttpContext) {
+    findOneByKeys(@odata.key key: number, @odata.context ctx: ODataHttpContext) {
         ctx.response.sendStatus(500);
         return {};
     }
@@ -984,16 +998,16 @@ export class UpsertTestEntity {
 @odata.type(UpsertTestEntity)
 export class UpsertTestEntityController extends ODataController {
     @odata.GET
-    findAll( @odata.context ctx: ODataHttpContext, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
+    findAll(@odata.context ctx: ODataHttpContext, @odata.result ___: any, @odata.stream ____: ODataProcessor) {
         return [new UpsertTestEntity(1, 'upsert')];
     }
 
     @odata.GET
-    findOneByKeys( @odata.id id: number, @odata.context ctx: ODataHttpContext) {
+    findOneByKeys(@odata.id id: number, @odata.context ctx: ODataHttpContext) {
         return new UpsertTestEntity(1, 'upsert');
     }
 
-    put( @odata.body body: any) {
+    put(@odata.body body: any) {
         let up = new UpsertTestEntity(1, 'upsert');
 
         if (body.Id && body.Id === 1) {
@@ -1007,7 +1021,7 @@ export class UpsertTestEntityController extends ODataController {
     }
 }
 
-export class DefTestServer extends ODataServer{}
+export class DefTestServer extends ODataServer { }
 DefTestServer.define(odata.controller(DefTestController, true));
 
 export class HiddenController extends ODataController { }
@@ -1017,6 +1031,7 @@ export class HiddenController extends ODataController { }
 @odata.controller(GeneratorTestController, "GeneratorEntitySet")
 @odata.controller(AsyncTestController, "AsyncEntitySet")
 @odata.controller(InlineCountController, "InlineCountEntitySet")
+@odata.controller(NextLinkController, "NextLinkEntitySet")
 @odata.controller(BoundOperationController, "BoundOperationEntitySet")
 @odata.controller(ImagesController, "ImagesControllerEntitySet")
 @odata.controller(MusicController, "MusicControllerEntitySet")
@@ -1039,33 +1054,33 @@ export class TestServer extends ODataServer {
     @Edm.ActionImport
     ActionImport() {
         return new Promise((resolve) => {
-            setTimeout(resolve);
+            setTimeout(resolve, 0);
         });
     }
 
     @Edm.ActionImport
-    ActionImportParams( @Edm.Int32 value: number) {
+    ActionImportParams(@Edm.Int32 value: number) {
         if (typeof value != "number") throw new Error("value is not a number!");
     }
 
     @Edm.FunctionImport(Edm.String)
-    FunctionImport( @Edm.Int64 value: number) {
+    FunctionImport(@Edm.Int64 value: number) {
         return `The number is ${value}.`;
     }
 
     @Edm.FunctionImport(Edm.String)
-    FunctionImportMore( @Edm.String message: string, @Edm.Int64 value: number) {
+    FunctionImportMore(@Edm.String message: string, @Edm.Int64 value: number) {
         return `The number is ${value} and your message was ${message}.`;
     }
 
     @Edm.FunctionImport(Edm.String)
-    SetStatusCode( @odata.context ctx: ODataHttpContext) {
+    SetStatusCode(@odata.context ctx: ODataHttpContext) {
         ctx.response.sendStatus(403);
         return `The status code is ${ctx.response.statusCode}`;
     }
 
     @Edm.ActionImport
-    SetStatusCode2( @odata.context ctx: ODataHttpContext) {
+    SetStatusCode2(@odata.context ctx: ODataHttpContext) {
         ctx.response.sendStatus(500);
     }
 }
@@ -1077,7 +1092,7 @@ serverCache.push(TestServer.create(5005));
 export class AuthenticationServer extends ODataServer {
     @odata.namespace("Echo")
     @Edm.FunctionImport(Edm.String)
-    echo( @Edm.String message: string): string {
+    echo(@Edm.String message: string): string {
         return message;
     }
 }
